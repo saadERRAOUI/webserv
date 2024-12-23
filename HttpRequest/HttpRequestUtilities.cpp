@@ -1,22 +1,13 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   HttpRequestUtilities.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/22 18:46:51 by serraoui         ###   ########.fr       */
+/*   Created: 2024/12/23 14:56:37 by serraoui          #+#    #+#             */
+/*   Updated: 2024/12/23 14:56:54 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//  Todo : Add includes from "./Includes/*" folder
-
-/* 
-    Author      : Saad ERRAOUI
-    Date        : 2024-12-22
-    Description : main method 
-*/
-int main(int ac, char *av[]) {
-    return (0);
-}
+#include "HttpRequest.hpp"

@@ -1,22 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/22 18:46:51 by serraoui         ###   ########.fr       */
+/*   Created: 2024/12/23 14:58:33 by serraoui          #+#    #+#             */
+/*   Updated: 2024/12/23 15:01:23 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//  Todo : Add includes from "./Includes/*" folder
+#ifndef WEBSERV_HPP
+# define WEBSERV_HPP
 
-/* 
-    Author      : Saad ERRAOUI
-    Date        : 2024-12-22
-    Description : main method 
-*/
-int main(int ac, char *av[]) {
-    return (0);
-}
+//Include std libraries
+//Add Macros
+//Add Constants
+
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+#endif WEBSERV_HPP
