@@ -6,7 +6,7 @@
 /*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/23 15:08:12 by serraoui         ###   ########.fr       */
+/*   Updated: 2024/12/23 15:43:45 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,12 @@ class HttpRequest {
         int                                 _body;
         std::map<std::string, std::string>  _headers;
     public :
+        /*
+            Constructors & Destructors
+        */
+        HttpRequest();
+        ~HttpRequest();
+        
         /*
             Getters
         */
