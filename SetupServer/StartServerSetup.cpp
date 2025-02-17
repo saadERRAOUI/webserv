@@ -35,7 +35,9 @@ void SetUpServer()
 		if (rt < 0)
 			std::cout << "Error accept: " << strerror(errno) << '\n';
 		read(rt, buffer, 1024);
-		std::cout << std::string(buffer) << "\n";
+		std::cout << "=================\n";
+		std::cout << std::string(buffer);
+		std::cout << "=================\n";
 		const char *message = "hello world\n";
 		int n = write(rt, message, strlen(message));
 		std::cout << "Error: " << strerror(errno) << "\n";

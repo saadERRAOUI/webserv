@@ -4,7 +4,7 @@ CXX = c++
 
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
 
-CPPFILS = SetupServer/StartServerSetup.cpp
+CPPFILS = SetupServer/StartServerSetup.cpp SetupServer/MultipSockets.cpp
 
 OBJS = $(CPPFILS:.cpp=.o)
 

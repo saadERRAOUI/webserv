@@ -20,6 +20,8 @@ void Multiple_connections()
 	int ret = poll(&pollfds[0], fds, 5000);
 	if (ret == -1)
 		std::cout << "-----> " << strerror(errno) << '\n';
+	else if (!ret)
+		std::cout << "time out was accurred .\n";
 	else
-		std::cout << "Ready to read data.\n";
+		std::cout << "The number of file descriptor with event: " << ret << "\n" ;
 }
