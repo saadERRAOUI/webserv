@@ -8,5 +8,6 @@
 #include <poll.h>
 #include <stdlib.h>
 // #include <sys/epoll.h>
+#include <string.h>
 #include <iostream>
 void Multiple_connections();

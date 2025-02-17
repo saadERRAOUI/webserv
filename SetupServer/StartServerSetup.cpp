@@ -9,7 +9,7 @@
 void SetUpServer()
 {
 	int fdsocket;
-	struct sockaddr_in my_addr;
+	struct sockaddr_in my_addr, client_addr;
 	int const enable = 1;
 
 	fdsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -26,11 +26,11 @@ void SetUpServer()
 		std::cerr << "Binding error: " << strerror(errno) << "\n";
 	if (listen(fdsocket, 2))
 		std::cerr << "Error listen: " << strerror(errno) << "\n";
-	socklen_t len_client = sizeof(my_addr);
-	Multiple_connections();
+	socklen_t len_client = sizeof(client_addr);
+	Multiple_connections();;
 	while (1)
 	{
-		int rt = accept(fdsocket, (sockaddr *)&my_addr, &len_client);
+		int rt = accept(fdsocket, (sockaddr *)&client_addr, &len_client);
 		char buffer[1024] = {0};
 		if (rt < 0)
 			std::cout << "Error accept: " << strerror(errno) << '\n';
@@ -38,10 +38,22 @@ void SetUpServer()
 		std::cout << "=================\n";
 		std::cout << std::string(buffer);
 		std::cout << "=================\n";
-		const char *message = "hello world\n";
+		const char *message =
+		    "HTTP/1.1 200 OK\r\n"
+		    "Content-Type: text/html; charset=UTF-8\r\n"
+		    "Date: Fri, 21 Jun 2024 14:18:33 GMT\r\n"
+		    "Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT\r\n"
+		    "Content-Length: 1234\r\n"
+		    "\r\n"
+		    "<!doctype html>\n"
+		    "<html>\n"
+		    "<head><title>My Page</title></head>\n"
+		    "<body><h1>Welcome!</h1></body>\n"
+		    "</html>\n";
+		
 		int n = write(rt, message, strlen(message));
-		std::cout << "Error: " << strerror(errno) << "\n";
 		std::cout << "----> n: " << n << "\n";
+
 	}
 	std::cout << "out of loop\n";
 
