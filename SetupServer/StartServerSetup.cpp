@@ -27,6 +27,7 @@ void SetUpServer()
 	if (listen(fdsocket, 2))
 		std::cerr << "Error listen: " << strerror(errno) << "\n";
 	socklen_t len_client = sizeof(my_addr);
+	Multiple_connections();
 	while (1)
 	{
 		int rt = accept(fdsocket, (sockaddr *)&my_addr, &len_client);
