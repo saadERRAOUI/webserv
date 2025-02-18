@@ -3,25 +3,42 @@
 
 /*
 	Author: BOUZID Hicham
-	Description: handle multiple sockets
+	Description: add socketfd to epoll inctence
 	Date: 2025-02-13
 */
 
-void Multiple_connections()
+void Sockets_manager(int sockfd, int epollfd)
 {
-	struct pollfd  *pollfds;
-	nfds_t fds = 3;
-	pollfds = (struct pollfd *)malloc(sizeof(struct pollfd) * 3);
+	struct epoll_event event;
+	int fds;
+	event.events = EPOLLIN;
+	event.data.fd = sockfd;
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event))
+		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
+	fds = epoll_wait(epollfd, &event, 10, -1);
+	for (;;)
+	{
+		if (event.events && EPOLLIN)
+			std::cout << "----------> " << strerror(errno) << '\n';
+	}
+}
 
-	if (!pollfds)
-		std::cerr << "Error: " << strerror(errno) << "\n";
-	pollfds[0].fd = 3;
-	pollfds[0].events = POLLIN;
-	int ret = poll(&pollfds[0], fds, 5000);
-	if (ret == -1)
-		std::cout << "-----> " << strerror(errno) << '\n';
-	else if (!ret)
-		std::cout << "time out was accurred .\n";
-	else
-		std::cout << "The number of file descriptor with event: " << ret << "\n" ;
+/*
+	Author: BOUZID hicham
+	Description: craet epoll inctence to manange multiple sockets
+	Date: 2025-02-18
+*/
+
+int create_manager()
+{
+	int EpollFd =    epoll_create1(EPOLL_CLOEXEC);
+	if (EpollFd < 0)
+	{
+		std::cerr << "Epoll problem: " << strerror(errno) << '\n';
+		exit(EXIT_FAILURE);
+	}
+	std::cout << "epoll inctence was created .\n";
+	// std::cout << "---> " << EpollFd << '\n';
+	// close(EpollFd);
+	return (EpollFd);
 }
