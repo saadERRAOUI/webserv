@@ -1,0 +1,21 @@
+client_max_body_size = "10M"
+
+[[ server    ]]
+host = "localhost"
+"21312" = "123"
+port = 8080
+
+[[server-location]]
+path = "/"
+root = "/var/www/html"
+methods = ["GET", "POST"]
+autoindex = true
+
+[[server]]
+host = "0.0.0.0"
+port = 9090
+
+[["server.location"]]
+path = "/"
+methods = ["GET"]
+autoindex = false
