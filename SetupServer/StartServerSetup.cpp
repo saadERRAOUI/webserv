@@ -24,6 +24,9 @@ int SetUpServer(int port)
 		std::cerr << "Error: " << strerror(errno) << "\n";
 	if (bind(fdsocket, (sockaddr *)&my_addr, sizeof(my_addr)))
 		std::cerr << "Binding error: " << strerror(errno) << "\n";
+	if (listen(fdsocket, 2))
+		std::cerr << "Error listen: " << strerror(errno) << "\n";
+
 	// socklen_t len_client = sizeof(client_addr);
 	// Multiple_connections();
 	// while (1)
@@ -64,5 +67,7 @@ int main()
 {
 	int epollfd =  create_manager();
 	int fdsock = SetUpServer(8080);
+	std::cout << "------------poll----> " << epollfd << "\n";
+	std::cout << "-------------server---> " << fdsock << "\n";
 	Sockets_manager(fdsock, epollfd);
 }

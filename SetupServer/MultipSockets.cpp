@@ -10,16 +10,39 @@
 void Sockets_manager(int sockfd, int epollfd)
 {
 	struct epoll_event event;
+	struct epoll_event Queueevent[MAX_EPOLL_EVENT];
+	char buffer[1024] = {0};
 	int fds;
+
 	event.events = EPOLLIN;
 	event.data.fd = sockfd;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event))
 		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
-	fds = epoll_wait(epollfd, &event, 10, -1);
+
+	// std::cout << "-----> " << event.events << "\n";
 	for (;;)
 	{
-		if (event.events && EPOLLIN)
-			std::cout << "----------> " << strerror(errno) << '\n';
+		fds = epoll_wait(epollfd, Queueevent, MAX_EPOLL_EVENT, -1);
+	// std::cout << "-----> " << Queueevent[0].data.fd << "\n";
+		if(fds != 1)
+		{
+			std::cout << "break----> " << fds << "\n";
+		} 
+		for (int i = 0; i < fds; i++)
+		{
+			if (Queueevent[i].data.fd == event.data.fd)
+			{
+				std::cout << "-----> " << Queueevent[i].data.fd << "\n";
+				std::cout << "-----> " << sockfd << "\n";
+				std::cout << "hellor we get a new request \n";
+				exit(0);
+			}
+			// printf("Got an event %d for this fd: %d \n",
+			// 	Queueevent[i].events, Queueevent[i].data.fd);
+			//  read(Queueevent[i].data.fd, buffer, 1024);
+			// std::cout << "-----> " << fds << '\n';
+			// printf("%s\n", buffer);
+		}
 	}
 }
 
@@ -31,7 +54,7 @@ void Sockets_manager(int sockfd, int epollfd)
 
 int create_manager()
 {
-	int EpollFd =    epoll_create1(EPOLL_CLOEXEC);
+	int EpollFd =    epoll_create(10);
 	if (EpollFd < 0)
 	{
 		std::cerr << "Epoll problem: " << strerror(errno) << '\n';
