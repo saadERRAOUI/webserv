@@ -25,7 +25,9 @@ typedef enum {
   BRACKET_OPEN,
   BRACKET_CLOSE,
   COMMA,
-  DOT
+  DOT,
+    COMMENT,
+    END_OF_LINE
 } e_token;
 
 typedef struct Token {
@@ -100,16 +102,17 @@ private:
   Section globalSection;    /*the head */
   Section *current_section; /*current section scope */
   state_machine state;
-  
+
   void determine_state(std::string &line);
   e_token determine_token(std::string &line, size_t &i);
   bool isComment(char c);
   void process_line(std::string &line);
-  void parse_quotes(std::string &line);
   void tokenize(std::string &line);
-  void process_key(Token &token);
+  void process_bare(Token &token);
   void process_quoted_string(Token &token);
   Token get_next_token(std::string &line);
+  bool is_token(char c);
+  void throw_error(std::string errr);
 public:
   ConfigParser(std::string path);
   void parse();
