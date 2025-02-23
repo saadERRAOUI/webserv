@@ -6,28 +6,37 @@
 /*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/23 15:43:45 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/02/23 17:27:06 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUEST_HPP
-# define HTTPREQUEST_HPP
+#define HTTPREQUEST_HPP
 
-# include  "../Includes/WebServ.hpp"
+#include <string>
+#include <map>
+#include "../Includes/WebServ.hpp"
+
+enum HttpRequestState {
+    HTTP_METHOD,
+    HTTP_REQUEST_URI,
+    HTTP_VERSION,
+    HTTP_HEADERS,
+    HTTP_BODY
+};
 
 class HttpRequest {
     private :
-        //Todo -> Add request params
-        //_method
-        //_rURI
-        //_version
-        //_Body -> file (int fd)
-        //Map<String, String> headers
         std::string                         _method; 
         std::string                         _requestURI;
         std::string                         _version; 
-        int                                 _body;
+        std::string                         _body;
         std::map<std::string, std::string>  _headers;
+        int                                 _state;
+        /*
+            Parsers map handlers
+        */
+        std::map<HttpRequestState, void (HttpRequest::*)(char)> _methodHandlerMap;
     public :
         /*
             Constructors & Destructors
@@ -38,10 +47,12 @@ class HttpRequest {
         /*
             Getters
         */
-        std::string     getMethod() const;
-        std::string     getRequestURI() const;
-        std::string     getVersion() const;
-        int             getBodyFd() const;
+        std::string                         getMethod() const;
+        std::string                         getRequestURI() const;
+        std::string                         getVersion() const;
+        std::string                         getBody() const;
+        std::map<std::string, std::string>  getHeaders() const;
+        int                                 getState() const;
         
         /*
             Setters
@@ -52,6 +63,15 @@ class HttpRequest {
         void            setBodyFd(int);
 
         /*
-            Member methods
+            Parser Member methods
         */
+        void            parseHttpMethod(char);
+        void            parseHttpRequestUriMethod(char);
+        void            parseHttpVersionMethod(char);
+        void            parseHttpHeadersMethod(char);
+        void            parseHttpBodyMethod(char);
+        
+        void            parseHttpRequestOrchestrator(char);
 };
+
+#endif // HTTPREQUEST_HPP
