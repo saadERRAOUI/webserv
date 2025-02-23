@@ -6,6 +6,14 @@
 	Date: 2025-02-07
 */
 
+// int ft_client(int fdsv, int epollfd)
+// {
+// 	struct sockaddr_in client;
+// 	socklen_t client_line;
+	
+
+// }
+
 int SetUpServer(int port)
 {
 	int fdsocket;
@@ -13,7 +21,6 @@ int SetUpServer(int port)
 	int const enable = 1;
 
 	fdsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	std::cout << fdsocket << " it's fd socket \n";
 	if (fdsocket < 0)
 		std::cerr << "Sock Error: " << strerror(errno) << "\n";
 	memset(&my_addr, 0, sizeof(sockaddr));
@@ -65,9 +72,14 @@ int SetUpServer(int port)
 
 int main()
 {
+	Server *tmp;
+	std::map<int , Server *> sockets;
+	for (int i= 8080; i < 8085; i++)
+	{
+		tmp = new Server(i, 0);
+		sockets[tmp->Getsockfd()] = tmp;
+
+	}
 	int epollfd =  create_manager();
-	int fdsock = SetUpServer(8080);
-	std::cout << "------------poll----> " << epollfd << "\n";
-	std::cout << "-------------server---> " << fdsock << "\n";
-	Sockets_manager(fdsock, epollfd);
+	Sockets_manager(&sockets, epollfd);
 }
