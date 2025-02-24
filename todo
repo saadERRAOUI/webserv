@@ -2,3 +2,4 @@ add epoll wait for listening to sockets
 fix the problem of the address already use.
 read all request from socket, and passe it to parsing  
 debuging the problem of flag into the instence 
+let reset ideas about this task .
