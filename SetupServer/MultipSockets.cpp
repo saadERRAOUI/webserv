@@ -58,7 +58,7 @@ void Sockets_manager(std::map<int , Server *> * sockets, int epollfd)
 	struct epoll_event *event  = (epoll_event *)malloc(sizeof(epoll_event) * sockets->size());
 	struct epoll_event Queueevent[MAX_EPOLL_EVENT];
 	int fds;
-	// char buffer[1024] = {0};
+	char buffer[1024] = {0};
 	index = 0;
 	for (std::map<int, Server *>::iterator  it = sockets->begin(); it != sockets->end(); it++ , index++)
 	{
@@ -71,36 +71,17 @@ void Sockets_manager(std::map<int , Server *> * sockets, int epollfd)
 	{
 		fds = epoll_wait(epollfd, Queueevent, MAX_EPOLL_EVENT, -1);
 		for (int i = 0; i < fds; i++){
-				std::cout << "fd readd: " << (*sockets)[Queueevent[i].data.fd]->Getsockfd()  << '\zn';
-			if ((*sockets)[Queueevent[i].data.fd]->Getsockfd() ==  0){
+			std::cout << "fd readd: " << (*sockets)[Queueevent[i].data.fd]->Getsockfd()  << '\n';
+			if ((*sockets)[Queueevent[i].data.fd]->Getflag() ==  0){
 				ft_client(Queueevent[i].data.fd, epollfd, sockets);
-				std::cout << "hello 1\n";
 			}
-			// else{
-			// 	int fd_read = (*sockets)[Queueevent[i].data.fd]->Getsockfd();
-			// 	int size = read(fd_read, buffer, 1024);
-			// 	std::cout << "=======>  " << size << "\n";
-			// 	std::cout << "fd readd: " << fd_read << "\n";
-			// 	exit(0);
-			// 	std::cout << std::string (buffer) << "\n";
-			// 	// exit(0);
-			// }
+			else{
+				int fd_read = (*sockets)[Queueevent[i].data.fd]->Getsockfd();
+				int size = read(fd_read, buffer, 1024);
+				std::cout << "=======>  " << size << "\n";
+				std::cout << std::string (buffer) << "\n";
+			}
 		}
-		// for (int i = 0; i < fds; i++)
-		// {
-		// 	for (int j = 0; j < size; j++)
-		// 	{	
-		// 		if (Queueevent[i].data.fd == event[j].data.fd)
-		// 		{
-						
-		// 		}
-		// 	}
-			// printf("Got an event %d for this fd: %d \n",
-			// 	Queueevent[i].events, Queueevent[i].data.fd);
-			//  read(Queueevent[i].data.fd, buffer, 1024);
-			// std::cout << "-----> " << fds << '\n';
-			// printf("%s\n", buffer);
-		// }
 	}
 }
 
