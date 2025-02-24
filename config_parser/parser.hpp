@@ -27,7 +27,8 @@ typedef enum {
   COMMA = 512,
   DOT = 1024,
     COMMENT = 2048,
-    END_OF_LINE = 4096
+    END_OF_LINE = 4096,
+    BEGIN_OF_LINE = 8192
 } e_token;
 
 typedef struct Token {
@@ -103,6 +104,9 @@ private:
   Section *current_section; /*current section scope */
   state_machine state;
   std::map<std::pair<e_substate, e_token> , int> valid_tokens_map;
+  std::map<std::pair<context, e_token> , int> valid_context_map;
+
+
   void determine_state();
   e_token determine_token(std::string &line, size_t &i);
   bool isComment(char c);
@@ -114,6 +118,8 @@ private:
   bool is_token(char c);
   void validate(std::deque<Token> &token_list);
   void throw_error(std::string errr);
+
+
 public:
   ConfigParser(std::string path);
   void parse();
