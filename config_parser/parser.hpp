@@ -15,19 +15,19 @@ typedef enum {
   PARSING_VALUE
 } e_substate;
 typedef enum {
-  QUOTED_STRING,
-  BARE_KEY,
-  DOUBLE_BRACKET_OPEN,
-  DOUBLE_BRACKET_CLOSE,
-  EQUALS,
-  BRACE_OPEN,
-  BRACE_CLOSE,
-  BRACKET_OPEN,
-  BRACKET_CLOSE,
-  COMMA,
-  DOT,
-    COMMENT,
-    END_OF_LINE
+  QUOTED_STRING = 1,
+  BARE_KEY = 2,
+  DOUBLE_BRACKET_OPEN = 4,
+  DOUBLE_BRACKET_CLOSE = 8,
+  EQUALS = 16,
+  BRACE_OPEN = 32,
+  BRACE_CLOSE = 64,
+  BRACKET_OPEN = 128,
+  BRACKET_CLOSE = 256,
+  COMMA = 512,
+  DOT = 1024,
+    COMMENT = 2048,
+    END_OF_LINE = 4096
 } e_token;
 
 typedef struct Token {
@@ -102,8 +102,8 @@ private:
   Section globalSection;    /*the head */
   Section *current_section; /*current section scope */
   state_machine state;
-
-  void determine_state(std::string &line);
+  std::map<std::pair<e_substate, e_token> , int> valid_tokens_map;
+  void determine_state();
   e_token determine_token(std::string &line, size_t &i);
   bool isComment(char c);
   void process_line(std::string &line);
@@ -112,6 +112,7 @@ private:
   void process_quoted_string(Token &token);
   Token get_next_token(std::string &line);
   bool is_token(char c);
+  void validate(std::deque<Token> &token_list);
   void throw_error(std::string errr);
 public:
   ConfigParser(std::string path);

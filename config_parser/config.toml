@@ -1,18 +1,24 @@
-     
-port = 8080
-[[server-location]]
+# weqeq2eqwewqe
+# 
+[[server]]
+[[server.location]] # eqweqweq
 path = "/"
 root = "/var/www/html"
 root = "/var/www/html"
 methods = ["GET", "POST"]
 autoindex = true
+port = 8080
+end= {1=  "13"}
+[[server.pepe.end]]
+key=13
 [[server]]
 host = "0.0.0.0"
 port = 9090
 
 [["server.location"]]
 
+table = {420 = "./qwere", '12'= "123", 13= ["get"], end = {1, 3 = 4, 4 = ["get"]}}
 path = "/"
 methods = ["GET"]
 autoindex = false
-table = {420 = "./qwere", '12'we= "123a}
+[[eqe]]

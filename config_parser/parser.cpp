@@ -9,15 +9,30 @@ ConfigParser::ConfigParser(std::string path)
   state.string_state = OUT_QUOTES;
   state.value_substate = IN_STRING;
   state.substate = PARSING_INITIAL;
+  
+  valid_tokens_map[std::pair<e_substate, e_token>(PARSING_HEADER, DOUBLE_BRACKET_OPEN)] = BARE_KEY | QUOTED_STRING ;
+  valid_tokens_map[std::pair<e_substate, e_token>(PARSING_HEADER, DOUBLE_BRACKET_CLOSE)] = END_OF_LINE | COMMENT;
+  valid_tokens_map[std::pair<e_substate, e_token>(PARSING_HEADER, BARE_KEY)] = DOT | DOUBLE_BRACKET_CLOSE;
+  valid_tokens_map[std::pair<e_substate, e_token>(PARSING_HEADER, QUOTED_STRING)] = DOT | DOUBLE_BRACKET_CLOSE;
+  valid_tokens_map[std::pair<e_substate, e_token>(PARSING_HEADER, DOT)] = BARE_KEY | QUOTED_STRING;
+
+    valid_tokens_map[std::pair<e_substate, e_token>(PARSING_KEY, BARE_KEY)] = EQUALS;
+    valid_tokens_map[std::pair<e_substate, e_token>(PARSING_KEY, QUOTED_STRING)] = EQUALS;
+    valid_tokens_map[std::pair<e_substate, e_token>(PARSING_KEY, EQUALS)] = BARE_KEY | QUOTED_STRING | BRACE_OPEN | BRACKET_OPEN;
+
+
+
+
   if (!file.is_open())
     throw std::invalid_argument("could not open the file!");
 }
+
 
 std::string trim(std::string &line) {
     size_t start = line.find_first_not_of(" \t");
     if (start == std::string::npos)
         return "";
-  return line.substr(line.find_first_not_of(" \t"),
+  return line.substr(start,
                      line.find_last_not_of(" \t") + 1);
 }
 
@@ -27,13 +42,31 @@ bool ConfigParser::isComment(char c) {
   return false;
 }
 
-void ConfigParser::determine_state(std::string &line) {
-  if (state.substate == PARSING_INITIAL) {
-    if (line.compare(0,2,"[[") == 0 && line.compare( line.length() - 2, 2, "]]"))
-      state.substate = PARSING_HEADER;
-    else
-      state.substate = PARSING_KEY;
-  }
+void ConfigParser::determine_state() {
+    if (this->line_data.token_list.empty())
+        return;
+    Token &token = this->line_data.token_list.front();
+    if (token.type == DOUBLE_BRACKET_OPEN)
+            state.substate = PARSING_HEADER;
+    else 
+        state.substate = PARSING_KEY;
+}
+
+void ConfigParser::validate(std::deque<Token> &token_list)
+{
+   if (state.substate == PARSING_KEY || state.substate == PARSING_HEADER)
+    {  for (std::deque<Token>::iterator i = token_list.begin(); i != token_list.end(); i++)
+        {
+            if (state.substate != PARSING_KEY && state.substate != PARSING_HEADER)
+                return;
+            if (i->type == END_OF_LINE || i->type == COMMENT)
+                break;
+            if ((valid_tokens_map[std::pair<e_substate, e_token>(state.substate, i->type)] & (i + 1)->type) == 0)
+                std :: cout << "Error at line " << line_data.line_nb << " : unexpected token " << i->type << " before " << (i + 1)->type << std::endl;
+            if (i->type == EQUALS)
+                state.substate = PARSING_VALUE;
+    }
+    }
 }
 
 void ConfigParser::throw_error(std::string error) {
@@ -43,12 +76,13 @@ void ConfigParser::throw_error(std::string error) {
 }
 
 void ConfigParser::process_line(std::string &line) {
-    determine_state(line);
     tokenize(line);
+    determine_state();
+    validate(this->line_data.token_list);
     if (state.string_state == IN_QUOTES)
         this->throw_error("unterminated string");
-    for (auto i : this->line_data.token_list)
-        std::cout << i.type << " : >" << i.value << "<" <<std::endl;
+    // for (auto i : this->line_data.token_list)
+    //     std::cout << i.type << " : >" << i.value << "<" <<std::endl;
     this->line_data.token_list.clear();
 }
 
@@ -96,7 +130,7 @@ void ConfigParser::process_quoted_string(Token &token)
 
 bool ConfigParser::is_token(char c)
 {
-   return c == '[' || c == ']' || c == '=' || c == '{' || c == '}' || c == ',' || c == '.' || c == '#' || c == ' ';
+   return isspace(c) ||  c == '[' || c == ']' || c == '=' || c == '{' || c == '}' || c == ',' || c == '.' || c == '#' || c == '"';
 }
 void ConfigParser::process_bare(Token &token)
 {
@@ -115,20 +149,21 @@ Token ConfigParser::get_next_token(std::string &line) {
     if (token.type == BARE_KEY)
         process_bare(token);
     if (token.type == QUOTED_STRING)
-    {
-        std::cout << line_data.line_nb << " line number : " << line_data.line_progress << std::endl;
         process_quoted_string(token);
-    }
     return token;
 }
+
+
 void ConfigParser::tokenize(std::string &line) {
     Token token = get_next_token(line);
 
-    while (token.type != END_OF_LINE)
+    while (token.type != END_OF_LINE && token.type != COMMENT)
      {
          this->line_data.token_list.push_back(token);
          token = get_next_token(line);
      }
+              this->line_data.token_list.push_back(token);
+
 }
 
 void ConfigParser::parse() {
