@@ -31,6 +31,13 @@ typedef enum {
     BEGIN_OF_LINE = 8192
 } e_token;
 
+// Add a new state to track if we're expecting a value or separator in table context
+typedef enum { 
+    TABLE_KEY,     // Expecting a key
+    TABLE_VALUE,   // Expecting a value
+    TABLE_SEPARATOR // Expecting comma or closing brace
+} t_table_state;
+
 typedef struct Token {
   e_token type;
   std::string value;

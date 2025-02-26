@@ -36,7 +36,13 @@ ConfigParser::ConfigParser(std::string path)
     valid_context_map[std::pair<context, e_token>(IN_ARRAY, COMMA)] = BARE_KEY | QUOTED_STRING;
     valid_context_map[std::pair<context, e_token>(IN_ARRAY, BRACKET_CLOSE)] = END_OF_LINE | COMMENT;
 
-    valid_context_map[std::pair<context, e_token>(IN_TABLE, BARE_KEY)] = END_OF_LINE | COMMENT;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, BRACE_OPEN)] = BARE_KEY;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, BARE_KEY)] = EQUALS;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] = QUOTED_STRING;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, QUOTED_STRING)] = COMMA | BRACE_CLOSE;
+      valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] =  QUOTED_STRING;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, COMMA)] = BARE_KEY;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, BRACE_CLOSE)] = END_OF_LINE | COMMENT ;
     
     
     if (!file.is_open())
@@ -86,7 +92,7 @@ void ConfigParser::validate(std::deque<Token> &token_list)
                 std::cout << "Error at line " << line_data.line_nb << " : unexpected token " << i->type << " before " << (i + 1)->type << std::endl;
             if (state.substate == PARSING_VALUE && (valid_context_map[std::pair<context, e_token>(state.value_substate, i->type)] & (i + 1)->type) == 0)
                 std::cout << "value Error at line " << line_data.line_nb << " : unexpected token " << i->type << " before " << (i + 1)->type << std::endl;
-            if (i->type == EQUALS)
+            if (i->type == EQUALS && state.substate != PARSING_VALUE)
                 {
                     state.substate = PARSING_VALUE;
                     if ((i + 1)->type == QUOTED_STRING)
@@ -97,6 +103,8 @@ void ConfigParser::validate(std::deque<Token> &token_list)
                         state.value_substate = IN_TABLE;
                     i++;
                 }
+            
+            
         }
     }
 }
