@@ -125,7 +125,8 @@ private:
   bool is_token(char c);
   void validate(std::deque<Token> &token_list);
   void throw_error(std::string errr);
-
+  void process_header();
+  void process_keypair();
 
 public:
   ConfigParser(std::string path);

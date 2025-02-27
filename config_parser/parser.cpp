@@ -116,11 +116,39 @@ void ConfigParser::throw_error(std::string error)
     throw std::invalid_argument(message);
 }
 
+
+void ConfigParser::process_header()
+{   
+    current_section - &globalSection;
+    for (size_t i = 1; i < this->line_data.token_list.size(); i++)
+    {
+        if (this->line_data.token_list[i].type & (QUOTED_STRING | BARE_KEY) )
+        {
+            current_section->raw_data[this->line_data.token_list[i].value].push_back(Section(this->line_data.token_list[i].value));
+            current_section = &current_section->raw_data[this->line_data.token_list[i].value].back();
+        }
+    }
+
+}
+
+
+void ConfigParser::process_keypair()
+{
+    std::string key;
+    
+
+    
+}
+
 void ConfigParser::process_line(std::string &line)
 {
     tokenize(line);
     determine_state();
     validate(this->line_data.token_list);
+    if (this->line_data.token_list[0].type == DOUBLE_BRACKET_OPEN)
+        process_header();
+    else
+        process_keypair();
     if (state.string_state == IN_QUOTES)
         this->throw_error("unterminated string");
     this->line_data.token_list.clear();
