@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   WebServ.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/23 14:58:33 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/23 16:12:28 by serraoui         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
@@ -20,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <map>
 
 enum HttpRequestState {
     HTTP_METHOD,

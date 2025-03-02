@@ -1,17 +1,5 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */
-/*   Updated: 2024/12/23 15:43:45 by serraoui         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef HTTPREQUEST_HPP
-# define HTTPREQUEST_HPP
+#define HTTPREQUEST_HPP
 
 # include  "../Includes/WebServ.hpp"
 
@@ -23,9 +11,9 @@ class HttpRequest {
         //_version
         //_Body -> file (int fd)
         //Map<String, String> headers
-        std::string                         _method; 
+        std::string                         _method;
         std::string                         _requestURI;
-        std::string                         _version; 
+        std::string                         _version;
         int                                 _body;
         std::map<std::string, std::string>  _headers;
     public :
@@ -34,7 +22,7 @@ class HttpRequest {
         */
         HttpRequest();
         ~HttpRequest();
-        
+
         /*
             Getters
         */
@@ -42,7 +30,7 @@ class HttpRequest {
         std::string     getRequestURI() const;
         std::string     getVersion() const;
         int             getBodyFd() const;
-        
+
         /*
             Setters
         */
@@ -55,3 +43,5 @@ class HttpRequest {
             Member methods
         */
 };
+
+#endif
