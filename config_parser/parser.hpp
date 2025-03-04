@@ -85,6 +85,63 @@ public:
       break;
     }
   }
+  
+  // Add copy constructor
+  TOMLValue(const TOMLValue& other)
+      : type(other.type), single(NULL), array(NULL), table(NULL), true_false(other.true_false) {
+    switch (type) {
+    case SINGLE:
+      if (other.single)
+        single = new std::string(*other.single);
+      break;
+    case ARRAY:
+      if (other.array)
+        array = new ArrayType(*other.array);
+      break;
+    case TABLE:
+      if (other.table)
+        table = new TableType(*other.table);
+      break;
+    case BOOL:
+      break;
+    }
+  }
+  
+  // Add assignment operator
+  TOMLValue& operator=(const TOMLValue& other) {
+    if (this != &other) {
+      // Clean up existing resources
+      delete single;
+      delete array;
+      delete table;
+      
+      // Copy from other
+      type = other.type;
+      single = NULL;
+      array = NULL;
+      table = NULL;
+      true_false = other.true_false;
+      
+      switch (type) {
+      case SINGLE:
+        if (other.single)
+          single = new std::string(*other.single);
+        break;
+      case ARRAY:
+        if (other.array)
+          array = new ArrayType(*other.array);
+        break;
+      case TABLE:
+        if (other.table)
+          table = new TableType(*other.table);
+        break;
+      case BOOL:
+        break;
+      }
+    }
+    return *this;
+  }
+  
   ~TOMLValue() {
     delete single;
     delete array;
@@ -107,7 +164,6 @@ private:
   t_line_data line_data; /*the line to parse */
   std::string file_path; /*the file path*/
   std::ifstream file;
-  Section globalSection;    /*the head */
   Section *current_section; /*current section scope */
   state_machine state;
   std::map<std::pair<e_substate, e_token> , int> valid_tokens_map;
@@ -131,6 +187,8 @@ private:
 public:
   ConfigParser(std::string path);
   void parse();
+  void debug_print_section(Section* section, int indent = 0);
+  Section globalSection;  // Make this public so main can access it
 };
 
 #endif

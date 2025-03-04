@@ -1,5 +1,3 @@
-# weqeq2eqwewqe
-# 
 [[server]]
 [[server.location]] # eqweqweq
 path = "/"
@@ -20,4 +18,3 @@ port = 9090
 path = "/"
 methods = ["GET"]
 autoindex = false
-[[eqe]]

@@ -119,33 +119,172 @@ void ConfigParser::throw_error(std::string error)
 
 void ConfigParser::process_header()
 {   
-    current_section - &globalSection;
-    for (size_t i = 1; i < this->line_data.token_list.size(); i++)
+    std::cout << " bracket";
+    current_section = &globalSection;  // Start at the root
+    
+    // Process each section part (e.g., "server", "location")
+    for (size_t i = 2; i < this->line_data.token_list.size(); i++)
     {
-        if (this->line_data.token_list[i].type & (QUOTED_STRING | BARE_KEY) )
+        if (this->line_data.token_list[i].type & (QUOTED_STRING | BARE_KEY))
         {
-            current_section->raw_data[this->line_data.token_list[i].value].push_back(Section(this->line_data.token_list[i].value));
-            current_section = &current_section->raw_data[this->line_data.token_list[i].value].back();
+            std::string section_name = this->line_data.token_list[i].value;
+            // Check if this section already exists
+            bool found = false;
+            
+            if (current_section->raw_data.count(section_name) > 0) {
+                // If we're at the last part of the path, add a new entry
+                if (i == this->line_data.token_list.size() - 2 || 
+                   (i + 1 < this->line_data.token_list.size() && 
+                    this->line_data.token_list[i + 1].type == DOUBLE_BRACKET_CLOSE)) {
+                    // This is the last segment, create a new section
+                    current_section->raw_data[section_name].push_back(Section(section_name));
+                    current_section = &current_section->raw_data[section_name].back();
+                    found = true;
+                } else {
+                    // This is not the last segment, use the existing section
+                    current_section = &current_section->raw_data[section_name].front();
+                    found = true;
+                }
+            }
+            
+            // If not found, create a new section
+            if (!found) {
+                current_section->raw_data[section_name].push_back(Section(section_name));
+                current_section = &current_section->raw_data[section_name].back();
+            }
         }
     }
-
 }
 
+// Fix the function definition - remove the default argument
+void ConfigParser::debug_print_section(Section* section, int indent)
+{
+    // Print section name
+    std::string indentation(indent * 2, ' ');
+    std::cout << indentation << "Section: " << section->name << std::endl;
+    
+    // Print key-value pairs
+    for (size_t i = 0; i < section->key_val.size(); i++) {
+        std::cout << indentation << "  Key: " << section->key_val[i].first << ", ";
+        
+        TOMLValue& val = section->key_val[i].second;
+        switch (val.type) {
+            case TOMLValue::SINGLE:
+                std::cout << "Value: " << *val.single << std::endl;
+                break;
+            case TOMLValue::ARRAY:
+                std::cout << "Array: [";
+                for (size_t j = 0; j < val.array->size(); j++) {
+                    std::cout << (j > 0 ? ", " : "") << (*val.array)[j];
+                }
+                std::cout << "]" << std::endl;
+                break;
+            case TOMLValue::TABLE:
+                std::cout << "Table: {";
+                for (auto it = val.table->begin(); it != val.table->end(); ++it) {
+                    std::cout << (it != val.table->begin() ? ", " : "") << it->first << " = " << it->second;
+                }
+                std::cout << "}" << std::endl;
+                break;
+        }
+    }
+    
+    // Recursively print subsections
+    for (auto& section_pair : section->raw_data) {
+        for (auto& subsection : section_pair.second) {
+            debug_print_section(&subsection, indent + 1);
+        }
+    }
+}
 
 void ConfigParser::process_keypair()
 {
     std::string key;
+    key = this->line_data.token_list[1].value;
     
-
+    // Check for equals sign
+    if (this->line_data.token_list[2].type != EQUALS || this->line_data.token_list.size() < 4)
+    {
+        this->throw_error("expected '=' after key");
+        return;
+    }
     
+    // Process different value types based on the token after equals
+    Token& value_token = this->line_data.token_list[3];
+    
+    if (value_token.type & (BARE_KEY | QUOTED_STRING))
+    {
+        // Simple string value
+        TOMLValue value(TOMLValue::SINGLE);
+        *value.single = value_token.value;
+        current_section->key_val.push_back(key_pair(key, value));
+    }
+    else if (value_token.type == BRACKET_OPEN)
+    {
+        // Array value
+        TOMLValue value(TOMLValue::ARRAY);
+        
+        // Process array elements (tokens between BRACKET_OPEN and BRACKET_CLOSE)
+        for (size_t i = 4; i < this->line_data.token_list.size(); i++)
+        {
+            if (this->line_data.token_list[i].type & (BARE_KEY | QUOTED_STRING))
+                value.array->push_back(this->line_data.token_list[i].value);
+            
+            if (this->line_data.token_list[i].type == BRACKET_CLOSE)
+                break;
+        }
+        
+        current_section->key_val.push_back(key_pair(key, value));
+    }
+    else if (value_token.type == BRACE_OPEN)
+    {
+        // Table value
+        TOMLValue value(TOMLValue::TABLE);
+        std::string table_key;
+        
+        // Process table key-value pairs (tokens between BRACE_OPEN and BRACE_CLOSE)
+        for (size_t i = 4; i < this->line_data.token_list.size(); i++)
+        {
+            if (this->line_data.token_list[i].type & (BARE_KEY | QUOTED_STRING) && table_key.empty())
+            {
+                table_key = this->line_data.token_list[i].value;
+            }
+            else if (this->line_data.token_list[i].type == EQUALS)
+            {
+                // Skip the equals token
+                continue;
+            }
+            else if (this->line_data.token_list[i].type & (BARE_KEY | QUOTED_STRING) && !table_key.empty())
+            {
+                // Add the key-value pair to the table
+                (*value.table)[table_key] = this->line_data.token_list[i].value;
+                table_key.clear();  // Reset for next key-value pair
+            }
+            
+            if (this->line_data.token_list[i].type == BRACE_CLOSE)
+                break;
+        }
+        
+        current_section->key_val.push_back(key_pair(key, value));
+    }
+    else
+    {
+        this->throw_error("invalid value type");
+    }
 }
 
 void ConfigParser::process_line(std::string &line)
 {
     tokenize(line);
+    std::cout << std::endl;
     determine_state();
     validate(this->line_data.token_list);
-    if (this->line_data.token_list[0].type == DOUBLE_BRACKET_OPEN)
+    if (this->line_data.token_list[1].type == COMMENT)
+        {
+            std::cout << "comment";
+            return;
+        };
+    if (this->line_data.token_list[1].type == DOUBLE_BRACKET_OPEN)
         process_header();
     else
         process_keypair();
@@ -186,18 +325,20 @@ e_token ConfigParser::determine_token(std::string &line, size_t &i)
 void ConfigParser::process_quoted_string(Token &token)
 {
     this->state.string_state = IN_QUOTES;
-    while (size_t &i = this->line_data.line_progress)
+    size_t &i = this->line_data.line_progress;
+    while (i < this->line_data.line.length())
     {
-        if (i >= this->line_data.line.length() || this->line_data.line[i] == '"')
+        if (this->line_data.line[i] == '"')
         {
-            if (this->line_data.line[i] == '"')
-                this->state.string_state = OUT_QUOTES, i++;
+            this->state.string_state = OUT_QUOTES;
+            i++;  // Move past the closing quote
             break;
         }
         token.value += this->line_data.line[i++];
     }
+    // If we got here without finding a closing quote, string is unterminated
+    // (this will be caught later in process_line)
 }
-
 void ConfigParser::process_bare(Token &token)
 {
     size_t &i = this->line_data.line_progress;
@@ -250,9 +391,21 @@ void ConfigParser::parse()
     }
 }
 
+// Modify main to print the parsed data
 int main()
 {
-    ConfigParser TOMLParser("config.toml");
-
-    TOMLParser.parse();
+    try {
+        ConfigParser TOMLParser("config.toml");
+        TOMLParser.parse();
+        
+        // Print parsed structure
+        std::cout << "\n--- Parsed Configuration ---\n";
+        TOMLParser.debug_print_section(&TOMLParser.globalSection);
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    return 0;
 }
