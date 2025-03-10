@@ -20,8 +20,11 @@ thene build an image with :
 the second step is run the container and bind  the volumes .
 
 
-# docker run -it -v /hibouzid/Desktop/webserv:/webserve  -p 8080:8080 -p 8081:8081 -p 8082:8082 vcontainer
+# docker run -it -v /Users/hitchman/Desktop/Working_space/webserv:/webserve  -p 8080:8080 -p 8081:8081 -p 8082:8082 vcontainer
 
 
 bind volumes to sync you working on vscode with container
 at end i create this container because of missing epoll on macos .
+
+docker build -t nginx .
+docker run -it  -p 80:80 nginx
