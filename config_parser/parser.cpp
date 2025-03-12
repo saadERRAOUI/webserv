@@ -60,7 +60,7 @@ std::string trim(std::string &line)
 bool ConfigParser::isComment(char c)
 {
     if ((c == '#' && state.string_state != OUT_QUOTES))
-        return true;
+        return  true;
     return false;
 }
 
@@ -119,7 +119,6 @@ void ConfigParser::throw_error(std::string error)
 
 void ConfigParser::process_header()
 {   
-    std::cout << " bracket";
     current_section = &globalSection;  // Start at the root
     
     // Process each section part (e.g., "server", "location")
@@ -276,14 +275,10 @@ void ConfigParser::process_keypair()
 void ConfigParser::process_line(std::string &line)
 {
     tokenize(line);
-    std::cout << std::endl;
     determine_state();
     validate(this->line_data.token_list);
     if (this->line_data.token_list[1].type == COMMENT)
-        {
-            std::cout << "comment";
-            return;
-        };
+            return this->line_data.token_list.clear();;
     if (this->line_data.token_list[1].type == DOUBLE_BRACKET_OPEN)
         process_header();
     else
@@ -391,21 +386,4 @@ void ConfigParser::parse()
     }
 }
 
-// Modify main to print the parsed data
-int main()
-{
-    try {
-        ConfigParser TOMLParser("config.toml");
-        TOMLParser.parse();
-        
-        // Print parsed structure
-        std::cout << "\n--- Parsed Configuration ---\n";
-        TOMLParser.debug_print_section(&TOMLParser.globalSection);
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    }
-    
-    return 0;
-}
+

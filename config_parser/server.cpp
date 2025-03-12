@@ -1,24 +1,78 @@
+#include "server.hpp"
 
-struct route {
-    std::string path;
-    std::string index;
-    std::vector <std::string> methods;
-    std::string root;
-    std::string redirection;
-    bool autoindex;
-}
-class Server 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+std::vector<int> Server::getPorts()
 {
-    int port;
-    //check if host is possible to be "localhost"
-    std::string host;
-    std::string server_name;
-    std::map<int, std::string> error_pages;
-    std::map<std::string, route> routes;
+    return this->port;
+}
+
+std::string Server::getHost()
+{
+    return this->host;
+}
+
+std::vector<std::string> Server::getServerName()
+{
+    return this->server_name;
+}
+
+std::map<std::string, route> Server::getRoutes()
+{
+    return this->routes;
+}
+
+std::map<int, std::string> Server::getErrorPages()
+{
+    return this->error_pages;
+}
+
+int Server::getMaxBodySize()
+{
+    return this->max_body_size;
 }
 
 
+void Server::setPort(std::vector<int> port)
+{
+    this->port = port;
+}
 
+void Server::setHost(std::string host)
+{
+    this->host = host;
+}
 
+void Server::setServerName(std::vector<std::string> server_name)
+{
+    this->server_name = server_name;
+}
 
-// std::map<std::string, route> 
+void Server::setRoutes(std::map<std::string, route> routes)
+{
+    this->routes = routes;
+}
+
+void Server::setErrorPages(std::map<int, std::string> error_pages)
+{
+    this->error_pages = error_pages;
+}
+
+void Server::setMaxBodySize(int max_body_size)
+{
+    this->max_body_size = max_body_size;
+}
+
