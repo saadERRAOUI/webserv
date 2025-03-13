@@ -1,4 +1,0 @@
---std=c++98 
--Wextra 
--Wall 
--Werror
