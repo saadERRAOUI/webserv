@@ -5,6 +5,10 @@
 
 int main()
 {
-    WebServ web("./config.toml");
+    try {
+        WebServ web("./config.toml");
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+    }
 
 }

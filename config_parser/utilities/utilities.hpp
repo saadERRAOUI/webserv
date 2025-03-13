@@ -5,3 +5,5 @@
 #include <sstream>
 
 int parseInt(std::string string);
+
+std::string parseString(int integer);

@@ -2,7 +2,8 @@
 #include <cstdio>
 #include <memory>
 #include <iostream>
-
+#include <stdlib.h>
+#include "./utilities/utilities.hpp"
 ConfigParser::ConfigParser(std::string path)
     : file_path(path), file(path.c_str()), globalSection("global"),
       current_section(&globalSection)
@@ -40,7 +41,7 @@ ConfigParser::ConfigParser(std::string path)
     valid_context_map[std::pair<context, e_token>(IN_TABLE, BARE_KEY)] = EQUALS;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] = QUOTED_STRING;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, QUOTED_STRING)] = COMMA | BRACE_CLOSE;
-      valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] =  QUOTED_STRING;
+    valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] =  QUOTED_STRING;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, COMMA)] = BARE_KEY;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, BRACE_CLOSE)] = END_OF_LINE | COMMENT ;
     
@@ -111,7 +112,7 @@ void ConfigParser::validate(std::deque<Token> &token_list)
 
 void ConfigParser::throw_error(std::string error)
 {
-    std::string message = "Error at line " + std::to_string(line_data.line_nb) +
+    std::string message = "Error at line " + std::string(parseString(line_data.line_nb)) +
                           " : " + error;
     throw std::invalid_argument(message);
 }
@@ -155,46 +156,51 @@ void ConfigParser::process_header()
     }
 }
 
-// Fix the function definition - remove the default argument
-void ConfigParser::debug_print_section(Section* section, int indent)
-{
-    // Print section name
-    std::string indentation(indent * 2, ' ');
-    std::cout << indentation << "Section: " << section->name << std::endl;
+// // Fix the function definition - remove the default argument
+// void ConfigParser::debug_print_section(Section* section, int indent)
+// {
+//     // Print section name
+//     std::string indentation(indent * 2, ' ');
+//     std::cout << indentation << "Section: " << section->name << std::endl;
     
-    // Print key-value pairs
-    for (size_t i = 0; i < section->key_val.size(); i++) {
-        std::cout << indentation << "  Key: " << section->key_val[i].first << ", ";
+//     // Print key-value pairs
+//     for (size_t i = 0; i < section->key_val.size(); i++) {
+//         std::cout << indentation << "  Key: " << section->key_val[i].first << ", ";
         
-        TOMLValue& val = section->key_val[i].second;
-        switch (val.type) {
-            case TOMLValue::SINGLE:
-                std::cout << "Value: " << *val.single << std::endl;
-                break;
-            case TOMLValue::ARRAY:
-                std::cout << "Array: [";
-                for (size_t j = 0; j < val.array->size(); j++) {
-                    std::cout << (j > 0 ? ", " : "") << (*val.array)[j];
-                }
-                std::cout << "]" << std::endl;
-                break;
-            case TOMLValue::TABLE:
-                std::cout << "Table: {";
-                for (auto it = val.table->begin(); it != val.table->end(); ++it) {
-                    std::cout << (it != val.table->begin() ? ", " : "") << it->first << " = " << it->second;
-                }
-                std::cout << "}" << std::endl;
-                break;
-        }
-    }
+//         TOMLValue& val = section->key_val[i].second;
+//         switch (val.type) {
+//             case TOMLValue::SINGLE:
+//                 if (val.single.get())
+//                     std::cout << "Value: " << *val.single.get() << std::endl;
+//                 break;
+//             case TOMLValue::ARRAY:
+//                 if (val.array.get()) {
+//                     std::cout << "Array: [";
+//                     for (size_t j = 0; j < val.array.get()->size(); j++) {
+//                         std::cout << (j > 0 ? ", " : "") << (*val.array.get())[j];
+//                     }
+//                     std::cout << "]" << std::endl;
+//                 }
+//                 break;
+//             case TOMLValue::TABLE:
+//                 if (val.table.get()) {
+//                     std::cout << "Table: {";
+//                     for (TableType::iterator it = val.table.get()->begin(); it != val.table.get()->end(); ++it) {
+//                         std::cout << (it != val.table.get()->begin() ? ", " : "") << it->first << " = " << it->second;
+//                     }
+//                     std::cout << "}" << std::endl;
+//                 }
+//                 break;
+//         }
+//     }
     
-    // Recursively print subsections
-    for (auto& section_pair : section->raw_data) {
-        for (auto& subsection : section_pair.second) {
-            debug_print_section(&subsection, indent + 1);
-        }
-    }
-}
+//     // Recursively print subsections
+//     for (auto& section_pair : section->raw_data) {
+//         for (auto& subsection : section_pair.second) {
+//             debug_print_section(&subsection, indent + 1);
+//         }
+//     }
+// }
 
 void ConfigParser::process_keypair()
 {
@@ -215,7 +221,7 @@ void ConfigParser::process_keypair()
     {
         // Simple string value
         TOMLValue value(TOMLValue::SINGLE);
-        *value.single = value_token.value;
+        *value.single.get() = value_token.value;
         current_section->key_val.push_back(key_pair(key, value));
     }
     else if (value_token.type == BRACKET_OPEN)

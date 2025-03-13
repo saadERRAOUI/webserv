@@ -10,3 +10,10 @@ int parseInt(std::string string)
         throw std::invalid_argument("Invalid integer");
     return x;
 }
+
+std::string parseString(int integer)
+{
+    std::stringstream ss;
+    ss << integer;
+    return ss.str();
+}

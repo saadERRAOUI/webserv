@@ -17,7 +17,8 @@ private:
     std::string root;
     std::string redirection;
     bool autoindex;
-public :
+
+public:
     std::string getPath();
     std::string getIndex();
     std::vector<std::string> getMethods();
@@ -29,7 +30,7 @@ public :
     void setMethods(std::vector<std::string> methods);
     void setRoot(std::string root);
     void setRedirection(std::string redirection);
-     void setAutoindex(bool autoindex);
+    void setAutoindex(bool autoindex);
 };
 
 class Server

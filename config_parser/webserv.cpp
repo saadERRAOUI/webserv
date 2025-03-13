@@ -5,11 +5,7 @@
 void Server::set(std::string &key, TOMLValue &val)
 {
     if (key == "port" && val.type == TOMLValue::ARRAY)
-    {
-        transform(val.array->begin(), val.array->end(), std::back_insert_iterator(this->port), parseInt);
-        for (std::vector<int>::iterator it = this->port.begin(); it != this->port.end(); it++)
-            std::cout << *it << std::endl;
-    }
+        transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port), parseInt);
     else if (key == "host" && val.type == TOMLValue::SINGLE)
         this->setHost(*val.single);
     else if (key == "server_name" && val.type == TOMLValue::ARRAY)
@@ -34,7 +30,7 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
 {
     this->config_file = config_file;
     parser.parse();
-    for (std::map<std::string, std::deque<Section>>::iterator sections = parser.globalSection.raw_data.begin(); sections != parser.globalSection.raw_data.end(); sections++)
+    for (std::map<std::string, std::deque<Section> >::iterator sections = parser.globalSection.raw_data.begin(); sections != parser.globalSection.raw_data.end(); sections++)
     {
         if (sections->first != "server")
             throw std::invalid_argument("Invalid section name");

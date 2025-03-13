@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <auto_ptr.h>
 typedef enum
 {
   INITIAL,
@@ -91,97 +92,83 @@ struct TOMLValue
     BOOL
   };
   e_type type;
-  std::string *single;
-  ArrayType *array;
-  TableType *table;
+  std::auto_ptr<std::string> single;  // Use auto_ptr (since C++98)
+  std::auto_ptr<ArrayType> array;
+  std::auto_ptr<TableType> table;
   bool true_false;
 
 public:
   TOMLValue(enum e_type type)
-      : type(type), single(NULL), array(NULL), table(NULL)
+      : type(type)
   {
     switch (type)
     {
     case SINGLE:
-      single = new std::string();
+      single = std::auto_ptr<std::string>(new std::string());
       break;
     case ARRAY:
-      array = new ArrayType();
+      array = std::auto_ptr<ArrayType>(new ArrayType());
       break;
     case TABLE:
-      table = new TableType();
+      table = std::auto_ptr<TableType>(new TableType());
       break;
     case BOOL:
       break;
     }
   }
 
-  // Add copy constructor
+  // Update copy constructor
   TOMLValue(const TOMLValue &other)
-      : type(other.type), single(NULL), array(NULL), table(NULL), true_false(other.true_false)
+      : type(other.type), true_false(other.true_false)
   {
     switch (type)
     {
     case SINGLE:
-      if (other.single)
-        single = new std::string(*other.single);
+      if (other.single.get())
+        single = std::auto_ptr<std::string>(new std::string(*other.single));
       break;
     case ARRAY:
-      if (other.array)
-        array = new ArrayType(*other.array);
+      if (other.array.get())
+        array = std::auto_ptr<ArrayType>(new ArrayType(*other.array));
       break;
     case TABLE:
-      if (other.table)
-        table = new TableType(*other.table);
+      if (other.table.get())
+        table = std::auto_ptr<TableType>(new TableType(*other.table));
       break;
     case BOOL:
       break;
     }
   }
 
-  // Add assignment operator
   TOMLValue &operator=(const TOMLValue &other)
   {
     if (this != &other)
     {
-      // Clean up existing resources
-      delete single;
-      delete array;
-      delete table;
-
-      // Copy from other
       type = other.type;
-      single = NULL;
-      array = NULL;
-      table = NULL;
       true_false = other.true_false;
+      single.reset();
+      array.reset();
+      table.reset();
 
       switch (type)
       {
       case SINGLE:
-        if (other.single)
-          single = new std::string(*other.single);
+        if (other.single.get())
+          single = std::auto_ptr<std::string>(new std::string(*other.single));
         break;
       case ARRAY:
-        if (other.array)
-          array = new ArrayType(*other.array);
+        if (other.array.get())
+          array = std::auto_ptr<ArrayType>(new ArrayType(*other.array));
         break;
       case TABLE:
-        if (other.table)
-          table = new TableType(*other.table);
+        if (other.table.get())
+          table = std::auto_ptr<TableType>(new TableType(*other.table));
         break;
       case BOOL:
         break;
       }
     }
     return *this;
-  }
-
-  ~TOMLValue()
-  {
-    delete single;
-    delete array;
-    delete table;
   }
 };
 
@@ -191,7 +178,7 @@ typedef struct Section
 {
   std::string name;
   std::deque<key_pair> key_val;
-  std::map<std::string, std::deque<Section>> /*section - values inside */
+  std::map<std::string, std::deque<Section> > /*section - values inside */
       raw_data;
   Section(std::string name) : name(name) {};
 } Section;
