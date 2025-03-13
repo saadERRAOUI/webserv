@@ -16,14 +16,12 @@ void Server::set(std::string &key, TOMLValue &val)
         throw std::invalid_argument("Invalid key/value");
 }
 
-void WebServ::parseServer(Section &section)
+Server WebServ::parseServer(Section &section)
 {
     Server server(*this);
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
-    {
         server.set(key_val->first, key_val->second);
-    }
-
+    return server;
 }
 
 WebServ::WebServ(std::string config_file) : parser(config_file)
@@ -35,6 +33,12 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
         if (sections->first != "server")
             throw std::invalid_argument("Invalid section name");
         for (std::deque<Section>::iterator section = sections->second.begin(); section != sections->second.end(); section++)
-            this->parseServer(*section);
+            this->servers.push_back(parseServer(*section));
     }
+}
+
+
+std::vector<Server> WebServ::getServers()
+{
+    return this->servers;
 }

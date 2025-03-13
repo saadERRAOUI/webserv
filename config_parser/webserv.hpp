@@ -18,6 +18,6 @@ class WebServ
     ConfigParser parser;
     public:
         WebServ(std::string config_file);
-        void parseServer(Section &section);
-
+        Server parseServer(Section &section);
+        std::vector<Server> getServers();
 };

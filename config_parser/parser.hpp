@@ -92,7 +92,7 @@ struct TOMLValue
     BOOL
   };
   e_type type;
-  std::auto_ptr<std::string> single;  // Use auto_ptr (since C++98)
+  std::auto_ptr<std::string> single;  
   std::auto_ptr<ArrayType> array;
   std::auto_ptr<TableType> table;
   bool true_false;
