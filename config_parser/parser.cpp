@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <stdlib.h>
-#include "./utilities/utilities.hpp"
+#include "utilities.hpp"
 ConfigParser::ConfigParser(std::string path)
     : file_path(path), file(path.c_str()), globalSection("global"),
       current_section(&globalSection)
