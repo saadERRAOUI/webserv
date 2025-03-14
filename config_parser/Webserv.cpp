@@ -46,7 +46,7 @@ Server WebServ::parseServer(Section &section)
         server.set(key_val->first, key_val->second);
     for (std::map<std::string, std::deque<Section> >::iterator sections = section.raw_data.begin(); sections != section.raw_data.end(); sections++)
     {
-        if (sections->first != "route" && sections->first != "error_page")
+        if (sections->first != "route" && sections->first != "error_pages")
             throw std::invalid_argument("Invalid section name");
         for (std::deque<Section>::iterator section = sections->second.begin(); section != sections->second.end(); section++)
         {
@@ -57,18 +57,18 @@ Server WebServ::parseServer(Section &section)
                     throw std::invalid_argument("Invalid route path");
                 server.getRoutes()[Route.getPath()] = Route;
             }
-            else if (section->name == "error_page")
+            else if (section->name == "error_pages")
             {
                 int error_code;
                 std::string path;
                 for (std::deque<key_pair>::iterator key_val = section->key_val.begin(); key_val != section->key_val.end(); key_val++)
                 {
-                    if (key_val->first == "error_code" && key_val->second.type == TOMLValue::SINGLE)
-                        error_code = parseInt(*key_val->second.single);
-                    else if (key_val->first == "path" && key_val->second.type == TOMLValue::SINGLE)
-                        path = *key_val->second.single;
+                    if (key_val->second.type == TOMLValue::SINGLE)
+                        error_code = parseInt(key_val->first);
                     else
                         throw std::invalid_argument("Invalid key/value in error_page");
+                    server.getErrorPages()[error_code] = *key_val->second.single;
+
                 }
             }
         }

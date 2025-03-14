@@ -5,7 +5,6 @@
 #include <fstream>
 #include <map>
 #include <string>
-#include <auto_ptr.h>
 typedef enum
 {
   INITIAL,
@@ -92,48 +91,53 @@ struct TOMLValue
     BOOL
   };
   e_type type;
-  std::auto_ptr<std::string> single;  
-  std::auto_ptr<ArrayType> array;
-  std::auto_ptr<TableType> table;
+  std::string *single;  
+  ArrayType *array;
+  TableType *table;
   bool true_false;
 
 public:
   TOMLValue(enum e_type type)
-      : type(type)
+      : type(type), single(NULL), array(NULL), table(NULL)
   {
     switch (type)
     {
     case SINGLE:
-      single = std::auto_ptr<std::string>(new std::string());
+      single = new std::string();
       break;
     case ARRAY:
-      array = std::auto_ptr<ArrayType>(new ArrayType());
+      array =  new ArrayType();
       break;
     case TABLE:
-      table = std::auto_ptr<TableType>(new TableType());
+      table = new TableType();
       break;
     case BOOL:
       break;
     }
   }
-
+  ~TOMLValue()
+  {
+    delete single;
+    delete array;
+    delete table;
+  }
   // Update copy constructor
   TOMLValue(const TOMLValue &other)
-      : type(other.type), true_false(other.true_false)
+      : type(other.type), true_false(other.true_false), single(NULL), array(NULL), table(NULL)
   {
     switch (type)
     {
     case SINGLE:
-      if (other.single.get())
-        single = std::auto_ptr<std::string>(new std::string(*other.single));
+      if (other.single)
+        single = (new std::string(*other.single));
       break;
     case ARRAY:
-      if (other.array.get())
-        array = std::auto_ptr<ArrayType>(new ArrayType(*other.array));
+      if (other.array)
+        array = new ArrayType(*other.array);
       break;
     case TABLE:
-      if (other.table.get())
-        table = std::auto_ptr<TableType>(new TableType(*other.table));
+      if (other.table)
+        table = (new TableType(*other.table));
       break;
     case BOOL:
       break;
@@ -146,23 +150,23 @@ public:
     {
       type = other.type;
       true_false = other.true_false;
-      single.reset();
-      array.reset();
-      table.reset();
+      delete single;
+      delete array;
+      delete table;
 
       switch (type)
       {
       case SINGLE:
-        if (other.single.get())
-          single = std::auto_ptr<std::string>(new std::string(*other.single));
+        if (other.single)
+          single = (new std::string(*other.single));
         break;
       case ARRAY:
-        if (other.array.get())
-          array = std::auto_ptr<ArrayType>(new ArrayType(*other.array));
+        if (other.array)
+          array = new ArrayType(*other.array);
         break;
       case TABLE:
-        if (other.table.get())
-          table = std::auto_ptr<TableType>(new TableType(*other.table));
+        if (other.table)
+          table = (new TableType(*other.table));
         break;
       case BOOL:
         break;

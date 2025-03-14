@@ -221,7 +221,7 @@ void ConfigParser::process_keypair()
     {
         // Simple string value
         TOMLValue value(TOMLValue::SINGLE);
-        *value.single.get() = value_token.value;
+        *value.single= value_token.value;
         if (value_token.type != QUOTED_STRING)
             if (value_token.value == "true" || value_token.value == "false")
             {
