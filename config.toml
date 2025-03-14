@@ -1,5 +1,14 @@
 # lmfao
+
+default_max_body_size = "123"
+
 [[server]]
 host = "127.0.0.1" 
 port = [12, -123]
 server_name = ["example.com"] 
+
+[[server.route]]
+path = "/api/v1"
+methods = ["GET"]
+autoindex = true
+

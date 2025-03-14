@@ -222,6 +222,12 @@ void ConfigParser::process_keypair()
         // Simple string value
         TOMLValue value(TOMLValue::SINGLE);
         *value.single.get() = value_token.value;
+        if (value_token.type != QUOTED_STRING)
+            if (value_token.value == "true" || value_token.value == "false")
+            {
+                value.true_false = value_token.value == "true";
+                value.type = TOMLValue::BOOL;
+            }
         current_section->key_val.push_back(key_pair(key, value));
     }
     else if (value_token.type == BRACKET_OPEN)
