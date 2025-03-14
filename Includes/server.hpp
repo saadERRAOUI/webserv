@@ -19,9 +19,10 @@ private:
     bool autoindex;
 
 public:
+    const route &operator=(const route &other);
     std::string getPath();
     std::string getIndex();
-    std::vector<std::string> getMethods();
+    std::vector<std::string> &getMethods();
     std::string getRoot();
     std::string getRedirection();
     bool getAutoindex();
@@ -55,11 +56,11 @@ public:
     void setMaxBodySize(int max_body_size);
 
     void set(std::string &key, TOMLValue &val);
-    std::vector<int> getPorts();
+    std::vector<int> &getPorts();
     std::string getHost();
-    std::vector<std::string> getServerName();
-    std::map<std::string, route> getRoutes();
-    std::map<int, std::string> getErrorPages();
+    std::vector<std::string> &getServerName();
+    std::map<std::string, route> &getRoutes();
+    std::map<int, std::string> &getErrorPages();
     int getMaxBodySize();
     void printServer();
 };
