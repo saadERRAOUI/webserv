@@ -1,5 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   WebServ.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/23 14:58:33 by serraoui          #+#    #+#             */
+/*   Updated: 2025/02/23 16:43:46 by serraoui         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#define WEBSERV_HPP
 
 //Include std libraries
 //Add Macros
@@ -10,16 +22,4 @@
 #include <algorithm>
 #include <map>
 
-enum HttpRequestState {
-    HTTP_METHOD,
-    HTTP_REQUEST_URI,
-    HTTP_VERSION,
-    HTTP_HEADERS,
-    HTTP_BODY,
-    HTTP_COMPLETE,
-    HTTP_ERROR
-};
-
-
-
-#endif WEBSERV_HPP
+#endif // WEBSERV_HPP
