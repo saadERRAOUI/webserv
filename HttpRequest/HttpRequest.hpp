@@ -43,7 +43,7 @@ class HttpRequest {
         */
         HttpRequest();
         ~HttpRequest();
-        
+
         /*
             Getters
         */
@@ -53,7 +53,7 @@ class HttpRequest {
         std::string                         getBody() const;
         std::map<std::string, std::string>  getHeaders() const;
         int                                 getState() const;
-        
+
         /*
             Setters
         */
@@ -74,4 +74,4 @@ class HttpRequest {
         void            parseHttpRequestOrchestrator(char);
 };
 
-#endif // HTTPREQUEST_HPP
+#endif

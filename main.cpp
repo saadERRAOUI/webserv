@@ -12,10 +12,10 @@
 
 //  Todo : Add includes from "./Includes/*" folder
 
-/* 
+/*
     Author      : Saad ERRAOUI
     Date        : 2024-12-22
-    Description : main method 
+    Description : main method
 */
 #include <iostream>
 #include <fstream>
