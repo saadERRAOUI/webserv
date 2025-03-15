@@ -18,25 +18,25 @@ void Server::set(std::string &key, TOMLValue &val)
 
 route WebServ::parseRoute(Section &section)
 {
-    route route;
+    route Route;
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
     {
         if (key_val->first == "path" && key_val->second.type == TOMLValue::SINGLE)
-            route.setPath(*key_val->second.single);
+        Route.setPath(*key_val->second.single);
         else if (key_val->first == "index" && key_val->second.type == TOMLValue::SINGLE)
-            route.setIndex(*key_val->second.single);
+            Route.setIndex(*key_val->second.single);
         else if (key_val->first == "methods" && key_val->second.type == TOMLValue::ARRAY)
-            route.setMethods(std::vector<std::string>(key_val->second.array->begin(), key_val->second.array->end()));
+            Route.setMethods(std::vector<std::string>(key_val->second.array->begin(), key_val->second.array->end()));
         else if (key_val->first == "root" && key_val->second.type == TOMLValue::SINGLE)
-            route.setRoot(*key_val->second.single);
+            Route.setRoot(*key_val->second.single);
         else if (key_val->first == "redirection" && key_val->second.type == TOMLValue::SINGLE)
-            route.setRedirection(*key_val->second.single);
+            Route.setRedirection(*key_val->second.single);
         else if (key_val->first == "autoindex" && key_val->second.type == TOMLValue::BOOL)
-            route.setAutoindex(key_val->second.true_false);
+            Route.setAutoindex(key_val->second.true_false);
         else
             throw std::invalid_argument("Invalid key/value in route");
     }
-    return route;
+    return Route;
 }
 
 Server WebServ::parseServer(Section &section)

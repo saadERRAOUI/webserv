@@ -20,6 +20,8 @@ private:
 
 public:
     const route &operator=(const route &other);
+    route() : path(""), index(""), methods(std::vector<std::string>()), root(""), redirection(""), autoindex(false) {};
+    route(const route &other);
     std::string getPath();
     std::string getIndex();
     std::vector<std::string> &getMethods();

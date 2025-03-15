@@ -1,16 +1,5 @@
 #include "server.hpp"
 
-
-
-
-
-
-
-
-
-
-
-
 const route &route::operator=(const route &other)
 {
     if (this != &other)
@@ -23,6 +12,16 @@ const route &route::operator=(const route &other)
         this->autoindex = other.autoindex;
     }
     return *this;
+}
+
+route::route(const route &other)
+{
+    this->path = other.path;
+    this->index = other.index;
+    this->methods = other.methods;
+    this->root = other.root;
+    this->redirection = other.redirection;
+    this->autoindex = other.autoindex;
 }
 
 std::string route::getPath()
