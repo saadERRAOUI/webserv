@@ -1,5 +1,4 @@
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#pragma once
 
 //Include std libraries
 //Add Macros
@@ -9,17 +8,23 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include "./../Includes/server.hpp"
+#include "./../Includes/parser.hpp"
 
-enum HttpRequestState {
-    HTTP_METHOD,
-    HTTP_REQUEST_URI,
-    HTTP_VERSION,
-    HTTP_HEADERS,
-    HTTP_BODY,
-    HTTP_COMPLETE,
-    HTTP_ERROR
+#include <vector>
+
+class WebServ
+{
+private:
+    std::vector<Server> servers;
+    std::string config_file;
+    std::map<int, std::string> error_pages;
+    int default_max_body_size;
+    ConfigParser parser;
+
+    public:
+        WebServ(std::string config_file);
+        Server parseServer(Section &section);
+        route parseRoute(Section &section);
+        std::vector<Server> getServers();
 };
-
-
-
-#endif WEBSERV_HPP

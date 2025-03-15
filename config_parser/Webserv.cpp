@@ -1,5 +1,5 @@
-#include "Webserv.hpp"
-#include "utilities.hpp"
+#include "./../Includes/Webserv.hpp"
+#include "./../Includes/utilities.hpp"
 #include <algorithm>
 
 void Server::set(std::string &key, TOMLValue &val)

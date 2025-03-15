@@ -38,6 +38,7 @@ class Server
 {
 private:
     std::vector<int> port;
+    int socket;
     // check if host is possible to be "localhost"
     std::string host;
     std::vector<std::string> server_name;
@@ -47,7 +48,9 @@ private:
 
 public:
     WebServ &webServ;
-    Server(WebServ &webServ) : webServ(webServ) {};
+    Server(WebServ &webServ) : webServ(webServ) {
+        this->socket = -1;
+    };
     void setPort(std::vector<int> port);
     void setHost(std::string host);
     void setServerName(std::vector<std::string> server_name);

@@ -1,4 +1,4 @@
-#include "server.hpp"
+#include "./../Includes/server.hpp"
 
 
 
@@ -148,7 +148,7 @@ void Server::setMaxBodySize(int max_body_size)
     this->max_body_size = max_body_size;
 }
 
-void Server::printServer() 
+void Server::printServer()
 {
     std::cout << "Host : " <<this->host << std::endl;
     std::cout << "Server name : ";

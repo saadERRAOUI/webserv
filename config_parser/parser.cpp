@@ -1,9 +1,9 @@
-#include "parser.hpp"
+#include "./../Includes/parser.hpp"
 #include <cstdio>
 #include <memory>
 #include <iostream>
 #include <stdlib.h>
-#include "utilities.hpp"
+#include "./../Includes/utilities.hpp"
 ConfigParser::ConfigParser(std::string path)
     : file_path(path), file(path.c_str()), globalSection("global"),
       current_section(&globalSection)
@@ -27,11 +27,11 @@ ConfigParser::ConfigParser(std::string path)
     valid_tokens_map[std::pair<e_substate, e_token>(PARSING_KEY, QUOTED_STRING)] = EQUALS;
     valid_tokens_map[std::pair<e_substate, e_token>(PARSING_KEY, EQUALS)] = BARE_KEY | QUOTED_STRING | BRACE_OPEN | BRACKET_OPEN;
 
-    
+
     valid_context_map[std::pair<context, e_token>(IN_STRING, BARE_KEY)] = END_OF_LINE | COMMENT;
     valid_context_map[std::pair<context, e_token>(IN_STRING, QUOTED_STRING)] = END_OF_LINE | COMMENT;
-    
-    
+
+
     valid_context_map[std::pair<context, e_token>(IN_ARRAY, BARE_KEY)] = COMMA | BRACKET_CLOSE;
     valid_context_map[std::pair<context, e_token>(IN_ARRAY, QUOTED_STRING)] = COMMA | BRACKET_CLOSE;
     valid_context_map[std::pair<context, e_token>(IN_ARRAY, COMMA)] = BARE_KEY | QUOTED_STRING;
@@ -44,8 +44,8 @@ ConfigParser::ConfigParser(std::string path)
     valid_context_map[std::pair<context, e_token>(IN_TABLE, EQUALS)] =  QUOTED_STRING;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, COMMA)] = BARE_KEY;
     valid_context_map[std::pair<context, e_token>(IN_TABLE, BRACE_CLOSE)] = END_OF_LINE | COMMENT ;
-    
-    
+
+
     if (!file.is_open())
         throw std::invalid_argument("could not open the file!");
 }
@@ -104,8 +104,8 @@ void ConfigParser::validate(std::deque<Token> &token_list)
                         state.value_substate = IN_TABLE;
                     i++;
                 }
-            
-            
+
+
         }
     }
 }
@@ -119,9 +119,9 @@ void ConfigParser::throw_error(std::string error)
 
 
 void ConfigParser::process_header()
-{   
+{
     current_section = &globalSection;  // Start at the root
-    
+
     // Process each section part (e.g., "server", "location")
     for (size_t i = 2; i < this->line_data.token_list.size(); i++)
     {
@@ -130,11 +130,11 @@ void ConfigParser::process_header()
             std::string section_name = this->line_data.token_list[i].value;
             // Check if this section already exists
             bool found = false;
-            
+
             if (current_section->raw_data.count(section_name) > 0) {
                 // If we're at the last part of the path, add a new entry
-                if (i == this->line_data.token_list.size() - 2 || 
-                   (i + 1 < this->line_data.token_list.size() && 
+                if (i == this->line_data.token_list.size() - 2 ||
+                   (i + 1 < this->line_data.token_list.size() &&
                     this->line_data.token_list[i + 1].type == DOUBLE_BRACKET_CLOSE)) {
                     // This is the last segment, create a new section
                     current_section->raw_data[section_name].push_back(Section(section_name));
@@ -146,7 +146,7 @@ void ConfigParser::process_header()
                     found = true;
                 }
             }
-            
+
             // If not found, create a new section
             if (!found) {
                 current_section->raw_data[section_name].push_back(Section(section_name));
@@ -162,11 +162,11 @@ void ConfigParser::process_header()
 //     // Print section name
 //     std::string indentation(indent * 2, ' ');
 //     std::cout << indentation << "Section: " << section->name << std::endl;
-    
+
 //     // Print key-value pairs
 //     for (size_t i = 0; i < section->key_val.size(); i++) {
 //         std::cout << indentation << "  Key: " << section->key_val[i].first << ", ";
-        
+
 //         TOMLValue& val = section->key_val[i].second;
 //         switch (val.type) {
 //             case TOMLValue::SINGLE:
@@ -193,7 +193,7 @@ void ConfigParser::process_header()
 //                 break;
 //         }
 //     }
-    
+
 //     // Recursively print subsections
 //     for (auto& section_pair : section->raw_data) {
 //         for (auto& subsection : section_pair.second) {
@@ -206,17 +206,17 @@ void ConfigParser::process_keypair()
 {
     std::string key;
     key = this->line_data.token_list[1].value;
-    
+
     // Check for equals sign
     if (this->line_data.token_list[2].type != EQUALS || this->line_data.token_list.size() < 4)
     {
         this->throw_error("expected '=' after key");
         return;
     }
-    
+
     // Process different value types based on the token after equals
     Token& value_token = this->line_data.token_list[3];
-    
+
     if (value_token.type & (BARE_KEY | QUOTED_STRING))
     {
         // Simple string value
@@ -234,17 +234,17 @@ void ConfigParser::process_keypair()
     {
         // Array value
         TOMLValue value(TOMLValue::ARRAY);
-        
+
         // Process array elements (tokens between BRACKET_OPEN and BRACKET_CLOSE)
         for (size_t i = 4; i < this->line_data.token_list.size(); i++)
         {
             if (this->line_data.token_list[i].type & (BARE_KEY | QUOTED_STRING))
                 value.array->push_back(this->line_data.token_list[i].value);
-            
+
             if (this->line_data.token_list[i].type == BRACKET_CLOSE)
                 break;
         }
-        
+
         current_section->key_val.push_back(key_pair(key, value));
     }
     else if (value_token.type == BRACE_OPEN)
@@ -252,7 +252,7 @@ void ConfigParser::process_keypair()
         // Table value
         TOMLValue value(TOMLValue::TABLE);
         std::string table_key;
-        
+
         // Process table key-value pairs (tokens between BRACE_OPEN and BRACE_CLOSE)
         for (size_t i = 4; i < this->line_data.token_list.size(); i++)
         {
@@ -271,11 +271,11 @@ void ConfigParser::process_keypair()
                 (*value.table)[table_key] = this->line_data.token_list[i].value;
                 table_key.clear();  // Reset for next key-value pair
             }
-            
+
             if (this->line_data.token_list[i].type == BRACE_CLOSE)
                 break;
         }
-        
+
         current_section->key_val.push_back(key_pair(key, value));
     }
     else

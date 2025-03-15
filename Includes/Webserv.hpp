@@ -1,5 +1,4 @@
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#pragma once
 
 //Include std libraries
 //Add Macros
@@ -9,24 +8,11 @@
 #include <string>
 #include <algorithm>
 #include <map>
-
-enum HttpRequestState {
-    HTTP_METHOD,
-    HTTP_REQUEST_URI,
-    HTTP_VERSION,
-    HTTP_HEADERS,
-    HTTP_BODY,
-    HTTP_COMPLETE,
-    HTTP_ERROR
-};
-
-
-
-#endif WEBSERV_HPP
+#include "./../Includes/server.hpp"
+#include "./../Includes/parser.hpp"
 
 #include <vector>
-#include "server.hpp"
-#include "parser.hpp"
+
 class WebServ
 {
 private:
