@@ -1,0 +1,30 @@
+First of all craete a Dockerfile  in the back of the working directory .
+for example the working directory is /hibouzid/Desktop/webserve you must add docker file in Desktop .
+
+for Dockerfile :
+
+# FROM ubuntu:latest
+
+# RUN apt update -y && apt upgrade -y
+
+# RUN apt install -y 	make 	clang 	curl 	git
+
+
+# RUN mkdir -p /webserve
+
+# COPY ./webserv /webserve
+
+thene build an image with :
+	# docker build -t vcontainer .
+
+the second step is run the container and bind  the volumes .
+
+
+# docker run -it -v /Users/hitchman/Desktop/Working_space/webserv:/webserve  -p 8080:8080 -p 8081:8081 -p 8082:8082 vcontainer
+
+
+bind volumes to sync you working on vscode with container
+at end i create this container because of missing epoll on macos .
+
+docker build -t nginx .
+docker run -it  -p 80:80 nginx

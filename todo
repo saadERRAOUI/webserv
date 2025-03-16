@@ -1,5 +1,8 @@
-add epoll wait for listening to sockets
-fix the problem of the address already use.
-read all request from socket, and passe it to parsing  
-debuging the problem of flag into the instence 
-let reset ideas about this task .
+Create a simillar path where we serve the files .
+
+thene start serve the files .
+depending on the request .
+
+-the cases of bad request is to have a server name in the config file but the request received whitout "Host: name"
+-read more subject
+- 
