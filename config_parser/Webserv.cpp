@@ -2,48 +2,38 @@
 #include "./../Includes/utilities.hpp"
 #include <algorithm>
 
-void Server::set(std::string &key, TOMLValue &val)
-{
-    if (key == "port" && val.type == TOMLValue::ARRAY)
-        transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port), parseInt);
-    else if (key == "host" && val.type == TOMLValue::SINGLE)
-        this->setHost(*val.single);
-    else if (key == "server_name" && val.type == TOMLValue::ARRAY)
-        this->setServerName(std::vector<std::string>(val.array->begin(), val.array->end()));
-    else if (key == "max_body_size" && val.type == TOMLValue::SINGLE)
-        this->setMaxBodySize(parseInt(*val.single));
-    else
-        throw std::invalid_argument("Invalid key/value");
-}
+
 
 route WebServ::parseRoute(Section &section)
 {
-    route route;
+    route Route;
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
     {
         if (key_val->first == "path" && key_val->second.type == TOMLValue::SINGLE)
-            route.setPath(*key_val->second.single);
+        Route.setPath(*key_val->second.single);
         else if (key_val->first == "index" && key_val->second.type == TOMLValue::SINGLE)
-            route.setIndex(*key_val->second.single);
+            Route.setIndex(*key_val->second.single);
         else if (key_val->first == "methods" && key_val->second.type == TOMLValue::ARRAY)
-            route.setMethods(std::vector<std::string>(key_val->second.array->begin(), key_val->second.array->end()));
+            Route.setMethods(std::vector<std::string>(key_val->second.array->begin(), key_val->second.array->end()));
         else if (key_val->first == "root" && key_val->second.type == TOMLValue::SINGLE)
-            route.setRoot(*key_val->second.single);
+            Route.setRoot(*key_val->second.single);
         else if (key_val->first == "redirection" && key_val->second.type == TOMLValue::SINGLE)
-            route.setRedirection(*key_val->second.single);
+            Route.setRedirection(*key_val->second.single);
         else if (key_val->first == "autoindex" && key_val->second.type == TOMLValue::BOOL)
-            route.setAutoindex(key_val->second.true_false);
+            Route.setAutoindex(key_val->second.true_false);
         else
             throw std::invalid_argument("Invalid key/value in route");
     }
-    return route;
+    return Route;
 }
 
 Server WebServ::parseServer(Section &section)
 {
     Server server(*this);
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
+    {
         server.set(key_val->first, key_val->second);
+    }
     for (std::map<std::string, std::deque<Section> >::iterator sections = section.raw_data.begin(); sections != section.raw_data.end(); sections++)
     {
         if (sections->first != "route" && sections->first != "error_pages")
@@ -64,7 +54,7 @@ Server WebServ::parseServer(Section &section)
                 for (std::deque<key_pair>::iterator key_val = section->key_val.begin(); key_val != section->key_val.end(); key_val++)
                 {
                     if (key_val->second.type == TOMLValue::SINGLE)
-                        error_code = parseInt(key_val->first);
+                        error_code = parse_positive_int(key_val->first);
                     else
                         throw std::invalid_argument("Invalid key/value in error_page");
                     server.getErrorPages()[error_code] = *key_val->second.single;
@@ -95,7 +85,7 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
     for (std::deque<key_pair>::iterator key_val = parser.globalSection.key_val.begin(); key_val != parser.globalSection.key_val.end(); key_val++)
     {
         if (key_val->first == "default_max_body_size" && key_val->second.type == TOMLValue::SINGLE)
-            this->default_max_body_size = parseInt(*key_val->second.single);
+            this->default_max_body_size = parse_positive_int(*key_val->second.single);
         else
             throw std::invalid_argument("Invalid key/value");
     }
@@ -112,3 +102,14 @@ std::vector<Server> WebServ::getServers()
 {
     return this->servers;
 }
+
+int WebServ::getDefaultMaxBodySize()
+{
+    return this->default_max_body_size;
+}
+
+std::map<int, std::string> &WebServ::getErrorPages()
+{
+    return this->error_pages;
+}
+

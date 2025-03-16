@@ -1,16 +1,5 @@
 #include "./../Includes/server.hpp"
 
-
-
-
-
-
-
-
-
-
-
-
 const route &route::operator=(const route &other)
 {
     if (this != &other)
@@ -24,6 +13,17 @@ const route &route::operator=(const route &other)
     }
     return *this;
 }
+
+route::route(const route &other) 
+{
+    this->path = other.path;
+    this->index = other.index;
+    this->methods = other.methods;
+    this->root = other.root;
+    this->redirection = other.redirection;
+    this->autoindex = other.autoindex;
+}
+
 
 std::string route::getPath()
 {
@@ -148,13 +148,46 @@ void Server::setMaxBodySize(int max_body_size)
     this->max_body_size = max_body_size;
 }
 
-void Server::printServer()
+Server::Server(const Server &other) : webServ(other.webServ)
+{
+    this->port = other.port;
+    this->host = other.host;
+    this->server_name = other.server_name;
+    this->routes = other.routes;
+    this->error_pages = other.error_pages;
+    this->max_body_size = other.max_body_size;
+}
+
+const Server &Server::operator=(const Server &other)
+{
+    if (this != &other)
+    {
+        this->port = other.port;
+        this->host = other.host;
+        this->server_name = other.server_name;
+        this->routes = other.routes;
+        this->error_pages = other.error_pages;
+        this->max_body_size = other.max_body_size;
+    }
+    return *this;
+}
+
+
+
+void Server::printServer() 
 {
     std::cout << "Host : " <<this->host << std::endl;
     std::cout << "Server name : ";
     for (std::vector<std::string>::iterator it = this->server_name.begin(); it != this->server_name.end(); it++)
         std::cout << *it << " ";
     std::cout << std::endl;
+    std::cout << "Ports : ";
+    for (std::vector<int>::iterator it = this->port.begin(); it != this->port.end(); it++)
+        std::cout << *it << " ";
+    std::cout << std::endl;
+    std::cout << "Max body size : ";
+    std::cout << this->max_body_size << std::endl;
+    std::cout << "Routes : " << std::endl;
     for (std::map<std::string, route>::iterator it = this->routes.begin(); it != this->routes.end(); it++)
     {
         std::cout << " Path: " << it->second.getPath() << std::endl;
@@ -173,7 +206,22 @@ void Server::printServer()
         std::cout <<  " Error code : " <<it->first << std::endl;
         std::cout << " Path : " << it->second << std::endl;
     }
-    std::cout << "Max body size : ";
-    std::cout << this->max_body_size << std::endl;
 
 }
+
+void Server::set(std::string &key, TOMLValue &val)
+{
+    if (key == "port" && val.type == TOMLValue::ARRAY)
+    {
+        transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port),parse_positive_int);
+    }
+    else if (key == "host" && val.type == TOMLValue::SINGLE)
+        this->setHost(*val.single);
+    else if (key == "server_name" && val.type == TOMLValue::ARRAY)
+        this->setServerName(std::vector<std::string>(val.array->begin(), val.array->end()));
+    else if (key == "max_body_size" && val.type == TOMLValue::SINGLE)
+        this->setMaxBodySize(parse_positive_int(*val.single));
+    else
+        throw std::invalid_argument("Invalid key/value");
+}
+
