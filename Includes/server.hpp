@@ -20,7 +20,7 @@ private:
 
 public:
     const route &operator=(const route &other);
-    route() : path(""), index(""), methods(std::vector<std::string>()), root(""), redirection(""), autoindex(false) {};
+    route() : root(""), redirection(""), autoindex(false) {};
     route(const route &other);
     std::string getPath();
     std::string getIndex();
@@ -45,6 +45,7 @@ private:
     std::vector<std::string> server_name;
     std::map<std::string, route> routes;
     std::map<int, std::string> error_pages;
+    int socket;
     int max_body_size;
 
 public:
@@ -65,6 +66,8 @@ public:
     std::vector<std::string> &getServerName();
     std::map<std::string, route> &getRoutes();
     std::map<int, std::string> &getErrorPages();
+    int getSocket();
+    int setSocket(int socket);
     int getMaxBodySize();
     void printServer();
 };

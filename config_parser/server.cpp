@@ -26,7 +26,6 @@ route::route(const route &other)
 }
 
 
-
 std::string route::getPath()
 {
     return this->path;
