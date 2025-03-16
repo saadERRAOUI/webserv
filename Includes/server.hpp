@@ -50,6 +50,8 @@ private:
 public:
     WebServ &webServ;
     Server(WebServ &webServ) : webServ(webServ) {};
+    Server(const Server &other);
+    const Server &operator=(const Server &other);
     void setPort(std::vector<int> port);
     void setHost(std::string host);
     void setServerName(std::vector<std::string> server_name);

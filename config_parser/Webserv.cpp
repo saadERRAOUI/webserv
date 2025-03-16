@@ -5,7 +5,9 @@
 void Server::set(std::string &key, TOMLValue &val)
 {
     if (key == "port" && val.type == TOMLValue::ARRAY)
+    {
         transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port), parseInt);
+    }
     else if (key == "host" && val.type == TOMLValue::SINGLE)
         this->setHost(*val.single);
     else if (key == "server_name" && val.type == TOMLValue::ARRAY)
@@ -43,7 +45,9 @@ Server WebServ::parseServer(Section &section)
 {
     Server server(*this);
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
+    {
         server.set(key_val->first, key_val->second);
+    }
     for (std::map<std::string, std::deque<Section> >::iterator sections = section.raw_data.begin(); sections != section.raw_data.end(); sections++)
     {
         if (sections->first != "route" && sections->first != "error_pages")

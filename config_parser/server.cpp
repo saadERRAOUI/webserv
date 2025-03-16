@@ -147,6 +147,31 @@ void Server::setMaxBodySize(int max_body_size)
     this->max_body_size = max_body_size;
 }
 
+Server::Server(const Server &other) : webServ(other.webServ)
+{
+    this->port = other.port;
+    this->host = other.host;
+    this->server_name = other.server_name;
+    this->routes = other.routes;
+    this->error_pages = other.error_pages;
+    this->max_body_size = other.max_body_size;
+}
+
+const Server &Server::operator=(const Server &other)
+{
+    if (this != &other)
+    {
+        this->port = other.port;
+        this->host = other.host;
+        this->server_name = other.server_name;
+        this->routes = other.routes;
+        this->error_pages = other.error_pages;
+        this->max_body_size = other.max_body_size;
+    }
+    return *this;
+}
+
+
 void Server::printServer() 
 {
     std::cout << "Host : " <<this->host << std::endl;
@@ -154,6 +179,13 @@ void Server::printServer()
     for (std::vector<std::string>::iterator it = this->server_name.begin(); it != this->server_name.end(); it++)
         std::cout << *it << " ";
     std::cout << std::endl;
+    std::cout << "Ports : ";
+    for (std::vector<int>::iterator it = this->port.begin(); it != this->port.end(); it++)
+        std::cout << *it << " ";
+    std::cout << std::endl;
+    std::cout << "Max body size : ";
+    std::cout << this->max_body_size << std::endl;
+    std::cout << "Routes : " << std::endl;
     for (std::map<std::string, route>::iterator it = this->routes.begin(); it != this->routes.end(); it++)
     {
         std::cout << " Path: " << it->second.getPath() << std::endl;
@@ -172,7 +204,5 @@ void Server::printServer()
         std::cout <<  " Error code : " <<it->first << std::endl;
         std::cout << " Path : " << it->second << std::endl;
     }
-    std::cout << "Max body size : ";
-    std::cout << this->max_body_size << std::endl;
 
 }
