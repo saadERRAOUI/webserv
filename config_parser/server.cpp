@@ -1,5 +1,6 @@
 #include "server.hpp"
-
+#include <algorithm>
+#include "utilities.hpp"
 const route &route::operator=(const route &other)
 {
     if (this != &other)
@@ -14,7 +15,7 @@ const route &route::operator=(const route &other)
     return *this;
 }
 
-route::route(const route &other)
+route::route(const route &other) 
 {
     this->path = other.path;
     this->index = other.index;
@@ -23,6 +24,8 @@ route::route(const route &other)
     this->redirection = other.redirection;
     this->autoindex = other.autoindex;
 }
+
+
 
 std::string route::getPath()
 {
@@ -147,6 +150,7 @@ void Server::setMaxBodySize(int max_body_size)
     this->max_body_size = max_body_size;
 }
 
+
 Server::Server(const Server &other) : webServ(other.webServ)
 {
     this->port = other.port;
@@ -170,6 +174,7 @@ const Server &Server::operator=(const Server &other)
     }
     return *this;
 }
+
 
 
 void Server::printServer() 
@@ -205,4 +210,21 @@ void Server::printServer()
         std::cout << " Path : " << it->second << std::endl;
     }
 
+}
+
+
+void Server::set(std::string &key, TOMLValue &val)
+{
+    if (key == "port" && val.type == TOMLValue::ARRAY)
+    {
+        transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port),parse_positive_int);
+    }
+    else if (key == "host" && val.type == TOMLValue::SINGLE)
+        this->setHost(*val.single);
+    else if (key == "server_name" && val.type == TOMLValue::ARRAY)
+        this->setServerName(std::vector<std::string>(val.array->begin(), val.array->end()));
+    else if (key == "max_body_size" && val.type == TOMLValue::SINGLE)
+        this->setMaxBodySize(parse_positive_int(*val.single));
+    else
+        throw std::invalid_argument("Invalid key/value");
 }

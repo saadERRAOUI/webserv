@@ -49,7 +49,7 @@ private:
 
 public:
     WebServ &webServ;
-    Server(WebServ &webServ) : webServ(webServ) {};
+    Server(WebServ &webServ) : max_body_size(-1), webServ(webServ) {};
     Server(const Server &other);
     const Server &operator=(const Server &other);
     void setPort(std::vector<int> port);

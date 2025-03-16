@@ -2,21 +2,7 @@
 #include "utilities.hpp"
 #include <algorithm>
 
-void Server::set(std::string &key, TOMLValue &val)
-{
-    if (key == "port" && val.type == TOMLValue::ARRAY)
-    {
-        transform(val.array->begin(), val.array->end(), std::back_insert_iterator<std::vector<int> >(this->port), parseInt);
-    }
-    else if (key == "host" && val.type == TOMLValue::SINGLE)
-        this->setHost(*val.single);
-    else if (key == "server_name" && val.type == TOMLValue::ARRAY)
-        this->setServerName(std::vector<std::string>(val.array->begin(), val.array->end()));
-    else if (key == "max_body_size" && val.type == TOMLValue::SINGLE)
-        this->setMaxBodySize(parseInt(*val.single));
-    else
-        throw std::invalid_argument("Invalid key/value");
-}
+
 
 route WebServ::parseRoute(Section &section)
 {
@@ -68,7 +54,7 @@ Server WebServ::parseServer(Section &section)
                 for (std::deque<key_pair>::iterator key_val = section->key_val.begin(); key_val != section->key_val.end(); key_val++)
                 {
                     if (key_val->second.type == TOMLValue::SINGLE)
-                        error_code = parseInt(key_val->first);
+                        error_code = parse_positive_int(key_val->first);
                     else
                         throw std::invalid_argument("Invalid key/value in error_page");
                     server.getErrorPages()[error_code] = *key_val->second.single;
@@ -99,7 +85,7 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
     for (std::deque<key_pair>::iterator key_val = parser.globalSection.key_val.begin(); key_val != parser.globalSection.key_val.end(); key_val++)
     {
         if (key_val->first == "default_max_body_size" && key_val->second.type == TOMLValue::SINGLE)
-            this->default_max_body_size = parseInt(*key_val->second.single);
+            this->default_max_body_size = parse_positive_int(*key_val->second.single);
         else
             throw std::invalid_argument("Invalid key/value");
     }
@@ -115,4 +101,14 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
 std::vector<Server> WebServ::getServers()
 {
     return this->servers;
+}
+
+int WebServ::getDefaultMaxBodySize()
+{
+    return this->default_max_body_size;
+}
+
+std::map<int, std::string> &WebServ::getErrorPages()
+{
+    return this->error_pages;
 }
