@@ -8,6 +8,9 @@
 TEST(parse, ParsesCorrectInput) {
     WebServ webServ("config.toml");
     std::vector<Server> servers = webServ.getServers();
+    std::vector<int> f = servers[0].getPorts();
+    for (std::vector<int>::iterator i= f.begin(); i != f.end(); i++)
+        std::cout << *i << std::endl;
     ASSERT_EQ(servers.size(), 1);
     EXPECT_EQ(servers[0].getHost(), "localhost");
     ASSERT_EQ(servers[0].getPorts().size(), 2);
