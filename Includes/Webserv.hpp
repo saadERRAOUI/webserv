@@ -3,13 +3,21 @@
 //Include std libraries
 //Add Macros
 //Add Constants
+#include "./../Includes/server.hpp"
+#include "./../Includes/parser.hpp"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <string.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <map>
-#include "./../Includes/server.hpp"
-#include "./../Includes/parser.hpp"
 
 #include <vector>
 
