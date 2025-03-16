@@ -20,7 +20,7 @@ class WebServ
         WebServ(std::string config_file);
         Server parseServer(Section &section);
         route parseRoute(Section &section);
-        std::vector<Server> getServers();
+        std::vector<Server> &getServers();
         int getDefaultMaxBodySize();
         std::map<int, std::string> &getErrorPages();
 };
