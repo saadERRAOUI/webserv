@@ -1,32 +1,26 @@
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#pragma once
 
 //Include std libraries
 //Add Macros
 //Add Constants
+#include "./../Includes/server.hpp"
+#include "./../Includes/parser.hpp"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <string.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <map>
 
-enum HttpRequestState {
-    HTTP_METHOD,
-    HTTP_REQUEST_URI,
-    HTTP_VERSION,
-    HTTP_HEADERS,
-    HTTP_BODY,
-    HTTP_COMPLETE,
-    HTTP_ERROR
-};
-
-
-
-#endif WEBSERV_HPP
-
 #include <vector>
-#include "server.hpp"
-#include "parser.hpp"
+
 class WebServ
 {
 private:

@@ -1,25 +1,39 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   WebServ.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/23 14:58:33 by serraoui          #+#    #+#             */
-/*   Updated: 2025/02/23 16:43:46 by serraoui         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#pragma once
 
 //Include std libraries
 //Add Macros
 //Add Constants
+#include "./../Includes/server.hpp"
+#include "./../Includes/parser.hpp"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <string.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <map>
 
-#endif // WEBSERV_HPP
+#include <vector>
+
+class WebServ
+{
+private:
+    std::vector<Server> servers;
+    std::string config_file;
+    std::map<int, std::string> error_pages;
+    int default_max_body_size;
+    ConfigParser parser;
+
+    public:
+        WebServ(std::string config_file);
+        Server parseServer(Section &section);
+        route parseRoute(Section &section);
+        std::vector<Server> getServers();
+};
+
