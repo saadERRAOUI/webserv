@@ -11,6 +11,14 @@ int parseInt(std::string string)
     return x;
 }
 
+int parse_positive_int(std::string string)
+{
+    int x = parseInt(string);
+    if (x < 0)
+        throw std::invalid_argument("Invalid positive integer");
+    return x;
+}
+
 std::string parseString(int integer)
 {
     std::stringstream ss;
