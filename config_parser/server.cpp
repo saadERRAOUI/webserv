@@ -1,5 +1,6 @@
-#include "./../Includes/server.hpp"
-
+#include "server.hpp"
+#include <algorithm>
+#include "utilities.hpp"
 const route &route::operator=(const route &other)
 {
     if (this != &other)
@@ -148,6 +149,7 @@ void Server::setMaxBodySize(int max_body_size)
     this->max_body_size = max_body_size;
 }
 
+
 Server::Server(const Server &other) : webServ(other.webServ)
 {
     this->port = other.port;
@@ -209,6 +211,7 @@ void Server::printServer()
 
 }
 
+
 void Server::set(std::string &key, TOMLValue &val)
 {
     if (key == "port" && val.type == TOMLValue::ARRAY)
@@ -224,4 +227,3 @@ void Server::set(std::string &key, TOMLValue &val)
     else
         throw std::invalid_argument("Invalid key/value");
 }
-

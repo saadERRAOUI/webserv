@@ -1,26 +1,32 @@
-#pragma once
+#ifndef WEBSERV_HPP
+# define WEBSERV_HPP
 
 //Include std libraries
 //Add Macros
 //Add Constants
-#include "./../Includes/server.hpp"
-#include "./../Includes/parser.hpp"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/epoll.h>
-#include <string.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <map>
 
-#include <vector>
+enum HttpRequestState {
+    HTTP_METHOD,
+    HTTP_REQUEST_URI,
+    HTTP_VERSION,
+    HTTP_HEADERS,
+    HTTP_BODY,
+    HTTP_COMPLETE,
+    HTTP_ERROR
+};
 
+
+
+
+
+#include <vector>
+#include "server.hpp"
+#include "parser.hpp"
 class WebServ
 {
 private:
@@ -39,3 +45,4 @@ private:
         std::map<int, std::string> &getErrorPages();
 };
 
+#endif 

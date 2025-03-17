@@ -5,8 +5,4 @@ depending on the request .
 
 -the cases of bad request is to have a server name in the config file but the request received whitout "Host: name"
 -read more subject
--
-
-2025-03-15
-Set up server function with multiplexing
-
+- 
