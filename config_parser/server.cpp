@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include <algorithm>
 #include "utilities.hpp"
+
 const route &route::operator=(const route &other)
 {
     if (this != &other)
