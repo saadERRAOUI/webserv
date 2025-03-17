@@ -1,5 +1,5 @@
-#include "./../Includes/Webserv.hpp"
-#include "./../Includes/utilities.hpp"
+#include "Webserv.hpp"
+#include "utilities.hpp"
 #include <algorithm>
 
 
@@ -112,4 +112,3 @@ std::map<int, std::string> &WebServ::getErrorPages()
 {
     return this->error_pages;
 }
-
