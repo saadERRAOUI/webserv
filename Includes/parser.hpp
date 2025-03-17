@@ -216,6 +216,17 @@ public:
   void parse();
   void debug_print_section(Section *section, int indent = 0);
   Section globalSection; // Make this public so main can access it
+  class SyntaxError : public std::exception
+{
+    std::string reason;
+  public:
+    SyntaxError(std::string reason) : reason(reason) {}
+    virtual ~SyntaxError() throw() {}
+    virtual const char* what() const throw()
+    {
+      return reason.c_str();
+    }
+};
 private : 
   Section *current_section; /*current section scope */
 };
