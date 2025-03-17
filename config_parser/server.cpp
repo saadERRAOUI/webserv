@@ -1,4 +1,5 @@
 #include "./../Includes/server.hpp"
+#include "./../Includes/utilities.hpp"
 
 const route &route::operator=(const route &other)
 {
@@ -14,7 +15,7 @@ const route &route::operator=(const route &other)
     return *this;
 }
 
-route::route(const route &other) 
+route::route(const route &other)
 {
     this->path = other.path;
     this->index = other.index;
@@ -174,7 +175,7 @@ const Server &Server::operator=(const Server &other)
 
 
 
-void Server::printServer() 
+void Server::printServer()
 {
     std::cout << "Host : " <<this->host << std::endl;
     std::cout << "Server name : ";

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/02/23 17:45:32 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/03/17 00:39:35 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@
 //     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
 //         std::cout << it->first << ": " << it->second << std::endl;
 //     }
-    
-    
+
+
 //     std::cout << "Parsed HTTP Body: " << httpRequest.getState() << std::endl;
 //     std::cout << httpRequest.getBody() << std::endl;
 //     requestFile.close();
@@ -70,10 +70,13 @@ void Socketcreate(WebServ *web)
     // std::vector<Server> tmp = web->getServers();
     for (std::vector<Server>::iterator it = web->getServers().begin(); it != web->getServers().end(); it++)
     {
+        it->setSocket(SetUpServer(it->getPorts()));
     //    int tmp =  SetUpServer((srd)it->getPorts());
-        std::vector<int>f = it->getPorts();
-        std::cout  << "========== " << f.front() <<" ===========\n";
+        // std::vector<int>f = it->getPorts();
+        // std::cout << "========== " << it->getPorts().size() << " ===========\n";
+        // std::cout << "========== " << f.size() << " ===========\n";
     }
+    // std::cout << "=====> " << web->getServers().size() << "   ==========\n";
 }
 
 int main()

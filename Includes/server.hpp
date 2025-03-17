@@ -6,7 +6,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <algorithm>
 #include "parser.hpp"
+
 class WebServ;
 struct route
 {
@@ -40,8 +42,7 @@ class Server
 {
 private:
     std::vector<int> port;
-    int socket;
-    // check if host is possible to be "localhost"
+    // check if host is pssible to be "localhost"
     std::string host;
     std::vector<std::string> server_name;
     std::map<std::string, route> routes;

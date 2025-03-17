@@ -98,7 +98,7 @@ WebServ::WebServ(std::string config_file) : parser(config_file)
     }
 }
 
-std::vector<Server> WebServ::getServers()
+std::vector<Server> &WebServ::getServers()
 {
     return this->servers;
 }
