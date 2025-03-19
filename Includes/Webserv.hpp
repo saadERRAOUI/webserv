@@ -5,11 +5,21 @@
 // Add Macros
 // Add Constants
 
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <string.h>
 #include <iostream>
+#include <netdb.h>
 #include <string>
 #include <algorithm>
 #include <map>
-
+// #include <stdlib.h>
 enum HttpRequestState
 {
 	HTTP_METHOD,
