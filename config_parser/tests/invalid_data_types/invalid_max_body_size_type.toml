@@ -1,8 +1,9 @@
 # lmfao
 
-default_max_body_size = "123"
+default_max_body_size = true
 
 [[server]]
+host = "localhost" 
 port = [12, 123]
 server_name = ["example.com"] 
 max_body_size = "1000000"

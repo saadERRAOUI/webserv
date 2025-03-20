@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */
-/*   Updated: 2025/02/23 17:27:06 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/03/17 01:01:02 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 #include <string>
 #include <map>
-#include "../Includes/WebServ.hpp"
+#include "../Includes/Webserv.hpp"
 
 enum HttpRequestState {
     HTTP_METHOD,
@@ -27,9 +27,9 @@ enum HttpRequestState {
 
 class HttpRequest {
     private :
-        std::string                         _method; 
+        std::string                         _method;
         std::string                         _requestURI;
-        std::string                         _version; 
+        std::string                         _version;
         std::string                         _body;
         std::map<std::string, std::string>  _headers;
         int                                 _state;
@@ -70,7 +70,7 @@ class HttpRequest {
         void            parseHttpVersionMethod(char);
         void            parseHttpHeadersMethod(char);
         void            parseHttpBodyMethod(char);
-        
+
         void            parseHttpRequestOrchestrator(char);
 };
 
