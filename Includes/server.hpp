@@ -45,7 +45,7 @@ private:
     std::vector<std::string> server_name;
     std::map<std::string, route> routes;
     std::map<int, std::string> error_pages;
-    int socket;
+    std::vector<int> socket;
     int max_body_size;
 
 public:
