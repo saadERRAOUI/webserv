@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
+/*   Updated: 2025/03/20 23:21:45 by hitchman         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+//  Todo : Add includes from "./Includes/*" folder
+
 /*
     Author      : Saad ERRAOUI
     Date        : 2024-12-22
     Description : main method
 */
-
 
 // #include "HttpRequest/HttpRequest.hpp"
 #include "Webserv.hpp"

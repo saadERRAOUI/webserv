@@ -67,7 +67,7 @@ public:
     std::map<std::string, route> &getRoutes();
     std::map<int, std::string> &getErrorPages();
     int getSocket();
-    void setSocket(int socket);
+    int setSocket(int socket);
     int getMaxBodySize();
     void printServer();
 };
