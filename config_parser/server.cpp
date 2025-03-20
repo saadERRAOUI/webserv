@@ -160,7 +160,6 @@ void Server::setSocket(int socket){
 Server::Server(const Server &other) : webServ(other.webServ)
 {
     this->port = other.port;
-    this->host = other.host;
     this->server_name = other.server_name;
     this->routes = other.routes;
     this->error_pages = other.error_pages;
@@ -172,7 +171,6 @@ const Server &Server::operator=(const Server &other)
     if (this != &other)
     {
         this->port = other.port;
-        this->host = other.host;
         this->server_name = other.server_name;
         this->routes = other.routes;
         this->error_pages = other.error_pages;
@@ -185,7 +183,6 @@ const Server &Server::operator=(const Server &other)
 
 void Server::printServer()
 {
-    std::cout << "Host : " <<this->host << std::endl;
     std::cout << "Server name : ";
     for (std::vector<std::string>::iterator it = this->server_name.begin(); it != this->server_name.end(); it++)
         std::cout << *it << " ";

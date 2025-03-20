@@ -1,6 +1,8 @@
 CPP = c++
 
+
 CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
+
 
 NAME = webserv
 
