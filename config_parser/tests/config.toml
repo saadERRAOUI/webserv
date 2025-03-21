@@ -3,6 +3,7 @@
 default_max_body_size = "123"
 
 [[server]]
+host="123.0.0.0"
 port = [12, 123]
 server_name = ["example.com"] 
 max_body_size = "1000000"
