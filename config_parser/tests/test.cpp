@@ -11,6 +11,7 @@ TEST(parse, ParsesCorrectInput) {
     std::vector<int> f = servers[0].getPorts();
     ASSERT_EQ(servers.size(), 1);
     ASSERT_EQ(servers[0].getPorts().size(), 2);
+    EXPECT_EQ(servers[0].getHost(), "123.0.0.0");
     EXPECT_EQ(servers[0].getPorts()[0], 12);
     EXPECT_EQ(servers[0].getPorts()[1], 123);
     ASSERT_EQ(servers[0].getServerName().size(), 1);
@@ -24,6 +25,7 @@ TEST(parse, ParsesCorrectInput) {
     EXPECT_EQ(servers[0].getRoutes().begin()->second.getRoot(), "/var/www/html/pepe");
     EXPECT_EQ(servers[0].getRoutes().begin()->second.getRedirection(), "");
     EXPECT_EQ(servers[0].getRoutes().begin()->second.getAutoindex(), true);
+    
     ASSERT_EQ(servers[0].getErrorPages().size(),3);
     EXPECT_EQ(webServ.getDefaultMaxBodySize(), 123);
 }  
