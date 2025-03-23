@@ -159,6 +159,7 @@ void Server::setSocket(int socket){
 
 Server::Server(const Server &other) : webServ(other.webServ)
 {
+    this->host = other.host;
     this->port = other.port;
     this->server_name = other.server_name;
     this->routes = other.routes;
