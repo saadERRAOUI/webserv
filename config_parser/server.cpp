@@ -149,16 +149,18 @@ void Server::setMaxBodySize(int max_body_size)
 {
     this->max_body_size = max_body_size;
 }
-int Server::getSocket(){
+std::vector<int> &Server::getSocket(){
     return this->socket;
 }
 
 void Server::setSocket(int socket){
-    this->socket = socket;
+    this->socket.push_back(socket);
+    // std::cout << this->socket.size() << "  " << socket << " ????????\n";
 }
 
 Server::Server(const Server &other) : webServ(other.webServ)
 {
+    this->host = other.host;
     this->port = other.port;
     this->server_name = other.server_name;
     this->routes = other.routes;

@@ -1,12 +1,13 @@
 #ifndef SERVER_H
-
 #define SERVER_H
 
+#include "parser.hpp"
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
-#include "parser.hpp"
+#include <unistd.h>
+#include <stdio.h>
 class WebServ;
 struct route
 {
@@ -66,8 +67,8 @@ public:
     std::vector<std::string> &getServerName();
     std::map<std::string, route> &getRoutes();
     std::map<int, std::string> &getErrorPages();
-    int getSocket();
-    int setSocket(int socket);
+    std::vector<int> &getSocket();
+    void setSocket(int socket);
     int getMaxBodySize();
     void printServer();
 };
