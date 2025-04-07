@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/03/24 01:48:03 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/07 10:47:07 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ int SetUpServer(Server to_create, int port)
     const int enable = 1;
 
     ss << port;
-    // std::cout << "-----___---> " << to_create << " ====\n";
     memset(&hints,  0, sizeof(addrinfo));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -85,7 +84,7 @@ void Socketcreate(WebServ *web)
 
 /*
     Author: BOUZID hicham
-    Description: craet epoll inctence to manange multiple sockets
+    Description: craete epoll inctence to manange multiple sockets
     Date: 2025-02-18
 */
 
@@ -101,6 +100,68 @@ int create_manager()
     return (EpollFd);
 }
 
+/*
+    Author: BOUZID Hicham
+    Description: check if the event come from a sever or client
+    Date: 2025-04-07
+*/
+
+int is_server(int fdserver, std::vector<int> servers)
+{
+    std::vector<int>::iterator it;
+    it = std::find(servers.begin(), servers.end(), fdserver);
+    if (it != servers.end())
+        return (1);
+    return (0);
+}
+
+/*
+    Author: BOUZID hicham
+    Description: add all servers socket to epoll
+                 to insure listening for incomming
+                 connections
+    Date: 2025-04-07
+*/
+
+
+void manage_connections(WebServ *web, int epollfd)
+{
+    struct epoll_event event;
+    struct epoll_event events[MAX_EPOLL_EVENT];
+    std::vector<int> sockservers;
+    // (void)epollfd;
+    for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
+    {
+        for (std::vector<int>::iterator it1 = it->getSocket().begin(); it1 != it->getSocket().end(); it1++)
+        {
+            event.events = EPOLLIN;
+            event.data.fd = *it1;
+            if(epoll_ctl(epollfd, EPOLL_CTL_ADD, *it1, &event))
+                std::cerr << "epoll ctl error: " << strerror(errno) << '\n';
+            sockservers.push_back(*it1);
+        }
+    }
+    while (true)
+    {
+        int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
+        if (n == -1)
+        {
+            std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
+            exit(EXIT_FAILURE);
+        }
+        for (int i = 0; i < n; i++)
+        {
+            if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
+            {
+                // here we must create class connection
+                std::cout << "let accept the connection\n";
+                std::cout << events[i].data.fd << " this socket recieve connection\n";
+                exit(1);
+            }
+        }
+    }
+}
+
 int main()
 {
     try
@@ -109,6 +170,7 @@ int main()
         // web.getServers()[0].printServer();
         Socketcreate(&web);
         int epollfd = create_manager();
+        manage_connections(&web, epollfd); //need web class .
     }
     catch (std::exception &e)
     {

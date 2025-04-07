@@ -8,6 +8,8 @@
 #include <vector>
 #include <unistd.h>
 #include <stdio.h>
+
+#define MAX_EPOLL_EVENT 64
 class WebServ;
 struct route
 {
