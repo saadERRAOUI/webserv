@@ -4,7 +4,7 @@ CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 NAME = webserv
 
-SRCS = main.cpp ./config_parser/*.cpp ./config_parser/utilities/*.cpp
+SRCS = main.cpp ./config_parser/*.cpp ./config_parser/utilities/*.cpp ./Connection/Connection.cpp
 
 $(NAME): $(SRCS)
 	$(CPP) $(CPPFLAGS) -I ./Includes $(SRCS) -o $(NAME)

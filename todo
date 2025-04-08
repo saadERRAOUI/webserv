@@ -5,4 +5,4 @@ depending on the request .
 
 -the cases of bad request is to have a server name in the config file but the request received whitout "Host: name"
 -read more subject
-- 
+- creat a socket manager to handle the upcomming connections .

@@ -21,17 +21,7 @@
 #include <string>
 #include <algorithm>
 #include <map>
-
-enum HttpRequestState
-{
-	HTTP_METHOD,
-	HTTP_REQUEST_URI,
-	HTTP_VERSION,
-	HTTP_HEADERS,
-	HTTP_BODY,
-	HTTP_COMPLETE,
-	HTTP_ERROR
-};
+// #include <algorithm>
 
 class WebServ
 {

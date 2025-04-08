@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/07 10:47:07 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/07 15:20:49 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 // #include "HttpRequest/HttpRequest.hpp"
 #include "Webserv.hpp"
 #include "server.hpp"
+#include "./Connection/Connection.hpp"
 #include <string>
 #include <sstream>
 
@@ -154,6 +155,7 @@ void manage_connections(WebServ *web, int epollfd)
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
                 // here we must create class connection
+                // create fd client
                 std::cout << "let accept the connection\n";
                 std::cout << events[i].data.fd << " this socket recieve connection\n";
                 exit(1);

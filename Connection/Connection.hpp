@@ -1,0 +1,24 @@
+#pragma once
+
+#include "server.hpp"
+#include "../HttpRequest/HttpRequest.hpp"
+// class connection containe the fd socket and class severe and
+class HttpRequest;
+class Server;
+
+/*
+	Author: BOUZID Hicham
+	Discreption: Class to handle connection btween sever & client
+*/
+class Connection{
+	// object request
+	HttpRequest *Request;
+	Server *s;
+	int fd_client;
+	public:
+	Connection(int fd, Server server);
+	void Setfd(int fd);
+	void SetHttpRequest(HttpRequest Request);
+	int Getfd();
+
+};
