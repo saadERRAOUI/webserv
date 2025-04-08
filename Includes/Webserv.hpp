@@ -21,6 +21,7 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <sys/time.h>
 // #include <algorithm>
 
 class WebServ

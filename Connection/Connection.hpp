@@ -10,14 +10,17 @@ class Server;
 	Author: BOUZID Hicham
 	Discreption: Class to handle connection btween sever & client
 */
+
 class Connection{
 	// object request
 	HttpRequest *Request;
 	Server *s;
 	int fd_client;
+	long timeout;
 	public:
-	Connection(int fd, Server server);
-	void Setfd(int fd);
+	Connection(int FdServer, int FdEpoll,WebServ *MainObject);
+	Connection();
+	// void Setfd(int fd);
 	void SetHttpRequest(HttpRequest Request);
 	int Getfd();
 

@@ -130,6 +130,7 @@ void manage_connections(WebServ *web, int epollfd)
     struct epoll_event event;
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
+    std::map<int , Connection> map_connections;
     // (void)epollfd;
     for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
     {
@@ -154,10 +155,14 @@ void manage_connections(WebServ *web, int epollfd)
         {
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
-                // here we must create class connection
-                // create fd client
-                std::cout << "let accept the connection\n";
-                std::cout << events[i].data.fd << " this socket recieve connection\n";
+                Connection *tmp = new Connection(events[i].data.fd, epollfd, web);
+                map_connections[tmp->Getfd()] = *tmp;
+                delete tmp;
+                int to_check = tmp->Getfd();
+                std::cout << "fd client: " << to_check << '\n';
+                std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
+                // std::cout << "let accept the connection\n";
+                // std::cout << events[i].data.fd << " this socket recieve connection\n";
                 exit(1);
             }
         }
