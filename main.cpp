@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/07 15:20:49 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/08 19:01:42 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void manage_connections(WebServ *web, int epollfd)
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
     std::map<int , Connection> map_connections;
-    // (void)epollfd;
+    char BUFFER[1024] = {0};
     for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
     {
         for (std::vector<int>::iterator it1 = it->getSocket().begin(); it1 != it->getSocket().end(); it1++)
@@ -161,9 +161,11 @@ void manage_connections(WebServ *web, int epollfd)
                 int to_check = tmp->Getfd();
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
-                // std::cout << "let accept the connection\n";
-                // std::cout << events[i].data.fd << " this socket recieve connection\n";
-                exit(1);
+            }
+            else
+            {
+                read(events[i].data.fd, BUFFER, 1024);
+                std::cout << "===========\n" << std::string(BUFFER) << '\n';
             }
         }
     }

@@ -20,8 +20,7 @@ class Connection{
 	public:
 	Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 	Connection();
-	// void Setfd(int fd);
-	void SetHttpRequest(HttpRequest Request);
+	void SetHttpRequest(HttpRequest *Request);
 	int Getfd();
 
 };

@@ -74,3 +74,8 @@ Connection::Connection(){
 int Connection::Getfd(){
 	return this->fd_client;
 }
+
+void Connection::SetHttpRequest(HttpRequest *Request)
+{
+	this->Request = Request;
+}
