@@ -117,6 +117,17 @@ int is_server(int fdserver, std::vector<int> servers)
 }
 
 
+HttpRequest *ft_static_request(){
+    HttpRequest *request = new HttpRequest;
+    request->setMethod("GET");
+    request->setRequestURI("/index.html");
+    request->setVersion("HTTP/1.1");
+    // request->_headers["Host"] = "example.com";
+    // request->_headers["User-Agent"] = "curl/7.68.0";
+    // request->_headers["Accept"] = "*/*";
+    return (request);
+    
+}
 
 /*
     Author: BOUZID hicham
