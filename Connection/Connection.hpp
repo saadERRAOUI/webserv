@@ -13,16 +13,14 @@ class Server;
 
 class Connection{
 	// object request
-	HttpRequest *Request;
-	Server *s;
-	std::string request;
-	int fd_client;
-	bool done;
-	long timeout;
+		HttpRequest *Request;
+		Server *s;
+		int fd_client;
+		bool done;
+		long timeout;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
 		void SetHttpRequest(HttpRequest &Request);
 		int Getfd();
-		void AddRequest(std::string buffer, bool done);
 };

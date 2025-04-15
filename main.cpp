@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/08 19:01:42 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/15 17:00:04 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,8 @@ int is_server(int fdserver, std::vector<int> servers)
     return (0);
 }
 
+
+
 /*
     Author: BOUZID hicham
     Description: add all servers socket to epoll
@@ -166,6 +168,23 @@ void manage_connections(WebServ *web, int epollfd)
             {
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
+                // // connection object
+                ft_static_request();
+                // if (offset < 1024)
+                // {
+                //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), true);
+                //     // call for parsing request and then call the response
+                //     // close(events[i].data.fd);
+                //     // after reading all and building response object,
+                //     // close fd and remove them from map of connections
+                //     // erase connection map with fd client
+                // }
+                // else{
+                //     // Arequest with false flag .
+                //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), false);
+                //     continue;
+                // }
+
             }
         }
     }
