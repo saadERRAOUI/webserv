@@ -60,6 +60,8 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 				Request = NULL;
 				timeout = get_current_time();
 				fd_client = ft_client(FdServer, FdEpoll);
+				done = false;
+				request = std::string("");
 			}
 		}
 	}
@@ -69,13 +71,28 @@ Connection::Connection(){
 	Request = NULL;
 	s = NULL;
 	fd_client = 0;
+	done = false;
+	request = std::string("");
 }
 
 int Connection::Getfd(){
 	return this->fd_client;
 }
 
-void Connection::SetHttpRequest(HttpRequest *Request)
+void Connection::AddRequest(std::string buffer, bool done)
 {
-	this->Request = Request;
+	if (request.empty())
+	{
+		request = buffer;
+		this->done = done;
+	}
+	else {
+		request += buffer;
+		this->done = done;
+	}
+}
+
+void Connection::SetHttpRequest(HttpRequest &Request)
+{
+	*this->Request = Request;
 }
