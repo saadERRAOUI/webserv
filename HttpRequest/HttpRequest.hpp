@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */
-/*   Updated: 2025/03/17 01:01:02 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:06:04 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ class HttpRequest {
         */
         HttpRequest();
         ~HttpRequest();
+        HttpRequest &operator=(const HttpRequest &copy_HttpRequest);
+
 
         /*
             Getters
@@ -61,7 +63,7 @@ class HttpRequest {
         void            setRequestURI(std::string);
         void            setVersion(std::string);
         void            setBodyFd(int);
-
+        void            setHeaders(std::string key, std::string value);
         /*
             Parser Member methods
         */

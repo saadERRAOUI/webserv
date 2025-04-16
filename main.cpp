@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/15 17:00:04 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:23:33 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include "Webserv.hpp"
 #include "server.hpp"
 #include "./Connection/Connection.hpp"
+#include "./HttpRequest/HttpRequest.hpp"
 #include <string>
 #include <sstream>
 
@@ -117,16 +118,20 @@ int is_server(int fdserver, std::vector<int> servers)
 }
 
 
-HttpRequest *ft_static_request(){
-    HttpRequest *request = new HttpRequest;
-    request->setMethod("GET");
-    request->setRequestURI("/index.html");
-    request->setVersion("HTTP/1.1");
-    // request->_headers["Host"] = "example.com";
-    // request->_headers["User-Agent"] = "curl/7.68.0";
-    // request->_headers["Accept"] = "*/*";
+HttpRequest ft_static_request(){
+    HttpRequest  request;/**  = new HttpRequest;*/
+    // std::string method = "GET"
+    request.setMethod(std::string("GET"));
+    request.setRequestURI(std::string("/index.html"));
+    request.setVersion(std::string("HTTP/1.1"));
+    request.setHeaders(std::string("Host"), std::string("example.com"));
+    // request._headers["Host"] = "example.com";
+    request.setHeaders(std::string("User-Agent"), std::string(" curl / 7.68.0 "));
+    // request._headers["User-Agent"] = "curl/7.68.0";
+    request.setHeaders(std::string("Accept"), std::string("*/*"));
+    // request._headers["Accept"] = "*/*";
     return (request);
-    
+
 }
 
 /*
@@ -180,7 +185,9 @@ void manage_connections(WebServ *web, int epollfd)
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
                 // // connection object
-                ft_static_request();
+                HttpRequest tmpRequest = ft_static_request();
+                // delete tmpRequest;
+                map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
                 // if (offset < 1024)
                 // {
                 //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), true);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/02/23 17:53:42 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:05:41 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,15 @@
     Constructors & Destructors
 */
 HttpRequest::HttpRequest() {
+    // BOUZID Hicham stop this constructor because it's
+    // cause problems when i start to create an object Request.
     // Initialize the method handler map
-    _methodHandlerMap[HTTP_METHOD] = &HttpRequest::parseHttpMethod;
-    _methodHandlerMap[HTTP_REQUEST_URI] = &HttpRequest::parseHttpRequestUriMethod;
-    _methodHandlerMap[HTTP_VERSION] = &HttpRequest::parseHttpVersionMethod;
-    _methodHandlerMap[HTTP_HEADERS] = &HttpRequest::parseHttpHeadersMethod;
-    _methodHandlerMap[HTTP_BODY] = &HttpRequest::parseHttpBodyMethod;
-    _state = HTTP_METHOD;
+    // _methodHandlerMap[HTTP_METHOD] = &HttpRequest::parseHttpMethod;
+    // _methodHandlerMap[HTTP_REQUEST_URI] = &HttpRequest::parseHttpRequestUriMethod;
+    // _methodHandlerMap[HTTP_VERSION] = &HttpRequest::parseHttpVersionMethod;
+    // _methodHandlerMap[HTTP_HEADERS] = &HttpRequest::parseHttpHeadersMethod;
+    // _methodHandlerMap[HTTP_BODY] = &HttpRequest::parseHttpBodyMethod;
+    // _state = HTTP_METHOD;
 }
 
 HttpRequest::~HttpRequest() {}
@@ -78,7 +80,7 @@ void            HttpRequest::setBodyFd(int bodyFd) {
     Member methods
 */
 void HttpRequest::parseHttpMethod(char byte) {
-    // std::cout << "parseHttpMethod() " << std::endl; 
+    // std::cout << "parseHttpMethod() " << std::endl;
 
     if (byte == ' ' || byte == '\n') {
         if (_method == "GET" || _method == "POST" || _method == "DELETE") {
@@ -97,7 +99,7 @@ void HttpRequest::parseHttpMethod(char byte) {
 }
 
 void HttpRequest::parseHttpRequestUriMethod(char byte) {
-    // std::cout << "parseHttpRequestUriMethod() " << std::endl; 
+    // std::cout << "parseHttpRequestUriMethod() " << std::endl;
 
     if (byte == ' ' || byte == '\n') {
         if (!_requestURI.empty()) {
@@ -118,7 +120,7 @@ void HttpRequest::parseHttpRequestUriMethod(char byte) {
 }
 
 void HttpRequest::parseHttpVersionMethod(char byte) {
-    // std::cout << "parseHttpVersionMethod() " << std::endl; 
+    // std::cout << "parseHttpVersionMethod() " << std::endl;
 
     if (byte == '\n') {
         if (_version.find("HTTP/") == 0) {
@@ -141,7 +143,7 @@ void HttpRequest::parseHttpHeadersMethod(char byte) {
     static bool lastCharWasCR = false; // Track if the last character was a carriage return
     static std::string _accumulatedHeader; // Track if the last character was a carriage return
 
-    // std::cout << "parseHttpHeadersMethod() " << std::endl; 
+    // std::cout << "parseHttpHeadersMethod() " << std::endl;
     if (byte == '\n' && lastCharWasCR) {
         // End of headers section
         _state = HTTP_BODY;
@@ -168,7 +170,7 @@ void HttpRequest::parseHttpHeadersMethod(char byte) {
 }
 
 void HttpRequest::parseHttpBodyMethod(char byte) {
-    // std::cout << "parseHttpBodyMethod() " << std::endl; 
+    // std::cout << "parseHttpBodyMethod() " << std::endl;
 
     // Accumulate body content
     _body += byte;
@@ -199,4 +201,28 @@ void HttpRequest::parseHttpRequestOrchestrator(char byte) {
             std::cerr << "Unknown state: " << _state << std::endl;
             break;
     }
+}
+
+void HttpRequest::setHeaders(std::string key, std::string value){
+    this->_headers[key] = value;
+}
+
+
+/*
+    Author: BOUZID Hicham
+    Description: copy assignment operator
+    date: 2025-04-16
+*/
+HttpRequest &HttpRequest::operator=(const HttpRequest &copy_HttpRequest){
+    if (this != &copy_HttpRequest)
+    {
+        this->_method = copy_HttpRequest._method;
+        this->_requestURI = copy_HttpRequest._requestURI;
+        this->_version = copy_HttpRequest._version;
+        this->_body = copy_HttpRequest._body;
+        this->_headers = copy_HttpRequest._headers;
+        this->_state = copy_HttpRequest._state;
+        this->_methodHandlerMap = copy_HttpRequest._methodHandlerMap;
+    }
+    return (*this);
 }

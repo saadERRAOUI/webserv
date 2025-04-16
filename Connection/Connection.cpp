@@ -79,7 +79,11 @@ int Connection::Getfd(){
 }
 
 
-void Connection::SetHttpRequest(HttpRequest &Request)
+void Connection::SetHttpRequest(HttpRequest *Request)
 {
-	*this->Request = Request;
+	this->Request = Request;
+}
+
+HttpRequest &Connection::GetRequest(){
+	return (*this->Request);
 }

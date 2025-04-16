@@ -14,13 +14,15 @@ class Server;
 class Connection{
 	// object request
 		HttpRequest *Request;
-		Server *s;
-		int fd_client;
-		bool done;
-		long timeout;
+		Server 		*s;
+		int 		fd_client;
+		bool 		done;
+		long 		timeout;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
-		void SetHttpRequest(HttpRequest &Request);
-		int Getfd();
+		void 		SetHttpRequest(HttpRequest *Request);
+
+		int 		Getfd();
+		HttpRequest& GetRequest();
 };
