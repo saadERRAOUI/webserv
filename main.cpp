@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/16 20:23:33 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/17 18:02:51 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,19 @@ HttpRequest ft_static_request(){
 
 }
 
+
+void Print_static_Request(HttpRequest tmpReques){
+    std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
+    std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
+    std::cout << "Version : " << tmpReques.getVersion() << '\n';
+    std::cout << "=================== PRINT HEADERS ===================\n";
+    std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
+    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+    {
+        std::cout << "KEY: " << it->first << " VALUE: " << it->second << '\n';
+    }
+    // close(events[i].data.fd);
+}
 /*
     Author: BOUZID hicham
     Description: add all servers socket to epoll
@@ -188,6 +201,18 @@ void manage_connections(WebServ *web, int epollfd)
                 HttpRequest tmpRequest = ft_static_request();
                 // delete tmpRequest;
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
+                /*HttpRequest tmpReques =*/Print_static_Request(map_connections[events[i].data.fd].GetRequest());
+
+                // std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
+                // std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
+                // std::cout << "Version : " << tmpReques.getVersion() << '\n';
+                // std::cout << "=================== PRINT HEADERS ===================\n";
+                // std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
+                // for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+                // {
+                        // std::cout << "KEY: " << it->first << " VALUE: " << it->second << '\n';
+                // }Z
+                    close(events[i].data.fd);
                 // if (offset < 1024)
                 // {
                 //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), true);
