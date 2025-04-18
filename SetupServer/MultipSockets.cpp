@@ -1,120 +1,80 @@
 #include "includes.hpp"
 
-Server::Server(int port, int flag){
-	std::cout << "Severe object was create socket for: "
-		<< (!flag ? "Server\n": "Client\n");
-	this->fdsock = !flag ? SetUpServer(port) : port;
-	this->port = port;
-	this->host = std::string("");
-	this->flag = flag;
-}
 
-Server::~Server(){
-	close(fdsock);
-	std::cout << "Servere with port: " << this->port << " was closed.\n";
-}
-
-int  Server::Getsockfd() const{
-	return (this->fdsock);
-}
-
-int  Server::Getflag() const{
-	return (this->flag);
-}
-
-/*
-	Author: BOUZID Hicham
-	Description: set up server and make it ready to reach connections
-	Date: 2025-02-07
-*/
-void  ft_client(int fdsv, int epollfd, std::map<int, Server *> *sockets)
+int SetUpServer(Server to_create, int port)
 {
-	std::cout << "hellooooo \n";
-	struct sockaddr_in client;
-	struct  epoll_event event;
+    int f, fd;
+    struct addrinfo hints, *res, *iter;
+    std::stringstream ss;
+    const int enable = 1;
 
-	socklen_t client_lenght = sizeof(client);
-	int fd =  accept(fdsv, (sockaddr *)&client, &client_lenght);
-	if (fd < 0)
-		std::cerr << "Error on accept function: " << strerror(errno) << "\n";
-	(*sockets)[fd] = new Server(fd, -1);;
-	event.events = EPOLLIN;
-	event.data.fd =  fd;
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event))
-			std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
+    ss << port;
+    memset(&hints,  0, sizeof(addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((f = getaddrinfo(to_create.getHost().c_str(), ss.str().c_str(), &hints, &res)) != 0)
+    {
+        std::cerr << "Error getaddrinfo: " << gai_strerror(f) << '\n';
+        exit(EXIT_FAILURE);
+    }
+    for (iter = res; iter != NULL; iter = iter->ai_next){
+        fd = socket(iter->ai_family, iter->ai_socktype , iter->ai_protocol);
+            if (fd == -1)
+                continue;
+            if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
+            {
+                std::cerr << "Error setsocketopt: " << strerror(errno) << '\n';
+                close(fd);
+                continue;
+            }
+            if(bind(fd, iter->ai_addr, iter->ai_addrlen) < 0)
+            {
+                std::cerr << "ERROR BIND: " << strerror(errno) << "\n";
+                close(fd);
+                continue;
+            }
+            break ;
+    }
+    freeaddrinfo(res);
+    if (iter == NULL)
+    {
+        std::cerr << "cannot bind: " << strerror(errno) << "\n";
+        exit(EXIT_FAILURE);
+    }
+    if (listen(fd, 2) == -1)
+    {
+        std::cerr << "listen: " << strerror(errno) << '\n';
+        exit(1) ;
+    }
+    return (fd);
 }
 
-/*
-	Author: BOUZID Hicham
-	Description: add socketfd to epoll inctence
-	Date: 2025-02-13
-*/
-
-void Sockets_manager(std::map<int , Server *> * sockets, int epollfd)
+void Socketcreate(WebServ *web)
 {
-	struct epoll_event event;
-	struct epoll_event Queueevent[MAX_EPOLL_EVENT];
-	int fds;
-	for (std::map<int, Server *>::iterator  it = sockets->begin(); it != sockets->end(); it++)
-	{
-		event.events =  EPOLLIN;
-		event.data.fd =  it->first;
-		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, it->first, &event))
-			std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
-	}
-	for (;;)
-	{
-		char buffer[1024] = {0};
-		fds = epoll_wait(epollfd, Queueevent, MAX_EPOLL_EVENT, -1);
-		for (int i = 0; i < fds; i++){
-			std::cout << "fd readd: " << (*sockets)[Queueevent[i].data.fd]->Getsockfd()  << " number of event: " << fds << 
-				'\n';
-			if ((*sockets)[Queueevent[i].data.fd]->Getflag() ==  0){
-				ft_client(Queueevent[i].data.fd, epollfd, sockets);
-			}
-			else{
-
-				int fd_read = (*sockets)[Queueevent[i].data.fd]->Getsockfd();
-				int size = read(fd_read, buffer, 1024);
-				std::cout << "=======>  " << size << " ============> " << fd_read << "\n";
-				std::cout << std::string (buffer) << "\n";
-				const char *message =
-				    "HTTP/1.1 200 OK\r\n"
-				    "Content-Type: text/html; charset=UTF-8\r\n"
-				    "Date: Fri, 21 Jun 2024 14:18:33 GMT\r\n"
-				    "Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT\r\n"
-				    "Content-Length: 1234\r\n"
-				    "\r\n"
-				    "<!doctype html>\n"
-				    "<html>\n"
-				    "<head><title>My Page</title></head>\n"
-				    "<body><h1>Welcome!</h1></body>\n"
-				    "</html>\n";
-				write(fd_read, message, strlen(message));
-				// event.events = EPOLLOUT;
-				// event.data.fd =  fd_read;
-				if (epoll_ctl(epollfd, EPOLL_CTL_DEL, fd_read, NULL))
-						std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
-				close(fd_read);
-			}
-		}
-	}
+    for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
+    {
+        for (std::vector<int>::iterator P_it = it->getPorts().begin(); P_it != it->getPorts().end(); P_it++)
+            it->setSocket(SetUpServer(*it, *P_it));
+    }
 }
 
+
+
 /*
-	Author: BOUZID hicham
-	Description: craet epoll inctence to manange multiple sockets
-	Date: 2025-02-18
+    Author: BOUZID hicham
+    Description: craete epoll inctence to manange multiple sockets
+    Date: 2025-02-18
 */
 
 int create_manager()
 {
-	int EpollFd =    epoll_create(10);
-	if (EpollFd < 0)
-	{
-		std::cerr << "Epoll problem: " << strerror(errno) << '\n';
-		exit(EXIT_FAILURE);
-	}
-	std::cout << "epoll inctence was created .\n";
-	return (EpollFd);
+    int EpollFd = epoll_create(10);
+    if (EpollFd < 0)
+    {
+        std::cerr << "Epoll problem: " << strerror(errno) << '\n';
+        exit(EXIT_FAILURE);
+    }
+    std::cout << "epoll inctence was created .\n";
+    return (EpollFd);
 }

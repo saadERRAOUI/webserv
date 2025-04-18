@@ -3,6 +3,7 @@
 #include "../Connection/Connection.hpp"
 
 
+
 /*
 	Author: BOUZID Hicham
 	Description:  build response depending
@@ -13,8 +14,9 @@
 class Connection;
 class HttpResponse
 {
-	Connection *infoResponse;
+	std::map<int, std::string> status_code;
+	bool offset_done;
+	int fd_client;
 	public:
-		HttpResponse(Connection &);
-		Connection &GetRequest();
+		HttpResponse(int fd_client);
 };

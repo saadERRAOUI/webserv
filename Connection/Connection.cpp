@@ -58,6 +58,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 			{
 				s = (Server *)&it;
 				Request = NULL;
+				Response = NULL;
 				timeout = get_current_time();
 				fd_client = ft_client(FdServer, FdEpoll);
 				done = false;
@@ -86,4 +87,12 @@ void Connection::SetHttpRequest(HttpRequest *Request)
 
 HttpRequest &Connection::GetRequest(){
 	return (*this->Request);
+}
+
+void		Connection::SetHttpRespons(HttpResponse *Response){
+	this->Response =  Response;
+}
+
+HttpResponse& Connection::GetResponse(){
+	return (*this->Response);
 }

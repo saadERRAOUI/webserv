@@ -18,89 +18,14 @@
     Description : main method
 */
 
-// #include "HttpRequest/HttpRequest.hpp"
+
 #include "Webserv.hpp"
 #include "server.hpp"
-#include "./Connection/Connection.hpp"
-#include "./HttpRequest/HttpRequest.hpp"
-#include <string>
-#include <sstream>
+#include "Connection/Connection.hpp"
+#include "HttpRequest/HttpRequest.hpp"
+#include "HttpResponse/HttpResponse.hpp"
+#include "SetupServer/includes.hpp"
 
-int SetUpServer(Server to_create, int port)
-{
-    int f, fd;
-    struct addrinfo hints, *res, *iter;
-    std::stringstream ss;
-    const int enable = 1;
-
-    ss << port;
-    memset(&hints,  0, sizeof(addrinfo));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-
-    if ((f = getaddrinfo(to_create.getHost().c_str(), ss.str().c_str(), &hints, &res)) != 0)
-    {
-        std::cerr << "Error getaddrinfo: " << gai_strerror(f) << '\n';
-        exit(EXIT_FAILURE);
-    }
-    for (iter = res; iter != NULL; iter = iter->ai_next){
-        fd = socket(iter->ai_family, iter->ai_socktype , iter->ai_protocol);
-            if (fd == -1)
-                continue;
-            if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
-            {
-                std::cerr << "Error setsocketopt: " << strerror(errno) << '\n';
-                close(fd);
-                continue;
-            }
-            if(bind(fd, iter->ai_addr, iter->ai_addrlen) < 0)
-            {
-                std::cerr << "ERROR BIND: " << strerror(errno) << "\n";
-                close(fd);
-                continue;
-            }
-            break ;
-    }
-    freeaddrinfo(res);
-    if (iter == NULL)
-    {
-        std::cerr << "cannot bind: " << strerror(errno) << "\n";
-        exit(EXIT_FAILURE);
-    }
-    if (listen(fd, 2) == -1)
-    {
-        std::cerr << "listen: " << strerror(errno) << '\n';
-        exit(1) ;
-    }
-    return (fd);
-}
-
-void Socketcreate(WebServ *web)
-{
-    for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
-    {
-        for (std::vector<int>::iterator P_it = it->getPorts().begin(); P_it != it->getPorts().end(); P_it++)
-            it->setSocket(SetUpServer(*it, *P_it));
-    }
-}
-
-/*
-    Author: BOUZID hicham
-    Description: craete epoll inctence to manange multiple sockets
-    Date: 2025-02-18
-*/
-
-int create_manager()
-{
-    int EpollFd = epoll_create(10);
-    if (EpollFd < 0)
-    {
-        std::cerr << "Epoll problem: " << strerror(errno) << '\n';
-        exit(EXIT_FAILURE);
-    }
-    std::cout << "epoll inctence was created .\n";
-    return (EpollFd);
-}
 
 /*
     Author: BOUZID Hicham
@@ -142,9 +67,7 @@ void Print_static_Request(HttpRequest tmpReques){
     std::cout << "=================== PRINT HEADERS ===================\n";
     std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
     for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-    {
-        std::cout << "KEY: " << it->first << " VALUE: " << it->second << '\n';
-    }
+        std::cout << it->first << ": " << it->second << '\n';
     // close(events[i].data.fd);
 }
 /*
@@ -197,38 +120,13 @@ void manage_connections(WebServ *web, int epollfd)
             {
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
-                // // connection object
                 HttpRequest tmpRequest = ft_static_request();
-                // delete tmpRequest;
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
                 /*HttpRequest tmpReques =*/Print_static_Request(map_connections[events[i].data.fd].GetRequest());
-
-                // std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
-                // std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
-                // std::cout << "Version : " << tmpReques.getVersion() << '\n';
-                // std::cout << "=================== PRINT HEADERS ===================\n";
-                // std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
-                // for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-                // {
-                        // std::cout << "KEY: " << it->first << " VALUE: " << it->second << '\n';
-                // }Z
-                    close(events[i].data.fd);
-                // if (offset < 1024)
-                // {
-                //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), true);
-                //     // call for parsing request and then call the response
-                //     // close(events[i].data.fd);
-                //     // after reading all and building response object,
-                //     // close fd and remove them from map of connections
-                //     // erase connection map with fd client
-                // }
-                // else{
-                //     // Arequest with false flag .
-                //     map_connections[events[i].data.fd].AddRequest(std::string(BUFFER), false);
-                //     continue;
-                // }
-
-            }
+                HttpResponse tmpHttpResponse(events[i].data.fd);
+                map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
+                close(events[i].data.fd);
+                }
         }
     }
 }
