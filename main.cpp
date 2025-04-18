@@ -116,7 +116,7 @@ void manage_connections(WebServ *web, int epollfd)
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
-            else
+            else if (map_connections.find(events[i].data.fd) == map_connections.end())
             {
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
@@ -125,8 +125,15 @@ void manage_connections(WebServ *web, int epollfd)
                 /*HttpRequest tmpReques =*/Print_static_Request(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
-                close(events[i].data.fd);
-                }
+                ResponseBuilder(&map_connections, [events[i].data.fd]);
+                // build response function .
+                // close(events[i].data.fd);
+            }
+            else
+            {
+                // iterat in every connection
+                std::cout << "HELLO MOTHERFUCKER .\n";
+            }
         }
     }
 }

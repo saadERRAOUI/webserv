@@ -20,3 +20,5 @@ class HttpResponse
 	public:
 		HttpResponse(int fd_client);
 };
+
+void ResponseBuilder(std::map<int, Connection> *, int);

@@ -10,3 +10,7 @@ HttpResponse::HttpResponse(int fd_client)
 	this->status_code[404] = std::string("Not Found");
 	this->status_code[500] = std::string("Internal Server Error");
 }
+
+void ResponseBuilder(std::map<int, Connection> *map_connections, ){
+
+}
