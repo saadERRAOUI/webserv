@@ -10,4 +10,20 @@ depending on the request .
 
 - terminating connection class .
 
-todo on evening : add timeout to to client;
+todo on evening : add timeout to to client; 10 second
+
+
+===========================================
+let build response:
+- After create socket client , the next step creat connection object
+that containe all infos about the connection and the server
+- now the request parsed and need to add them to the  Connection object
+- start build Response depeneding on  connection object .
+first of all start with simple resonse that containe a small body lenght.
+
+=============================================
+- fill the request object .
+- print the content of connection and request object.
+- add this print content into a function that can do all this work at the last.
+- now we will build the response depending on the request status code
+and choosing the right path .
