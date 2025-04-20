@@ -21,4 +21,4 @@ class HttpResponse
 		HttpResponse(int fd_client);
 };
 
-void ResponseBuilder(std::map<int, Connection> *, int);
+void ResponseBuilder(Connection *, bool);

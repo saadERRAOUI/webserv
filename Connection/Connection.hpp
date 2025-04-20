@@ -14,19 +14,21 @@ class Server;
 
 class Connection{
 	// object request
-		HttpRequest *Request;
-		HttpResponse *Response;
-		Server 		*s;
-		int 		fd_client;
-		bool 		done;
-		long 		timeout;
+		HttpRequest		*Request;
+		HttpResponse	*Response;
+		Server			*s;
+		std::string		path_optional;
+		int				fd_client;
+		bool			done;
+		long			timeout;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
 		void 		SetHttpRequest(HttpRequest *Request);
 		void		SetHttpRespons(HttpResponse *Response);
-		
+
 		int 		Getfd();
-		HttpRequest& GetRequest();
-		HttpResponse& GetResponse();
+		HttpRequest&	GetRequest();
+		HttpResponse&	GetResponse();
+		Server&			Getserver();
 };

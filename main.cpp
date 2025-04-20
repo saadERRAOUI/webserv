@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/17 18:02:51 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/20 10:28:35 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void manage_connections(WebServ *web, int epollfd)
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
-            else if (map_connections.find(events[i].data.fd) == map_connections.end())
+            else if (map_connections.find(events[i].data.fd) != map_connections.end())
             {
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
@@ -125,14 +125,15 @@ void manage_connections(WebServ *web, int epollfd)
                 /*HttpRequest tmpReques =*/Print_static_Request(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
-                ResponseBuilder(&map_connections, [events[i].data.fd]);
+                ResponseBuilder(&map_connections[events[i].data.fd], true);
                 // build response function .
-                // close(events[i].data.fd);
+                close(events[i].data.fd);
             }
             else
             {
                 // iterat in every connection
                 std::cout << "HELLO MOTHERFUCKER .\n";
+                exit(-1);
             }
         }
     }

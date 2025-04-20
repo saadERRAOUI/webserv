@@ -60,6 +60,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 				Request = NULL;
 				Response = NULL;
 				timeout = get_current_time();
+				path_optional = "";
 				fd_client = ft_client(FdServer, FdEpoll);
 				done = false;
 			}
@@ -71,6 +72,7 @@ Connection::Connection(){
 	Request = NULL;
 	s = NULL;
 	fd_client = 0;
+	path_optional = "";
 	done = false;
 	// request = std::string("");
 }
@@ -95,4 +97,8 @@ void		Connection::SetHttpRespons(HttpResponse *Response){
 
 HttpResponse& Connection::GetResponse(){
 	return (*this->Response);
+}
+
+Server &Connection::Getserver(){
+	return (*this->s);
 }
