@@ -9,6 +9,8 @@ server_name = ["example.coom"]
 max_body_size = "23"
 
 [[server.error_pages]]
+
+400 = "400.html"
 404 = "404.html"
 505 = "505.html"
 400 = "400.html"

@@ -28,11 +28,46 @@ static bool HostName(Server *tmpServer, std::string name)
 }
 
 /*
-
+	Author: BOUZID Hicham
+	Description: open file and return lenght
+	Date: 2025-05-21
 */
 
-void ErrorBuilder(Connection *Infos, Server *tmpServer){
-	std::s
+std::string OpenFile(std::string PathFile, int status)
+{
+
+	std::cout << "Path file: " << std::string("../") + PathFile << "\n";
+	std::cout << "status code: " << status << "\n";
+	return (std::string(""));
+}
+
+/*
+	Author: BOUZID Hicham
+	Description: build a response for error stats
+				and serve the default error pages
+				of ours error pages.
+	Date: 2025-04-21
+*/
+void ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
+	std::string response = Infos->GetRequest().getVersion();
+	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+
+
+	response += " 400 ";
+	response += Infos->GetResponse().GetStatusCode(code);
+	response += "\n";
+	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+	{
+		response += it->first;
+		response += ":";
+		response += it->second;
+		response += "\n";
+	}
+	response += "Content-Length: " ;
+	// tmpServer->getErrorPages()[code];
+	std::string rt = OpenFile(tmpServer->getErrorPages()[code], code);
+	// function open a file and then return the lenght
+
 }
 
 void ResponseBuilder(Connection *Infos, bool flag){
@@ -43,7 +78,12 @@ void ResponseBuilder(Connection *Infos, bool flag){
 	Server *TmpServer =  &Infos->Getserver();
 	// HostName(TmpServer, host);
 	if (HostName(&Infos->Getserver(), host) == false){
+		ErrorBuilder(Infos, TmpServer, 400);
 		std::cerr << "server_name not found" << '\n';
 	}
 		// std::cout << "Hello World\n";
+}
+
+std::string HttpResponse::GetStatusCode(int code_number){
+	return status_code[code_number];
 }

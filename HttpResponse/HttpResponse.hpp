@@ -19,6 +19,7 @@ class HttpResponse
 	int fd_client;
 	public:
 		HttpResponse(int fd_client);
+	std::string  GetStatusCode(int);
 };
 
 void ResponseBuilder(Connection *, bool);

@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/20 10:28:35 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/21 15:17:00 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,6 @@ void manage_connections(WebServ *web, int epollfd)
             {
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
                 map_connections[tmp.Getfd()] = tmp;
-                // delete tmp;
                 int to_check = tmp.Getfd();
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
@@ -126,7 +125,6 @@ void manage_connections(WebServ *web, int epollfd)
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd], true);
-                // build response function .
                 close(events[i].data.fd);
             }
             else
