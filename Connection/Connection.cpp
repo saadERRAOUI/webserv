@@ -56,7 +56,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 		{
 			if (*it_sock == FdServer)
 			{
-				s = (Server *)&it;
+				s = &(*it);
 				Request = NULL;
 				Response = NULL;
 				timeout = get_current_time();
@@ -99,6 +99,6 @@ HttpResponse& Connection::GetResponse(){
 	return (*this->Response);
 }
 
-Server &Connection::Getserver(){
+Server& Connection::Getserver(){
 	return (*this->s);
 }

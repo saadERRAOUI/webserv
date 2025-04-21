@@ -64,10 +64,10 @@ void Print_static_Request(HttpRequest tmpReques){
     std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
     std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
     std::cout << "Version : " << tmpReques.getVersion() << '\n';
-    std::cout << "=================== PRINT HEADERS ===================\n";
-    std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
-    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-        std::cout << it->first << ": " << it->second << '\n';
+    // std::cout << "=================== PRINT HEADERS ===================\n";
+    // std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
+    // for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+    //     std::cout << it->first << ": " << it->second << '\n';
     // close(events[i].data.fd);
 }
 /*
@@ -109,10 +109,10 @@ void manage_connections(WebServ *web, int epollfd)
         {
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
-                Connection *tmp = new Connection(events[i].data.fd, epollfd, web);
-                map_connections[tmp->Getfd()] = *tmp;
-                delete tmp;
-                int to_check = tmp->Getfd();
+                Connection tmp = Connection(events[i].data.fd, epollfd, web);
+                map_connections[tmp.Getfd()] = tmp;
+                // delete tmp;
+                int to_check = tmp.Getfd();
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
