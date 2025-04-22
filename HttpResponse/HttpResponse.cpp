@@ -35,10 +35,26 @@ static bool HostName(Server *tmpServer, std::string name)
 
 std::string OpenFile(std::string PathFile, int status)
 {
-
-	std::cout << "Path file: " << std::string("../") + PathFile << "\n";
-	std::cout << "status code: " << status << "\n";
-	return (std::string(""));
+	std::ifstream fd(PathFile.c_str());
+	std::string line, rt;
+	(void)status;
+	std::cout << "_________________> " << PathFile << "\n";
+	fd.open(PathFile.c_str(), std::ifstream::in);
+	if (!fd)
+	{
+		std::cerr << "Error file : " << strerror(errno) << '\n';
+		return (std::string(""));
+	}
+	std::getline(fd, line);
+	rt = line;
+	while (std::getline(fd, line)){
+		rt += line;
+	}
+	std::cout << "================================\n";
+	std::cout << rt ;
+	std::cout << "================================\n";
+	fd.close();
+	return (rt);
 }
 
 /*
@@ -65,7 +81,7 @@ void ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
 	}
 	response += "Content-Length: " ;
 	// tmpServer->getErrorPages()[code];
-	std::string rt = OpenFile(tmpServer->getErrorPages()[code], code);
+	std::string rt = OpenFile(std::string("./../www/html/ErrorPages/") + tmpServer->getErrorPages()[code], code);
 	// function open a file and then return the lenght
 
 }
