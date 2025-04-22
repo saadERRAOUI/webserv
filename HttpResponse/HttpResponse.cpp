@@ -38,23 +38,34 @@ std::string OpenFile(std::string PathFile, int status)
 	std::ifstream fd(PathFile.c_str());
 	std::string line, rt;
 	(void)status;
-	std::cout << "_________________> " << PathFile << "\n";
-	fd.open(PathFile.c_str(), std::ifstream::in);
-	if (!fd)
+
+
+	if (!fd.is_open())
 	{
 		std::cerr << "Error file : " << strerror(errno) << '\n';
 		return (std::string(""));
 	}
 	std::getline(fd, line);
-	rt = line;
+	rt = line + "\n";
 	while (std::getline(fd, line)){
-		rt += line;
+		rt += (line + "\n");
 	}
-	std::cout << "================================\n";
-	std::cout << rt ;
-	std::cout << "================================\n";
 	fd.close();
 	return (rt);
+}
+/*
+	Author: BOUZID Hicham
+	Description: convert number to std::string
+	Date: 2025-04-22
+*/
+
+std::string tostring(int number)
+{
+	std::ostringstream str;
+
+	str << number;
+	std::string converted = str.str();
+	return (converted);
 }
 
 /*
@@ -69,21 +80,23 @@ void ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
 	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
 
 
-	response += " 400 ";
+	response += " " + tostring(code) + " ";
+
 	response += Infos->GetResponse().GetStatusCode(code);
-	response += "\n";
+	response += "\r\n";
 	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
 	{
 		response += it->first;
-		response += ":";
+		response += ": ";
 		response += it->second;
-		response += "\n";
+		response += "\r\n";
 	}
-	response += "Content-Length: " ;
-	// tmpServer->getErrorPages()[code];
-	std::string rt = OpenFile(std::string("./../www/html/ErrorPages/") + tmpServer->getErrorPages()[code], code);
-	// function open a file and then return the lenght
-
+	std::string rt = OpenFile(std::string("./www/html/ErrorPages/") + tmpServer->getErrorPages()[code], code);
+	response += "Content-Length: " + tostring((int)rt.size());
+	response += "\n\r";
+	response += rt;
+	std::cout << "\n\n\n\n\n";
+	std::cout <<  response;
 }
 
 void ResponseBuilder(Connection *Infos, bool flag){

@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/21 15:17:00 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/22 16:29:48 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ HttpRequest ft_static_request(){
     request.setVersion(std::string("HTTP/1.1"));
     request.setHeaders(std::string("Host"), std::string("example.com"));
     // request._headers["Host"] = "example.com";
-    request.setHeaders(std::string("User-Agent"), std::string(" curl / 7.68.0 "));
+    request.setHeaders(std::string("User-Agent"), std::string("curl / 7.68.0 "));
     // request._headers["User-Agent"] = "curl/7.68.0";
     request.setHeaders(std::string("Accept"), std::string("*/*"));
     // request._headers["Accept"] = "*/*";
