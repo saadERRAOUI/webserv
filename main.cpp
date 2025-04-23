@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/22 16:29:48 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/23 13:45:33 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void manage_connections(WebServ *web, int epollfd)
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
-            else if (map_connections.find(events[i].data.fd) != map_connections.end())
+            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end())
             {
                 read(events[i].data.fd, BUFFER, 1024);
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
@@ -125,6 +125,7 @@ void manage_connections(WebServ *web, int epollfd)
                 // Print_static_Request(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
+                // i forget why i use bool true ahahahaha .
                 ResponseBuilder(&map_connections[events[i].data.fd], true);
             }
             else
@@ -133,6 +134,7 @@ void manage_connections(WebServ *web, int epollfd)
                 std::cout << "HELLO MOTHERFUCKER .\n";
                 exit(-1);
             }
+            MonitorConnection(map_connections, epollfd);
         }
     }
 }
