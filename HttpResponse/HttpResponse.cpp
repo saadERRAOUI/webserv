@@ -75,13 +75,12 @@ std::string tostring(int number)
 				of ours error pages.
 	Date: 2025-04-21
 */
-void ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
-	std::string response = Infos->GetRequest().getVersion();
+std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
 	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+	std::string response = Infos->GetRequest().getVersion();
 
 
 	response += " " + tostring(code) + " ";
-
 	response += Infos->GetResponse().GetStatusCode(code);
 	response += "\r\n";
 	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
@@ -93,23 +92,21 @@ void ErrorBuilder(Connection *Infos, Server *tmpServer, int code){
 	}
 	std::string rt = OpenFile(std::string("./www/html/ErrorPages/") + tmpServer->getErrorPages()[code], code);
 	response += "Content-Length: " + tostring((int)rt.size());
-	response += "\n\r";
+	response += "\r\n\r\n";
 	response += rt;
-	std::cout << "\n\n\n\n\n";
-	std::cout <<  response;
+	return (response);
 }
 
 void ResponseBuilder(Connection *Infos, bool flag){
 	(void)Infos;
 	(void)flag;
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
-	std::cout << "==============> " << host << '\n';
 	Server *TmpServer =  &Infos->Getserver();
-	// HostName(TmpServer, host);
 	if (HostName(&Infos->Getserver(), host) == false){
-		ErrorBuilder(Infos, TmpServer, 400);
-		std::cerr << "server_name not found" << '\n';
-	}
+		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
+		Infos->SetBool(true);
+		// close(Infos->Getfd());
+	} 
 		// std::cout << "Hello World\n";
 }
 

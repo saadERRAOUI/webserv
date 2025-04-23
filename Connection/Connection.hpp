@@ -26,8 +26,10 @@ class Connection{
 		Connection();
 		void 		SetHttpRequest(HttpRequest *Request);
 		void		SetHttpRespons(HttpResponse *Response);
+		void		SetBool(bool);
 
-		int 		Getfd();
+		int				Getfd();
+		bool			GetBool();
 		HttpRequest&	GetRequest();
 		HttpResponse&	GetResponse();
 		Server&			Getserver();

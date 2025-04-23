@@ -49,12 +49,12 @@ HttpRequest ft_static_request(){
     request.setMethod(std::string("GET"));
     request.setRequestURI(std::string("/index.html"));
     request.setVersion(std::string("HTTP/1.1"));
-    request.setHeaders(std::string("Host"), std::string("example.com"));
-    // request._headers["Host"] = "example.com";
-    request.setHeaders(std::string("User-Agent"), std::string("curl / 7.68.0 "));
-    // request._headers["User-Agent"] = "curl/7.68.0";
+    request.setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
     request.setHeaders(std::string("Accept"), std::string("*/*"));
-    // request._headers["Accept"] = "*/*";
+    request.setHeaders(std::string("User-Agent"), std::string("Thunder Client (https://www.thunderclient.com)"));
+    request.setHeaders(std::string("Host"), std::string("example.com"));
+    request.setHeaders(std::string("Connection"), std::string("close"));
+    // Host
     return (request);
 
 }
@@ -70,6 +70,7 @@ void Print_static_Request(HttpRequest tmpReques){
     //     std::cout << it->first << ": " << it->second << '\n';
     // close(events[i].data.fd);
 }
+
 /*
     Author: BOUZID hicham
     Description: add all servers socket to epoll
@@ -121,11 +122,10 @@ void manage_connections(WebServ *web, int epollfd)
                 std::cout << "===========\n" << std::string(BUFFER) << '\n';
                 HttpRequest tmpRequest = ft_static_request();
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
-                /*HttpRequest tmpReques =*/Print_static_Request(map_connections[events[i].data.fd].GetRequest());
+                // Print_static_Request(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd], true);
-                close(events[i].data.fd);
             }
             else
             {

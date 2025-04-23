@@ -102,3 +102,11 @@ HttpResponse& Connection::GetResponse(){
 Server& Connection::Getserver(){
 	return (*this->s);
 }
+
+void Connection::SetBool(bool f){
+	this->done = f;
+}
+
+bool Connection::GetBool(){
+	return (this->done);
+}
