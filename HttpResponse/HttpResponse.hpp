@@ -15,7 +15,7 @@ class Connection;
 class HttpResponse
 {
 	std::map<int, std::string> status_code;
-	bool offset_done;
+	int offset;
 	int fd_client;
 	public:
 	HttpResponse(int fd_client);
@@ -23,7 +23,7 @@ class HttpResponse
 	std::string			GetStatusCode(int);
 };
 
-void ResponseBuilder(Connection *, bool);
+void ResponseBuilder(Connection *);
 std::string tostring(int number);
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code);
 bool HostName(Server *tmpServer, std::string name);

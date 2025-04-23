@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/23 13:45:33 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/04/23 19:00:28 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,8 @@ void manage_connections(WebServ *web, int epollfd)
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
     std::map<int , Connection> map_connections;
-    char BUFFER[1024] = {0};
+    char BUFFER[8000] = {0};
+
     for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
     {
         for (std::vector<int>::iterator it1 = it->getSocket().begin(); it1 != it->getSocket().end(); it1++)
@@ -106,9 +107,9 @@ void manage_connections(WebServ *web, int epollfd)
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
             exit(EXIT_FAILURE);
         }
+        std::cout << "number of events:  " << n << "\n";
         for (int i = 0; i < n; i++)
         {
-            // std::cout << "=========================================================   " << i << '\n';
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
@@ -119,23 +120,14 @@ void manage_connections(WebServ *web, int epollfd)
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end())
             {
-                read(events[i].data.fd, BUFFER, 1024);
-                // std::cout << "===========\n" << std::string(BUFFER) << '\n';
+                read(events[i].data.fd, BUFFER, 8000);
                 HttpRequest tmpRequest = ft_static_request();
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
-                // Print_static_Request(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
-                // i forget why i use bool true ahahahaha .
-                ResponseBuilder(&map_connections[events[i].data.fd], true);
+                ResponseBuilder(&map_connections[events[i].data.fd]);
             }
-            // else
-            // {
-            //     // iterat in every 
-            //     std::cout << "HELLO MOTHERFUCKER .\n";
-            //     exit(-1);
-            // }
-            MonitorConnection(&map_connections, epollfd);
+            // MonitorConnection(&map_connections, epollfd);
         }
     }
 }

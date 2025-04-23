@@ -36,8 +36,8 @@ std::string OpenFile(std::string PathFile, int status)
 */
 bool HostName(Server *tmpServer, std::string name)
 {
-	std::cout << "the name of server is : " << name << '\n';
-	std::cout << "the first server name is: " << *(tmpServer->getServerName().begin()) << '\n';
+	// std::cout << "the name of server is : " << name << '\n';
+	// std::cout << "the first server name is: " << *(tmpServer->getServerName().begin()) << '\n';
 	std::vector<std::string>::iterator it = find(tmpServer->getServerName().begin(), tmpServer->getServerName().end(), name);
 	if (it == tmpServer->getServerName().end())
 		return (false);
@@ -68,7 +68,7 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
 	std::string response = Infos->GetRequest().getVersion();
 	std::string DefaultOrOurs;
-	
+
 	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
 	response += " " + tostring(code) + " ";
 	response += Infos->GetResponse().GetStatusCode(code);

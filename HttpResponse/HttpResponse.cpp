@@ -4,7 +4,7 @@ HttpResponse::HttpResponse(int fd_client)
 {
 	// std::cout << "need to remove just for check Response builder\n";
 	this->fd_client = fd_client;
-	offset_done = false;
+	offset = 0;
 	this->status_code[400] = std::string("Bad Request");
 	this->status_code[403] = std::string("Forbidden");
 	this->status_code[404] = std::string("Not Found");
@@ -12,25 +12,25 @@ HttpResponse::HttpResponse(int fd_client)
 }
 
 
-void ResponseBuilder(Connection *Infos, bool flag){
-	(void)Infos;
-	(void)flag;
+void ResponseBuilder(Connection *Infos){
+
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
+
 	if (HostName(&Infos->Getserver(), host) == false){
 		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
 		Infos->SetBool(true);
 		return ;
 	}
-	// else if (Infos->GetRequest().getMethod() == "GET"){
-
-	// }
+	else if (Infos->GetRequest().getMethod() == "GET"){
+		
+	}
 	// else if (Infos->GetRequest().getMethod() == "POST"){
 
 	// }
-	// else if (Infos->GetRequest().getMethod() == "DELETE"){
+	else if (Infos->GetRequest().getMethod() == "DELETE"){
 
-	// }
+	}
 }
 
 /*
