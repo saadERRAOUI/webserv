@@ -22,15 +22,15 @@ void ResponseBuilder(Connection *Infos, bool flag){
 		Infos->SetBool(true);
 		return ;
 	}
-	else if (Infos->GetRequest().getMethod() == "GET"){
+	// else if (Infos->GetRequest().getMethod() == "GET"){
 
-	}
-	else if (Infos->GetRequest().getMethod() == "POST"){
+	// }
+	// else if (Infos->GetRequest().getMethod() == "POST"){
 
-	}
-	else if (Infos->GetRequest().getMethod() == "DELETE"){
+	// }
+	// else if (Infos->GetRequest().getMethod() == "DELETE"){
 
-	}
+	// }
 }
 
 /*
@@ -40,19 +40,20 @@ void ResponseBuilder(Connection *Infos, bool flag){
 	Date: 2025-04-23
 */
 
-void MonitorConnection(std::map<int, Connection> &Connections,int epollFd){
-	std::map<int , Connection>::iterator it= Connections.begin();
+void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
+	std::map<int , Connection>::iterator it= Connections->begin();
+	struct  epoll_event event;
 
-	for (; it != Connections.end(); it++){
+	for (; it != Connections->end(); it++){
 		if (it->second.GetBool() == true)
 		{
-			if (epoll_ctl(epollFd, EPOLL_CTL_DEL, it->first, NULL))
+			if (epoll_ctl(epollFd, EPOLL_CTL_DEL, it->first, &event))
 					std::cerr << "EPOLL_CTL_DEL: " << strerror(errno) << '\n';
 			close(it->first);
-			Connections.erase(it->first);
+			break;
 		}
 	}
-	std::cout << "size of map: "  << '\n';
+	Connections->erase(it->first);
 }
 
 std::string HttpResponse::GetStatusCode(int code_number){

@@ -108,6 +108,7 @@ void manage_connections(WebServ *web, int epollfd)
         }
         for (int i = 0; i < n; i++)
         {
+            // std::cout << "=========================================================   " << i << '\n';
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
@@ -119,7 +120,7 @@ void manage_connections(WebServ *web, int epollfd)
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end())
             {
                 read(events[i].data.fd, BUFFER, 1024);
-                std::cout << "===========\n" << std::string(BUFFER) << '\n';
+                // std::cout << "===========\n" << std::string(BUFFER) << '\n';
                 HttpRequest tmpRequest = ft_static_request();
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
                 // Print_static_Request(map_connections[events[i].data.fd].GetRequest());
@@ -128,13 +129,13 @@ void manage_connections(WebServ *web, int epollfd)
                 // i forget why i use bool true ahahahaha .
                 ResponseBuilder(&map_connections[events[i].data.fd], true);
             }
-            else
-            {
-                // iterat in every connection
-                std::cout << "HELLO MOTHERFUCKER .\n";
-                exit(-1);
-            }
-            MonitorConnection(map_connections, epollfd);
+            // else
+            // {
+            //     // iterat in every 
+            //     std::cout << "HELLO MOTHERFUCKER .\n";
+            //     exit(-1);
+            // }
+            MonitorConnection(&map_connections, epollfd);
         }
     }
 }

@@ -44,6 +44,17 @@ bool HostName(Server *tmpServer, std::string name)
 	return (true);
 }
 
+/*
+	Author: BOUZID Hicham
+	Description: chose if the default error pages
+				found on config file of we should serve ours
+	Date: 2025-04-23
+*/
+std::string chose_one(std::string a, std::string b){
+	if (!a.empty() && !access(a.c_str(), R_OK))
+		return (a);
+	return (std::string("./www/html/ErrorPages/") + b);
+}
 
 /*
 	Author: BOUZID Hicham
@@ -56,7 +67,9 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
 	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
 	std::string response = Infos->GetRequest().getVersion();
-
+	std::string DefaultOrOurs;
+	
+	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
 	response += " " + tostring(code) + " ";
 	response += Infos->GetResponse().GetStatusCode(code);
 	response += "\r\n";
@@ -67,7 +80,7 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 		response += it->second;
 		response += "\r\n";
 	}
-	std::string rt = OpenFile(std::string("./www/html/ErrorPages/") + tmpServer->getErrorPages()[code], code);
+	std::string rt = OpenFile(DefaultOrOurs, code);
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;
