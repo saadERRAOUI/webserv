@@ -3,19 +3,19 @@
 default_max_body_size = "123"
 
 [[server]]
-host = "127.0.0.1"
-port = [9090, 9091, 8080]
-server_name = ["example.coom"]
-max_body_size = "23"
+host="123.0.0.0"
+port = [12, 123]
+server_name = ["example.com"] 
+max_body_size = "1000000"
 
 [[server.error_pages]]
-
-400 = "400.html"
 404 = "404.html"
 505 = "505.html"
 400 = "400.html"
 
 [[server.route]]
-path = "/api/v1"
+locatoin = "imgs"
 methods = ["GET"]
 autoindex = true
+index = "index.html"
+root = "/var/www/html/pepe/"

@@ -107,7 +107,6 @@ void manage_connections(WebServ *web, int epollfd)
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
             exit(EXIT_FAILURE);
         }
-        std::cout << "number of events:  " << n << "\n";
         for (int i = 0; i < n; i++)
         {
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
@@ -127,7 +126,7 @@ void manage_connections(WebServ *web, int epollfd)
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
-            // MonitorConnection(&map_connections, epollfd);
+            MonitorConnection(&map_connections, epollfd);
         }
     }
 }
