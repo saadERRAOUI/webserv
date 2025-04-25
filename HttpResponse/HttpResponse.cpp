@@ -23,7 +23,8 @@ void ResponseBuilder(Connection *Infos){
 		return ;
 	}
 	else if (Infos->GetRequest().getMethod() == "GET"){
-		
+		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
+		std::cout << "GET RESPONSE: " << GetMethod(Infos) << '\n';
 	}
 	// else if (Infos->GetRequest().getMethod() == "POST"){
 

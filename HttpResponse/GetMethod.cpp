@@ -2,23 +2,41 @@
 
 /*
     Author: BOUZID Hicham
+    Description: check if the URI containe the full LOCATION or not
+    Date: 2025-04-25
+*/
+
+bool CompareRU(std::string URI, std::string location){
+    std::string tmplocation = location;
+    int index;
+
+    if (tmplocation[location.length() - 1] != '/' && tmplocation != location)
+        tmplocation += "/";
+    for (index = 0; index < (int)URI.length() && index < (int)tmplocation.length(); index++){
+        if (URI[index] != tmplocation[index])
+            break;
+    }
+    if (index == (int)tmplocation.length())
+        return (true);
+    return (false);    
+}
+
+/*
+    Author: BOUZID Hicham
     Description: match the request That we got with ours routes
     Date: 2025-04-24 
 */
 
 std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &TmpRequest){
     std::string URI = TmpRequest.getRequestURI();
-    std::map<std::string, route>::iterator it =  TmpRoutes.find(TmpRequest.getRequestURI());
-    if (it != TmpRoutes.end())
-        return (TmpRequest.getRequestURI());
-    // it = TmpRoutes.begin();
-    for (it = TmpRoutes.begin();it != TmpRoutes.end(); it++){
-        // std::cout << "it: " << it->first << '\n';
-    }
-    // for (std::map<std::string, route>::iterator it = TmpRoutes.begin(); it != TmpRoutes.end(); it++){
+    std::map<std::string, route>::iterator it;
 
-    // }
-    return(std::string(""));
+    for (it = TmpRoutes.begin();it != TmpRoutes.end(); it++){
+        if (CompareRU(TmpRequest.getRequestURI(), it->first) == true)
+            return (it->first);
+    }
+
+    return(std::string("ROUTE NOT FOUND TO SERVE !!!"));
 }
 
 
