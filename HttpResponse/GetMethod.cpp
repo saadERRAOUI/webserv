@@ -59,7 +59,6 @@ std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &Tm
 }
 
 
-
 /*
     Author: BOUZID Hicham
     Description: Implementing GET method that
@@ -68,7 +67,23 @@ std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &Tm
 */
 std::string GetMethod(Connection *Infos){
     std::map<std::string, route> routes = Infos->Getserver().getRoutes();
-    // Server *tmpServer = &Infos->Getserver();
-    return (MatchRoutes(routes, Infos->GetRequest()));
+    std::string result;
+
+    result = MatchRoutes(routes, Infos->GetRequest());
+    // in ths condition i checked for error pages or somthing wrong
+    if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty())
+        return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
+    // here we check for ace
+    else
+    {
+        // Build  add to request URI slash + build response 301 
+        if (result  == Infos->GetRequest().getRequestURI() + std::string("/")){
+            Infos->GetRequest().setHeaders(std::string("Location"),
+                Infos->GetRequest().getRequestURI() + std::string("/"));
+                return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
+        }
+
+    }
+    return (std::string("empty"));
     //Check for all routes and autoindex
 }
