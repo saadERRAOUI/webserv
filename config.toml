@@ -14,7 +14,7 @@ max_body_size = "23"
 400 = "400.html"
 
 [[server.route]]
-path = "/api/v1"
+path = "/api/v1/"
 methods = ["GET"]
 autoindex = true
 index = "index.html"
