@@ -58,6 +58,26 @@ std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &Tm
     return(std::string("404"));
 }
 
+/*
+    Author: BOUZID Hicham
+    Description: created to serve default index.html
+                if we have right else return error
+    Date: 2025-04-29
+*/
+std::string ServerNormal(Connection *Infos, std::string URI, std::string route)
+{
+    std::string ActualPath;
+
+    ActualPath = std::string("...") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    if (access(ActualPath.c_str(), R_OK))
+        // std::cout << "this error if not found: "<< strerror(errno) << '\n';
+        return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
+    std::cout << "this line under is the whole path to serve this request\n";
+    std::cout << Infos->Getserver().getRoutes()[route].getRoot() + URI << "\n";
+    return(std::string(""));
+
+}
+
 
 /*
     Author: BOUZID Hicham
@@ -71,40 +91,53 @@ std::string GetMethod(Connection *Infos){
 
     result = MatchRoutes(routes, Infos->GetRequest());
     // in ths condition i checked for error pages or somthing wrong
-    if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty())
+    if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
+    }
     // here we check for ace
     else
     {
-        // Build  add to request URI slash + build response 301 
-        if (result  == Infos->GetRequest().getRequestURI() + std::string("/")){
-            Infos->GetRequest().setHeaders(std::string("Location"),
-                Infos->GetRequest().getRequestURI() + std::string("/"));
-                return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
-        }
-        else if (result == Infos->GetRequest().getRequestURI()){
-            if (Infos->Getserver().getRoutes()[result].getRedirection().empty())
-            {
-                if (Infos->SetRedirect(Infos->Getserver().getRoutes()[result].getRedirection()) == true){
-                    Infos->GetRequest().setHeaders(std::string("Location"),
-                       Infos->Getserver().getRoutes()[result].getRedirection());
-                        return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
-                }
-                // response with error an set the connection done
-                else
-                        return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
-            }
-            else if (Infos->Getserver().getRoutes()[result].getIndex().empty()){
-                // serve the index file.
-                // normale if found
-            }
-            else{
-                if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
-                    // list all files
-                }
-                else
-                    return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
-            }
+      // Build  add to request URI slash + build response 301 
+      if (result  == (Infos->GetRequest().getRequestURI() + std::string("/"))){
+          Infos->GetRequest().setHeaders(std::string("Location"),
+              Infos->GetRequest().getRequestURI() + std::string("/"));
+              return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
+      }
+      else if (result == Infos->GetRequest().getRequestURI()){
+          if (!Infos->Getserver().getRoutes()[result].getRedirection().empty())
+          {
+              if (Infos->SetRedirect(Infos->Getserver().getRoutes()[result].getRedirection()) == true){
+                  std::cout <<  "this is the path of redirection: " << Infos->Getserver().getRoutes()[result].getRedirection() << '\n';
+                  Infos->GetRequest().setHeaders(std::string("Location"),
+                     Infos->Getserver().getRoutes()[result].getRedirection());
+                      return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
+              }
+              // response with error an set the connection done
+              else
+              {
+                  // std::cout << "Not Allowed .\n";
+                      return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
+              }
+          }
+          else if (!Infos->Getserver().getRoutes()[result].getIndex().empty()){
+              return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() + 
+                  Infos->Getserver().getRoutes()[result].getIndex(), result));
+              // Ser
+              // serve the index file.
+              // normale if found
+          }
+          else{
+              if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
+              std::cout << "++++++++++++++++++++++++++\n";
+                  // list all files
+              }
+              else
+                  return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
+          }
+      }
+        // serve file if have a right permition
+        else{
+
         }
 
     }
