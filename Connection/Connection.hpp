@@ -21,12 +21,15 @@ class Connection{
 		int				fd_client;
 		bool			done;
 		long			timeout;
+		// vector to prevent from infinit redirection 
+		std::vector<std::string> redirect;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
 		void 		SetHttpRequest(HttpRequest *Request);
 		void		SetHttpRespons(HttpResponse *Response);
 		void		SetBool(bool);
+		bool		SetRedirect(std::string URI);
 
 		int				Getfd();
 		bool			GetBool();

@@ -82,6 +82,30 @@ std::string GetMethod(Connection *Infos){
                 Infos->GetRequest().getRequestURI() + std::string("/"));
                 return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
         }
+        else if (result == Infos->GetRequest().getRequestURI()){
+            if (Infos->Getserver().getRoutes()[result].getRedirection().empty())
+            {
+                if (Infos->SetRedirect(Infos->Getserver().getRoutes()[result].getRedirection()) == true){
+                    Infos->GetRequest().setHeaders(std::string("Location"),
+                       Infos->Getserver().getRoutes()[result].getRedirection());
+                        return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
+                }
+                // response with error an set the connection done
+                else
+                        return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
+            }
+            else if (Infos->Getserver().getRoutes()[result].getIndex().empty()){
+                // serve the index file.
+                // normale if found
+            }
+            else{
+                if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
+                    // list all files
+                }
+                else
+                    return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
+            }
+        }
 
     }
     return (std::string("empty"));

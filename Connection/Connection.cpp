@@ -110,3 +110,20 @@ void Connection::SetBool(bool f){
 bool Connection::GetBool(){
 	return (this->done);
 }
+
+/*
+	Author: BOUZID Hicham
+	Description: add a uri redirection to a
+		vector to avoid unfinit redirection
+	Date: 2025-04-29
+*/
+
+bool Connection::SetRedirect(std::string URI){
+	std::vector<std::string>::iterator it = find(redirect.begin(), redirect.end(), URI);
+	if (it == redirect.end())
+	{
+		this->redirect.push_back(URI);
+		return (true);
+	}
+	return (false);
+}

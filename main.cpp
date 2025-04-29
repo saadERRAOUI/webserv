@@ -120,6 +120,9 @@ void manage_connections(WebServ *web, int epollfd)
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end())
             {
                 read(events[i].data.fd, BUFFER, 8000);
+                // std::cout << "=============================\n";
+                // std::cout << BUFFER << '\n';
+                // std::cout << "=============================\n";
                 HttpRequest tmpRequest = ft_static_request();
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
                 HttpResponse tmpHttpResponse(events[i].data.fd);
