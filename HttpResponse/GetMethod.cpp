@@ -68,15 +68,13 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 {
     std::string ActualPath;
 
-    ActualPath = std::string("...") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
     if (access(ActualPath.c_str(), R_OK))
-        // std::cout << "this error if not found: "<< strerror(errno) << '\n';
         return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
-    	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+    std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
 	std::string response = Infos->GetRequest().getVersion();
-	std::string DefaultOrOurs;
-
-	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
+    if (code != 200)
+	    ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
 	response += " " + tostring(code) + " ";
 	response += Infos->GetResponse().GetStatusCode(code);
 	response += "\r\n";
@@ -87,15 +85,13 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 		response += it->second;
 		response += "\r\n";
 	}
-	std::string rt = OpenFile(DefaultOrOurs, code);
+	std::string rt = OpenFile(ActualPath, code);
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;
 	if (code != 301)
 		Infos->SetBool(true);
 	return (response);
-    return(std::string(""));
-
 }
 
 
@@ -117,7 +113,7 @@ std::string GetMethod(Connection *Infos){
     // here we check for ace
     else
     {
-      // Build  add to request URI slash + build response 301 
+      // Build  add to request URI slash + build response 301
       if (result  == (Infos->GetRequest().getRequestURI() + std::string("/"))){
           Infos->GetRequest().setHeaders(std::string("Location"),
               Infos->GetRequest().getRequestURI() + std::string("/"));
@@ -138,7 +134,7 @@ std::string GetMethod(Connection *Infos){
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
           }
           else if (!Infos->Getserver().getRoutes()[result].getIndex().empty()){
-              return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() + 
+              return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() +
                   Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
               // Ser
               // serve the index file.

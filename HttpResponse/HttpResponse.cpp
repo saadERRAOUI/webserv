@@ -11,6 +11,7 @@ HttpResponse::HttpResponse(int fd_client)
 	this->status_code[403] = std::string("Forbidden");
 	this->status_code[404] = std::string("Not Found");
 	this->status_code[405] = std::string("Method Not Allowed");
+	this->status_code[413] = std::string("Payload Too Large");
 	this->status_code[500] = std::string("Internal Server Error");
 }
 
