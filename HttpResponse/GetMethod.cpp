@@ -64,7 +64,7 @@ std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &Tm
                 if we have right else return error
     Date: 2025-04-29
 */
-std::string ServerNormal(Connection *Infos, std::string URI, std::string route)
+std::string ServerNormal(Connection *Infos, std::string URI, std::string route, int code)
 {
     std::string ActualPath;
 
@@ -72,8 +72,28 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route)
     if (access(ActualPath.c_str(), R_OK))
         // std::cout << "this error if not found: "<< strerror(errno) << '\n';
         return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
-    std::cout << "this line under is the whole path to serve this request\n";
-    std::cout << Infos->Getserver().getRoutes()[route].getRoot() + URI << "\n";
+    	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+	std::string response = Infos->GetRequest().getVersion();
+	std::string DefaultOrOurs;
+
+	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
+	response += " " + tostring(code) + " ";
+	response += Infos->GetResponse().GetStatusCode(code);
+	response += "\r\n";
+	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+	{
+		response += it->first;
+		response += ": ";
+		response += it->second;
+		response += "\r\n";
+	}
+	std::string rt = OpenFile(DefaultOrOurs, code);
+	response += "Content-Length: " + tostring((int)rt.size());
+	response += "\r\n\r\n";
+	response += rt;
+	if (code != 301)
+		Infos->SetBool(true);
+	return (response);
     return(std::string(""));
 
 }
@@ -114,14 +134,12 @@ std::string GetMethod(Connection *Infos){
               }
               // response with error an set the connection done
               else
-              {
                   // std::cout << "Not Allowed .\n";
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
-              }
           }
           else if (!Infos->Getserver().getRoutes()[result].getIndex().empty()){
               return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() + 
-                  Infos->Getserver().getRoutes()[result].getIndex(), result));
+                  Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
               // Ser
               // serve the index file.
               // normale if found

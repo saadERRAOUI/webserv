@@ -28,11 +28,13 @@ first of all start with simple resonse that containe a small body lenght.
 - now we will build the response depending on the request status code
 and choosing the right path .
 
-
 compare the server name if not found return error by calling a funcion that build error response.
 
 /location/
 
 
 check if neccessary should end with /
-
+=====================================
+check for auto index if on return , index file
+else list files
+else error 

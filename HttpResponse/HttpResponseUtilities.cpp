@@ -63,6 +63,7 @@ std::string chose_one(std::string a, std::string b){
 				of ours error pages.
 	Date: 2025-04-21
 */
+
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
 	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
@@ -84,6 +85,8 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;
+	if (code != 301)
+		Infos->SetBool(true);
 	return (response);
 }
 

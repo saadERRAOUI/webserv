@@ -5,6 +5,7 @@ HttpResponse::HttpResponse(int fd_client)
 	// std::cout << "need to remove just for check Response builder\n";
 	this->fd_client = fd_client;
 	offset = 0;
+	this->status_code[200] = std::string("OK");
 	this->status_code[301] = std::string("Moved Permanently");
 	this->status_code[400] = std::string("Bad Request");
 	this->status_code[403] = std::string("Forbidden");
@@ -27,9 +28,6 @@ void ResponseBuilder(Connection *Infos){
 	else if (Infos->GetRequest().getMethod() == "GET"){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 		std::string tmpstring = GetMethod(Infos);
-		// std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!\n";
-		// std::cout << tmpstring.c_str() << '\n';
-		// std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!\n";
 		write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
