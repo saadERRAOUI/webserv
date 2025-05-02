@@ -94,6 +94,14 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 	return (response);
 }
 
+/*
+    Author: BOUZID Hicham
+    Description: list file if autoindex on
+                     and index file not found
+    Date: 2025-05-01
+
+*/
+
 
 /*
     Author: BOUZID Hicham
@@ -101,6 +109,7 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
                 simulate other webserves like nginx or apache
     Date: 2025-04-24
 */
+
 std::string GetMethod(Connection *Infos){
     std::map<std::string, route> routes = Infos->Getserver().getRoutes();
     std::string result;
@@ -142,6 +151,7 @@ std::string GetMethod(Connection *Infos){
           }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
+                // return (ListFiles());
               std::cout << "++++++++++++++++++++++++++\n";
                   // list all files
               }
