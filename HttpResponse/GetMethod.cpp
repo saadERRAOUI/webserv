@@ -69,6 +69,7 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
     std::string ActualPath;
 
     ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    std::cout << "From this path we will serve: " << ActualPath << '\n';
     if (access(ActualPath.c_str(), R_OK))
         return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
     std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
@@ -102,6 +103,24 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 
 */
 
+std::string ListFiles(Connection *Infos, std::string URI, std::string route, int code){
+    std::string ActualPath;
+    std::string RListing;
+    DIR *dir;
+    // struct dirent *dp;
+    (void)code;
+
+    std::cout << "ENTER into list files: " << '\n';
+    ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    std::cout << "From this path we will serve: " << ActualPath << '\n';
+    if ((dir = opendir(ActualPath.c_str())) == NULL)
+        return (ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403 : 404)));
+    RListing =  "<!DOCTYPE html><html><head><title>Index of " + URI + "</title></head><body>\n";
+    RListing += "<h1>Index of " + URI + "</h1><hr><pre>\n";
+    RListing += "<a href=\"../\">../</a>\n";
+    // std::cout << RListing << '\n';
+    return (RListing);
+}
 
 /*
     Author: BOUZID Hicham
@@ -110,7 +129,8 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
     Date: 2025-04-24
 */
 
-std::string GetMethod(Connection *Infos){
+std::string GetMethod(Connection *Infos)
+{
     std::map<std::string, route> routes = Infos->Getserver().getRoutes();
     std::string result;
 
@@ -142,7 +162,7 @@ std::string GetMethod(Connection *Infos){
                   // std::cout << "Not Allowed .\n";
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
           }
-          else if (!Infos->Getserver().getRoutes()[result].getIndex().empty()){
+          else if (Infos->Getserver().getRoutes()[result].getIndex().empty()){
               return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() +
                   Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
               // Ser
@@ -151,8 +171,8 @@ std::string GetMethod(Connection *Infos){
           }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
-                // return (ListFiles());
-              std::cout << "++++++++++++++++++++++++++\n";
+                  std::cout << "++++++++++++++++++++++++++\n";
+                  return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
                   // list all files
               }
               else
