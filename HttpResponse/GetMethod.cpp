@@ -107,19 +107,44 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     std::string ActualPath;
     std::string RListing;
     DIR *dir;
-    // struct dirent *dp;
-    (void)code;
+    struct dirent *dp;
 
-    std::cout << "ENTER into list files: " << '\n';
+    // std::cout << "ENTER into list files: " << '\n';
     ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
     std::cout << "From this path we will serve: " << ActualPath << '\n';
     if ((dir = opendir(ActualPath.c_str())) == NULL)
         return (ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403 : 404)));
     RListing =  "<!DOCTYPE html><html><head><title>Index of " + URI + "</title></head><body>\n";
     RListing += "<h1>Index of " + URI + "</h1><hr><pre>\n";
-    RListing += "<a href=\"../\">../</a>\n";
-    // std::cout << RListing << '\n';
-    return (RListing);
+    dp = readdir(dir);
+    while ((dp = readdir(dir)) != NULL)
+    {
+
+        RListing += "<a href=\"" + ((dp->d_type == 8) ? std::string(dp->d_name) : std::string(dp->d_name) + "/") + "\">" + ((dp->d_type == 8) ? std::string(dp->d_name) : std::string(dp->d_name) + "/") + "</a>\n";
+    }
+    RListing += "</pre><hr></body></html>\n";
+    closedir(dir);
+    std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+    std::string response = Infos->GetRequest().getVersion();
+    if (code != 200)
+        ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
+    response += " " + tostring(code) + " ";
+    response += Infos->GetResponse().GetStatusCode(code);
+    response += "\r\n";
+    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+    {
+        response += it->first;
+        response += ": ";
+        response += it->second;
+        response += "\r\n";
+    }
+    response += "Content-Length: " + tostring((int)RListing.size());
+    response += "\r\n\r\n";
+    response += RListing;
+    if (code != 301)
+    Infos->SetBool(true);
+
+    return (response);
 }
 
 /*
