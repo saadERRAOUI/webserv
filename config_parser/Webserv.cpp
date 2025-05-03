@@ -21,8 +21,13 @@ route WebServ::parseRoute(Section &section)
             Route.setRedirection(*key_val->second.single);
         else if (key_val->first == "autoindex" && key_val->second.type == TOMLValue::BOOL)
             Route.setAutoindex(key_val->second.true_false);
+        else if (key_val->first == "upload" && key_val->second.type == TOMLValue::SINGLE)
+            Route.setUpload(*key_val->second.single);
+        else if (key_val->first == "cgi_extensions" && key_val->second.type == TOMLValue::TABLE)
+            Route.setCGI(*key_val->second.table);
         else
             throw std::invalid_argument("Invalid key/value in route");
+    
     }
     return Route;
 }

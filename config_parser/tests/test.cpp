@@ -51,11 +51,11 @@ TEST(syntax_error_incorrect_header , incorrect_header) {
 
 
 TEST(INVALID_SERVER_NAME , InvalidServerName) {
-    ASSERT_THROW(WebServ webServ("./sinvalid_names/invalid_servername.toml"), std::invalid_argument);
+    ASSERT_THROW(WebServ webServ("./invalid_names/invalid_servername.toml"), std::invalid_argument);
 }
 
 TEST(INVALID_KEY , InvalidKEYPAIR) {
-    ASSERT_THROW(WebServ webServ("./sinvalid_names/invalid_keypair.toml"), std::invalid_argument);
+    ASSERT_THROW(WebServ webServ("./invalid_names/invalid_keypair.toml"), std::invalid_argument);
 }
 
 

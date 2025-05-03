@@ -37,6 +37,25 @@ std::string route::getIndex()
     return this->index;
 }
 
+void route::setCGI(std::map<std::string,std::string> &table)
+{
+    this->cgi_extensons = table;
+
+}
+
+void route::setUpload(std::string &path)
+{
+    this->upload_path = path;
+}
+
+std::string route::getUpload()
+{
+    return this->upload_path;
+}
+std::map<std::string, std::string> & route::getCGI()
+{
+    return this->cgi_extensons;
+}
 std::vector<std::string> &route::getMethods()
 {
     return this->methods;
@@ -171,6 +190,7 @@ const Server &Server::operator=(const Server &other)
 {
     if (this != &other)
     {
+        this->host = other.host;
         this->port = other.port;
         this->server_name = other.server_name;
         this->routes = other.routes;
