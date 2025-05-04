@@ -4,9 +4,9 @@
 
 
 
-route WebServ::parseRoute(Section &section)
+Route WebServ::parseRoute(Section &section)
 {
-    route Route;
+    Route Route;
     for (std::deque<key_pair>::iterator key_val = section.key_val.begin(); key_val != section.key_val.end(); key_val++)
     {
         if (key_val->first == "path" && key_val->second.type == TOMLValue::SINGLE)
@@ -23,7 +23,7 @@ route WebServ::parseRoute(Section &section)
             Route.setAutoindex(key_val->second.true_false);
         else if (key_val->first == "upload" && key_val->second.type == TOMLValue::SINGLE)
             Route.setUpload(*key_val->second.single);
-        else if (key_val->first == "cgi_extensions" && key_val->second.type == TOMLValue::TABLE)
+        else if (key_val->first == "CGI_extensions" && key_val->second.type == TOMLValue::TABLE)
             Route.setCGI(*key_val->second.table);
         else
             throw std::invalid_argument("Invalid key/value in route");
@@ -47,7 +47,7 @@ Server WebServ::parseServer(Section &section)
         {
             if (section->name == "route")
             {
-                route Route = parseRoute(*section);
+                Route Route = parseRoute(*section);
                 if (Route.getPath().empty())
                     throw std::invalid_argument("Invalid route path");
                 server.getRoutes()[Route.getPath()] = Route;

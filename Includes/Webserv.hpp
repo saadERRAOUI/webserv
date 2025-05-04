@@ -46,7 +46,7 @@ private:
 public:
 	WebServ(std::string config_file);
 	Server parseServer(Section &section);
-	route parseRoute(Section &section);
+	Route parseRoute(Section &section);
 	std::vector<Server> &getServers();
 	int getDefaultMaxBodySize();
 	std::map<int, std::string> &getErrorPages();

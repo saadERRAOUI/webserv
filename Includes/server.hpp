@@ -8,7 +8,7 @@
 #include <vector>
 #include "parser.hpp"
 class WebServ;
-struct route
+struct Route
 {
 private:
     std::string path;
@@ -16,24 +16,31 @@ private:
     std::vector<std::string> methods;
     std::string root;
     std::string redirection;
+    std::string upload_path;
+    std::map<std::string, std::string> cgi_extensons;
     bool autoindex;
 
 public:
-    const route &operator=(const route &other);
-    route() : root(""), redirection(""), autoindex(false) {};
-    route(const route &other);
-    std::string getPath();
-    std::string getIndex();
-    std::vector<std::string> &getMethods();
-    std::string getRoot();
-    std::string getRedirection();
-    bool getAutoindex();
-    std::string setPath(std::string path);
+    const Route &operator=(const Route &other);
+    Route() : root(""), redirection(""), autoindex(false) {};
+    Route(const Route &other);
+    std::string getPath() const;
+    std::string getIndex() const ;
+    const std::vector<std::string> &getMethods() const;
+    std::string getRoot() const;
+    std::string getRedirection() const;
+    bool getAutoindex() const;
+    const std::map<std::string, std::string> &getCGI() const;
+    std::string getUpload() const;
+    std::string setPath(std::string path) ;
+    std::string Route::getCgiPath(const std::string& request_path) const;
     void setIndex(std::string index);
     void setMethods(std::vector<std::string> methods);
     void setRoot(std::string root);
     void setRedirection(std::string redirection);
     void setAutoindex(bool autoindex);
+    void setCGI(std::map<std::string, std::string> &table);
+    void setUpload(std::string &path);
 };
 
 class Server
@@ -43,7 +50,7 @@ private:
     // check if host is possible to be "localhost"
     std::string host;
     std::vector<std::string> server_name;
-    std::map<std::string, route> routes;
+    std::map<std::string, Route> routes;
     std::map<int, std::string> error_pages;
     std::vector<int> socket;
     int max_body_size;
@@ -56,7 +63,7 @@ public:
     void setPort(std::vector<int> port);
     void setHost(std::string host);
     void setServerName(std::vector<std::string> server_name);
-    void setRoutes(std::map<std::string, route> routes);
+    void setRoutes(std::map<std::string, Route> routes);
     void setErrorPages(std::map<int, std::string> error_pages);
     void setMaxBodySize(int max_body_size);
 
@@ -64,10 +71,10 @@ public:
     std::vector<int> &getPorts();
     std::string getHost();
     std::vector<std::string> &getServerName();
-    std::map<std::string, route> &getRoutes();
+    std::map<std::string, Route> &getRoutes();
     std::map<int, std::string> &getErrorPages();
-    int getSocket();
-    void setSocket(int socket);
+    std::vector<int> &getSocket();
+    void setSocket(std::vector<int> socket);
     int getMaxBodySize();
     void printServer();
 };

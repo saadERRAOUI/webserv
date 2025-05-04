@@ -92,7 +92,7 @@ void ConfigParser::validate(std::deque<Token> &token_list)
             if (state.substate != PARSING_VALUE && (valid_tokens_map[std::pair<e_substate, e_token>(state.substate, i->type)] & (i + 1)->type) == 0)
                 this->throw_error("Unexpected token");
             if (state.substate == PARSING_VALUE && (valid_context_map[std::pair<context, e_token>(state.value_substate, i->type)] & (i + 1)->type) == 0)
-                this->throw_error(std::string("Unexpected token at value") + "on token " + i->type + " "));
+                this->throw_error(std::string("Unexpected token at value"));
             if (i->type == EQUALS && state.substate != PARSING_VALUE)
                 {
                     state.substate = PARSING_VALUE;

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "utilities.hpp"
 
-const route &route::operator=(const route &other)
+const Route &Route::operator=(const Route &other)
 {
     if (this != &other)
     {
@@ -16,7 +16,7 @@ const route &route::operator=(const route &other)
     return *this;
 }
 
-route::route(const route &other)
+Route::Route(const Route &other)
 {
     this->path = other.path;
     this->index = other.index;
@@ -26,83 +26,88 @@ route::route(const route &other)
     this->autoindex = other.autoindex;
 }
 
+std::string Route::getCgiPath(const std::string& request_path) const {
+    std::string relative_path = request_path.substr(this->path.size());
 
-std::string route::getPath()
+    return this->root + relative_path; 
+}
+
+std::string Route::getPath() const
 {
     return this->path;
 }
 
-std::string route::getIndex()
+std::string Route::getIndex() const
 {
     return this->index;
 }
 
-void route::setCGI(std::map<std::string,std::string> &table)
+void Route::setCGI(std::map<std::string,std::string> &table)
 {
     this->cgi_extensons = table;
 
 }
 
-void route::setUpload(std::string &path)
+void Route::setUpload(std::string &path)
 {
     this->upload_path = path;
 }
 
-std::string route::getUpload()
+std::string Route::getUpload() const
 {
     return this->upload_path;
 }
-std::map<std::string, std::string> & route::getCGI()
+const std::map<std::string, std::string> & Route::getCGI() const
 {
     return this->cgi_extensons;
 }
-std::vector<std::string> &route::getMethods()
+const std::vector<std::string> &Route::getMethods() const
 {
     return this->methods;
 }
 
-std::string route::getRoot()
+std::string Route::getRoot() const
 {
     return this->root;
 }
 
-std::string route::getRedirection()
+std::string Route::getRedirection() const
 {
     return this->redirection;
 }
 
-bool route::getAutoindex()
+bool Route::getAutoindex() const
 {
     return this->autoindex;
 }
 
-std::string route::setPath(std::string path)
+std::string Route::setPath(std::string path) 
 {
     this->path = path;
     return this->path;
 }
 
-void route::setIndex(std::string index)
+void Route::setIndex(std::string index)
 {
     this->index = index;
 }
 
-void route::setMethods(std::vector<std::string> methods)
+void Route::setMethods(std::vector<std::string> methods)
 {
     this->methods = methods;
 }
 
-void route::setRoot(std::string root)
+void Route::setRoot(std::string root)
 {
     this->root = root;
 }
 
-void route::setRedirection(std::string redirection)
+void Route::setRedirection(std::string redirection)
 {
     this->redirection = redirection;
 }
 
-void route::setAutoindex(bool autoindex)
+void Route::setAutoindex(bool autoindex)
 {
     this->autoindex = autoindex;
 }
@@ -123,7 +128,7 @@ std::vector<std::string> &Server::getServerName()
     return this->server_name;
 }
 
-std::map<std::string, route> &Server::getRoutes()
+std::map<std::string, Route> &Server::getRoutes()
 {
     return this->routes;
 }
@@ -154,7 +159,7 @@ void Server::setServerName(std::vector<std::string> server_name)
     this->server_name = server_name;
 }
 
-void Server::setRoutes(std::map<std::string, route> routes)
+void Server::setRoutes(std::map<std::string, Route> routes)
 {
     this->routes = routes;
 }
@@ -168,11 +173,11 @@ void Server::setMaxBodySize(int max_body_size)
 {
     this->max_body_size = max_body_size;
 }
-int Server::getSocket(){
+std::vector<int> &Server::getSocket(){
     return this->socket;
 }
 
-void Server::setSocket(int socket){
+void Server::setSocket(std::vector<int> socket){
     this->socket = socket;
 }
 
@@ -215,12 +220,12 @@ void Server::printServer()
     std::cout << "Max body size : ";
     std::cout << this->max_body_size << std::endl;
     std::cout << "Routes : " << std::endl;
-    for (std::map<std::string, route>::iterator it = this->routes.begin(); it != this->routes.end(); it++)
+    for (std::map<std::string, Route>::iterator it = this->routes.begin(); it != this->routes.end(); it++)
     {
         std::cout << " Path: " << it->second.getPath() << std::endl;
         std::cout << " Index: " << it->second.getIndex() << std::endl;
         std::cout << " Methods : " << std::endl;
-        for (std::vector<std::string>::iterator it2 = it->second.getMethods().begin(); it2 != it->second.getMethods().end(); it2++)
+        for (std::vector<std::string>::const_iterator it2 = it->second.getMethods().begin(); it2 != it->second.getMethods().end(); it2++)
             std::cout << "          " <<*it2 << " ";
         std::cout << std::endl;
         std::cout << " Root : "  << it->second.getRoot() << std::endl;

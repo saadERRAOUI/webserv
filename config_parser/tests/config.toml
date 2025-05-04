@@ -19,5 +19,5 @@ methods = ["GET"]
 autoindex = true
 index = "index.html"
 root = "/var/www/html/pepe"
-upload = "./Path";
-CGI_extensions = {.php = "/usr/bin/python" , .js = "/usr/bin/node" }
+upload = "./Path"
+CGI_extensions = {php = "/usr/bin/python" , js = "/usr/bin/node" }
