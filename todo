@@ -37,4 +37,11 @@ check if neccessary should end with /
 =====================================
 check for auto index if on return , index file
 else list files
-else error 
+else error
+
+=====================================
+2025-05-05
+
+get the lenght of file and if we must serve this file in chunked mode or not
+
+change the name of the file to serve by an image to check if an error can happen .

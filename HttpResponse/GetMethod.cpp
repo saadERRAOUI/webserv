@@ -142,8 +142,7 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     response += "\r\n\r\n";
     response += RListing;
     if (code != 301)
-    Infos->SetBool(true);
-
+        Infos->SetBool(true);
     return (response);
 }
 

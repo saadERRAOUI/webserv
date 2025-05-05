@@ -1,4 +1,22 @@
 #include "HttpResponse.hpp"
+/*
+	Author: BOUZID Hicham
+	Description: function get the lenght of file
+	Date: 2025-05-05
+*/
+
+long GetLenght(std::string PathFile){
+	std::ifstream file(PathFile.c_str(), std::ios::binary);
+
+	if (!file.is_open()){
+		std::cerr << "Error file: " << strerror(errno) << '\n';
+		return (-1);
+	}
+	file.seekg(0, std::ios::end);
+	long size = file.tellg();
+	file.close();
+	return (size);
+}
 
 /*
 	Author: BOUZID Hicham
@@ -8,7 +26,7 @@
 
 std::string OpenFile(std::string PathFile, int status)
 {
-	std::ifstream fd(PathFile.c_str());
+	std::ifstream fd(PathFile.c_str(), std::ios::binary);
 	std::string line, rt;
 	(void)status;
 
@@ -17,6 +35,7 @@ std::string OpenFile(std::string PathFile, int status)
 		std::cerr << "Error file : " << strerror(errno) << '\n';
 		return (std::string(""));
 	}
+
 	std::getline(fd, line);
 	rt = line + "\n";
 	while (std::getline(fd, line))

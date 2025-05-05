@@ -27,6 +27,7 @@
 #include <fstream>
 #include <fcntl.h>
 #include <dirent.h>
+#include <cstdio>
 // #include <algorithm>
 
 class WebServ

@@ -5,11 +5,11 @@ default_max_body_size = "123"
 [[server]]
 host = "127.0.0.1"
 port = [9090, 9091, 8080]
-server_name = ["example.com"]
+server_name = ["example.coom"]
 max_body_size = "23"
 
 [[server.error_pages]]
-301 = "301.html" 
+301 = "301.html"
 400 = "400.html"
 403 = "403.html"
 404 = "404.html"
