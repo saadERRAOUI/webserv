@@ -61,6 +61,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 				Response = NULL;
 				timeout = get_current_time();
 				path_optional = "";
+				size = 0;
 				fd_client = ft_client(FdServer, FdEpoll);
 				done = false;
 			}
@@ -72,6 +73,7 @@ Connection::Connection(){
 	Request = NULL;
 	s = NULL;
 	fd_client = 0;
+	size = 0;
 	path_optional = "";
 	done = false;
 	// request = std::string("");
@@ -126,4 +128,37 @@ bool Connection::SetRedirect(std::string URI){
 		return (true);
 	}
 	return (false);
+}
+
+
+void Connection::SetSize(int n){
+	this->size = n;
+}
+
+int Connection::GetSize(){
+	return (this->size);
+}
+
+/*
+	Author: BOUZID Hicham
+	Description: this function defernce
+				the whole size of file from the readed
+	Date: 2025-05-05
+*/
+void Connection::DefSize(int n){
+	this->size -= n;
+	if (this->size <= 0){
+		SetBool(true);
+		file->close();
+	}
+}
+
+
+void	Connection::Setfile(std::ifstream &file){
+	this->file = &file;
+}
+
+
+std::ifstream *Connection::GetFile(){
+	return file;
 }

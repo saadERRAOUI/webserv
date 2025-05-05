@@ -24,26 +24,29 @@ long GetLenght(std::string PathFile){
 	Date: 2025-05-21
 */
 
-std::string OpenFile(std::string PathFile, int status)
+std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 {
-	std::ifstream fd(PathFile.c_str(), std::ios::binary);
+	char BUFFER[8001] = {0};
 	std::string line, rt;
-	(void)status;
 
-	if (!fd.is_open())
+	std::cout << "here.\n";
+	if(status == true)
 	{
-		std::cerr << "Error file : " << strerror(errno) << '\n';
-		return (std::string(""));
-	}
+		std::ifstream fd(PathFile.c_str(), std::ios::binary);
 
-	std::getline(fd, line);
-	rt = line + "\n";
-	while (std::getline(fd, line))
-	{
-		rt += (line + "\n");
+		if (!fd.is_open())
+		{
+			std::cerr << "Error file : " << strerror(errno) << '\n';
+			return (std::string(""));
+		}
+		fd.read(BUFFER, 8000);
+		Infos->Setfile(fd);
+		Infos->DefSize(strlen(BUFFER));
+		return (std::string(BUFFER));
 	}
-	fd.close();
-	return (rt);
+	Infos->GetFile()->read(BUFFER, 8000);
+	Infos->DefSize(strlen(BUFFER));
+	return (std::string(BUFFER));
 }
 
 
@@ -100,7 +103,7 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 		response += it->second;
 		response += "\r\n";
 	}
-	std::string rt = OpenFile(DefaultOrOurs, code);
+	std::string rt = OpenFile(DefaultOrOurs, true, Infos);
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;

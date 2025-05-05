@@ -23,12 +23,13 @@ class HttpResponse
 	std::string			GetStatusCode(int);
 };
 
-void ResponseBuilder(Connection *);
-std::string tostring(int number);
-std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code);
-bool HostName(Server *tmpServer, std::string name);
-std::string OpenFile(std::string PathFile, int status);
-void MonitorConnection(std::map<int, Connection> *Connections, int epollFd);
-std::string GetMethod(Connection *Infos);
-std::string chose_one(std::string a, std::string b);
-long GetLenght(std::string PathFile);
+void			ResponseBuilder(Connection *);
+std::string 	tostring(int number);
+std::string 	ErrorBuilder(Connection *Infos, Server *tmpServer, int code);
+bool 			HostName(Server *tmpServer, std::string name);
+std::string 	OpenFile(std::string PathFile, bool status, Connection *Infos);
+void 			MonitorConnection(std::map<int, Connection> *Connections, int epollFd);
+std::string 	GetMethod(Connection *Infos);
+std::string 	chose_one(std::string a, std::string b);
+long	 		GetLenght(std::string PathFile);
+std::string 	ft_Get(Connection *Infos, std::string URI, std::string route, int code);

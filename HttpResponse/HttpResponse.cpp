@@ -27,6 +27,7 @@ void ResponseBuilder(Connection *Infos){
 		return ;
 	}
 	else if (Infos->GetRequest().getMethod() == "GET"){
+		// std::cout << "=+++++++=============================\n";
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 		std::string tmpstring = GetMethod(Infos);
 		write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));

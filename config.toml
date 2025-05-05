@@ -5,7 +5,7 @@ default_max_body_size = "123"
 [[server]]
 host = "127.0.0.1"
 port = [9090, 9091, 8080]
-server_name = ["example.coom"]
+server_name = ["example.com"]
 max_body_size = "23"
 
 [[server.error_pages]]

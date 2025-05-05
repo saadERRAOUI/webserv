@@ -74,6 +74,9 @@ class HttpRequest {
         void            parseHttpBodyMethod(char);
 
         void            parseHttpRequestOrchestrator(char);
+
+        // added by hicham 2025-05-05 , used for response.
+        void            ClearURI();
 };
 
 #endif

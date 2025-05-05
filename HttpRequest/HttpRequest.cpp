@@ -226,3 +226,8 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy_HttpRequest){
     }
     return (*this);
 }
+
+
+void HttpRequest::ClearURI(){
+    this->_requestURI = "";
+}

@@ -86,7 +86,7 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 		response += it->second;
 		response += "\r\n";
 	}
-	std::string rt = OpenFile(ActualPath, code);
+	std::string rt = OpenFile(ActualPath, true, Infos);
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;
@@ -205,10 +205,58 @@ std::string GetMethod(Connection *Infos)
       }
         // serve file if have a right permition
         else{
-
+            return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
     }
     return (std::string("empty"));
     //Check for all routes and autoindex
+}
+
+
+/*
+    Author: BOUZID Hicham
+    Description: this function serve both small and hug file\
+    Date: 2025-05-05
+*/
+
+std::string ft_Get(Connection *Infos, std::string URI, std::string route, int code){
+    std::string ActualPath;
+    std::string response;
+
+    response = std::string("");
+    std::cout << "URI:::::::::::::::::\n";
+    if (!URI.empty())
+    {
+        ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+        std::cout << "From this path we will serve: " << ActualPath << '\n';
+        if (access(ActualPath.c_str(), R_OK))
+            return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
+        std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+        response = Infos->GetRequest().getVersion();
+        if (code != 200)
+            ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
+        response += " " + tostring(code) + " ";
+        response += Infos->GetResponse().GetStatusCode(code);
+        response += "\r\n";
+        for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+        {
+            response += it->first;
+        	response += ": ";
+        	response += it->second;
+        	response += "\r\n";
+        }
+        Infos->SetSize(GetLenght(ActualPath));
+        // response += "Content-Type: image/apng";
+        response += "Content-Length: " + tostring(Infos->GetSize());
+        response += "\r\n\r\n";
+        std::string rt = OpenFile(ActualPath, true, Infos);
+        response += rt;
+        Infos->GetRequest().ClearURI();
+        return (response);
+    }
+    std::cout << "------------------------------\n";
+    std::string rt = OpenFile(ActualPath, false, Infos);
+    response +=  rt;
+    return (response);
 }

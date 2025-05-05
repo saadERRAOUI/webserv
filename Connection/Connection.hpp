@@ -20,20 +20,27 @@ class Connection{
 		std::string		path_optional;
 		int				fd_client;
 		bool			done;
+		int				size;
 		long			timeout;
+		std::ifstream 	*file;
 		// vector to prevent from infinit redirection 
 		std::vector<std::string> redirect;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
-		void 		SetHttpRequest(HttpRequest *Request);
-		void		SetHttpRespons(HttpResponse *Response);
-		void		SetBool(bool);
-		bool		SetRedirect(std::string URI);
+		void 			SetHttpRequest(HttpRequest *Request);
+		void			SetHttpRespons(HttpResponse *Response);
+		void			SetBool(bool);
+		bool			SetRedirect(std::string URI);
+		void			SetSize(int);
+		void			Setfile(std::ifstream &file);
 
 		int				Getfd();
 		bool			GetBool();
 		HttpRequest&	GetRequest();
 		HttpResponse&	GetResponse();
 		Server&			Getserver();
+		int				GetSize();
+		void			DefSize(int);
+		std::ifstream	*GetFile();
 };
