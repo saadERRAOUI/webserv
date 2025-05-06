@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/23 19:00:28 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/05/06 16:21:59 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ void manage_connections(WebServ *web, int epollfd)
     while (true)
     {
         int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
+        std::cout << "number of event: " << n << '\n';
         if (n == -1)
         {
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
@@ -111,15 +112,23 @@ void manage_connections(WebServ *web, int epollfd)
         {
             if ((events[i].events & EPOLLIN) && is_server(events[i].data.fd, sockservers))
             {
+                std::cout << "====================First time here .====================\n";
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
                 map_connections[tmp.Getfd()] = tmp;
                 int to_check = tmp.Getfd();
                 std::cout << "fd client: " << to_check << '\n';
                 std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
-            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end())
+            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLIN))
             {
-                read(events[i].data.fd, BUFFER, 8000);
+                std::cout << "==========================the second time here=================\n";
+                int size = read(events[i].data.fd, BUFFER, 8000);
+                if (size < 8000)
+                {
+                    std::cout << "I think here we must change reading or writing mode.\n";
+                    map_connections[events[i].data.fd].ChagenMode(epollfd, events[i].data.fd, EPOLLOUT);
+                    std::cout << "The mode was changed .\n";
+                }
                 // std::cout << "=============================\n";
                 // std::cout << BUFFER << '\n';
                 // std::cout << "=============================\n";
@@ -127,6 +136,11 @@ void manage_connections(WebServ *web, int epollfd)
                 map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
+                ResponseBuilder(&map_connections[events[i].data.fd]);
+            }
+            else
+            {
+                std::cout << "========================The third time here========================\n";
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
             MonitorConnection(&map_connections, epollfd);

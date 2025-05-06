@@ -23,7 +23,7 @@ class Connection{
 		int				size;
 		long			timeout;
 		std::ifstream 	*file;
-		// vector to prevent from infinit redirection 
+		// vector to prevent from infinit redirection
 		std::vector<std::string> redirect;
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
@@ -43,4 +43,6 @@ class Connection{
 		int				GetSize();
 		void			DefSize(int);
 		std::ifstream	*GetFile();
+		void			ChagenMode(int FdEpoll, int fd_client, int mood);
+
 };

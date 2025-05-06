@@ -37,7 +37,7 @@ int ft_client(int FdServer, int FdEpoll){
 	int fd_client =  accept(FdServer, (sockaddr *)&client, &client_lenght);
 	if (fd_client < 0)
 		std::cerr << "Error on accept function: " << strerror(errno) << "\n";
-	event.events = EPOLLIN | EPOLLOUT;
+	event.events = EPOLLIN;
 	event.data.fd =  fd_client;
 	if (epoll_ctl(FdEpoll, EPOLL_CTL_ADD, fd_client, &event))
 			std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
@@ -161,4 +161,20 @@ void	Connection::Setfile(std::ifstream &file){
 
 std::ifstream *Connection::GetFile(){
 	return file;
+}
+
+/*
+	Author: BOUZID Hicham
+	Description: change the settings associated with fd
+	date: 2025-05-05
+*/
+
+void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
+{
+	struct epoll_event event;
+
+	event.events = mood;
+	event.data.fd = fd_client;
+	if (epoll_ctl(FdEpoll, EPOLL_CTL_MOD, fd_client, &event))
+		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
 }
