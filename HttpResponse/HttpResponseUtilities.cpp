@@ -14,6 +14,7 @@ long GetLenght(std::string PathFile){
 	}
 	file.seekg(0, std::ios::end);
 	long size = file.tellg();
+	file.seekg(0, std::ios::beg);
 	file.close();
 	return (size);
 }
@@ -32,21 +33,24 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 	std::cout << "here.\n";
 	if(status == true)
 	{
-		std::ifstream fd(PathFile.c_str(), std::ios::binary);
+		std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
 
-		if (!fd.is_open())
+		if (!fd->is_open())
 		{
 			std::cerr << "Error file : " << strerror(errno) << '\n';
 			return (std::string(""));
 		}
-		fd.read(BUFFER, 8000);
-		Infos->Setfile(fd);
-		Infos->DefSize(strlen(BUFFER));
-		return (std::string(BUFFER));
+		Infos->Setfile(*fd);
+    	Infos->GetFile()->read(BUFFER, 8000);
+		Infos->SetSize(Infos->GetFile()->gcount());
+		Infos->DefSize(0);
+		return (std::string(BUFFER, Infos->GetSize()));
 	}
-	Infos->GetFile()->read(BUFFER, 8000);
-	Infos->DefSize(strlen(BUFFER));
-	return (std::string(BUFFER));
+    Infos->GetFile()->read(BUFFER, 8000);
+	Infos->SetSize(Infos->GetFile()->gcount());
+	Infos->DefSize(0);
+	// Infos->DefSize(std::string(BUFFER).size());
+	return (std::string(BUFFER, Infos->GetSize()));
 }
 
 

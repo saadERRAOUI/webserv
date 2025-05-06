@@ -249,8 +249,8 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        // response += "Content-Type: image/apng";
         response += "Content-Length: " + tostring(Infos->GetSize());
+        // response += "Content-Type: image/png";
         response += "\r\n\r\n";
         std::string rt = OpenFile(ActualPath, true, Infos);
         response += rt;
