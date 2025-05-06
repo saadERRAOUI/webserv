@@ -18,6 +18,11 @@ HttpResponse::HttpResponse(int fd_client)
 
 void ResponseBuilder(Connection *Infos){
 
+	// if (!Infos)
+	// {
+	// 	std::cout << "NULLllllllll\n";
+	// 	exit (0);
+	//
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
 
@@ -55,13 +60,16 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 	for (; it != Connections->end(); it++){
 		if (it->second.GetBool() == true)
 		{
+			// std::cout << "????????????????????????????????????????????????????????  " << it->first << "\n";
 			if (epoll_ctl(epollFd, EPOLL_CTL_DEL, it->first, &event))
 					std::cerr << "EPOLL_CTL_DEL: " << strerror(errno) << '\n';
 			close(it->first);
 			break;
 		}
 	}
-	Connections->erase(it->first);
+	if (it != Connections->end())
+		Connections->erase(it->first);
+
 }
 
 std::string HttpResponse::GetStatusCode(int code_number){

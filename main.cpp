@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/06 16:21:59 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/05/06 17:59:36 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,17 +43,17 @@ int is_server(int fdserver, std::vector<int> servers)
 }
 
 
-HttpRequest ft_static_request(){
-    HttpRequest  request;/**  = new HttpRequest;*/
+HttpRequest *ft_static_request(){
+    HttpRequest  *request  = new HttpRequest;
     // std::string method = "GET"
-    request.setMethod(std::string("GET"));
-    request.setRequestURI(std::string("/api/v1/index.html"));
-    request.setVersion(std::string("HTTP/1.1"));
-    request.setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
-    request.setHeaders(std::string("Accept"), std::string("*/*"));
-    request.setHeaders(std::string("User-Agent"), std::string("Thunder Client (https://www.thunderclient.com)"));
-    request.setHeaders(std::string("Host"), std::string("example.com"));
-    request.setHeaders(std::string("Connection"), std::string("close"));
+    request->setMethod(std::string("GET"));
+    request->setRequestURI(std::string("/api/v1/index.html"));
+    request->setVersion(std::string("HTTP/1.1"));
+    request->setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
+    request->setHeaders(std::string("Accept"), std::string("*/*"));
+    request->setHeaders(std::string("User-Agent"), std::string("Thunder Client (https://www.thunderclient.com)"));
+    request->setHeaders(std::string("Host"), std::string("example.com"));
+    request->setHeaders(std::string("Connection"), std::string("close"));
     // Host
     return (request);
 
@@ -132,16 +132,16 @@ void manage_connections(WebServ *web, int epollfd)
                 // std::cout << "=============================\n";
                 // std::cout << BUFFER << '\n';
                 // std::cout << "=============================\n";
-                HttpRequest tmpRequest = ft_static_request();
-                map_connections[events[i].data.fd].SetHttpRequest(&tmpRequest);
+                HttpRequest *tmpRequest = ft_static_request();
+                map_connections[events[i].data.fd].SetHttpRequest(tmpRequest);
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
-            else
+            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLOUT))
             {
-                std::cout << "========================The third time here========================\n";
-                ResponseBuilder(&map_connections[events[i].data.fd]);
+                    std::cout << "========================The third time here========================`:  " << events[i].data.fd << "\n";
+                    ResponseBuilder(&map_connections[events[i].data.fd]);
             }
             MonitorConnection(&map_connections, epollfd);
         }

@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/04/16 20:05:41 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/05/06 18:04:14 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,5 +229,5 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy_HttpRequest){
 
 
 void HttpRequest::ClearURI(){
-    this->_requestURI = "";
+    this->_version = "";
 }

@@ -226,7 +226,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
 
     response = std::string("");
     std::cout << "URI:::::::::::::::::\n";
-    if (!URI.empty())
+    if (!Infos->GetRequest().getVersion().empty())
     {
         ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
         std::cout << "From this path we will serve: " << ActualPath << '\n';
@@ -237,6 +237,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         if (code != 200)
             ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
         response += " " + tostring(code) + " ";
+        // std::cout << "--------------"
         response += Infos->GetResponse().GetStatusCode(code);
         response += "\r\n";
         for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
