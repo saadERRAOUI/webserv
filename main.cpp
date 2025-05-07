@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/06 17:59:36 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/05/07 16:03:15 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
     // std::string method = "GET"
     request->setMethod(std::string("GET"));
-    request->setRequestURI(std::string("/api/v1/index.html"));
+    request->setRequestURI(std::string("/api/v1/tree.jpg"));
     request->setVersion(std::string("HTTP/1.1"));
     request->setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
     request->setHeaders(std::string("Accept"), std::string("*/*"));
