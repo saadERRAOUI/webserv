@@ -30,7 +30,6 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 	char BUFFER[8001] = {0};
 	std::string line, rt;
 
-	std::cout << "here.\n";
 	if(status == true)
 	{
 		std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
@@ -42,11 +41,14 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 		}
 		Infos->Setfile(*fd);
     	Infos->GetFile()->read(BUFFER, 8000);
+		write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
 		Infos->SetSize(Infos->GetFile()->gcount());
 		Infos->DefSize(0);
 		return (std::string(BUFFER, Infos->GetSize()));
+		// std::cout << "here.\n";
 	}
     Infos->GetFile()->read(BUFFER, 8000);
+	write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
 	Infos->SetSize(Infos->GetFile()->gcount());
 	Infos->DefSize(0);
 	// Infos->DefSize(std::string(BUFFER).size());

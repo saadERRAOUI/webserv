@@ -147,7 +147,7 @@ int Connection::GetSize(){
 */
 void Connection::DefSize(int n){
 	this->size -= n;
-	if (this->size <= 0){
+	if (this->size < 8000){
 		// std::cout << "000000000000000000000000\n";
 		SetBool(true);
 		file->close();
