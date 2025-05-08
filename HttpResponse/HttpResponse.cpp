@@ -18,11 +18,6 @@ HttpResponse::HttpResponse(int fd_client)
 
 void ResponseBuilder(Connection *Infos){
 
-	// if (!Infos)
-	// {
-	// 	std::cout << "NULLllllllll\n";
-	// 	exit (0);
-	//
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
 
@@ -32,10 +27,8 @@ void ResponseBuilder(Connection *Infos){
 		return ;
 	}
 	else if (Infos->GetRequest().getMethod() == "GET"){
-		// std::cout << "=+++++++=============================\n";
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 		std::string tmpstring = GetMethod(Infos);
-		// write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
 	// else if (Infos->GetRequest().getMethod() == "POST"){
@@ -60,7 +53,6 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 	for (; it != Connections->end(); it++){
 		if (it->second.GetBool() == true)
 		{
-			std::cout << "???????????????????????cc?????????????????????????????????  " << it->first << "\n";
 			if (epoll_ctl(epollFd, EPOLL_CTL_DEL, it->first, &event))
 					std::cerr << "EPOLL_CTL_DEL: " << strerror(errno) << '\n';
 			close(it->first);
@@ -68,11 +60,7 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 		}
 	}
 	if (it != Connections->end())
-	{
-		std::cout << "???????????????????????cc?????????????????????????????????  " << it->first << "\n";
 		Connections->erase(it->first);
-	}
-
 }
 
 std::string HttpResponse::GetStatusCode(int code_number){

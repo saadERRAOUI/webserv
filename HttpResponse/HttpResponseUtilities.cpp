@@ -88,7 +88,7 @@ std::string chose_one(std::string a, std::string b){
 	Author: BOUZID Hicham
 	Description: build a response for error stats
 				and serve the default error pages
-				of ours error pages.
+				or ours error pages.
 	Date: 2025-04-21
 */
 
