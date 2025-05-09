@@ -13,9 +13,10 @@ int main()
         if (servers[0].getRoutes().size() >= 1)
         {
             Route &main = servers[0].getRoutes()["/api/v1"];
-           
             Cgi cgi(main, a);
             cgi.env_set_up();
             cgi.execute();
+            std::cout << cgi.getResponse();
+            
         }
 }

@@ -33,13 +33,13 @@ public:
     const std::map<std::string, std::string> &getCGI() const;
     std::string getUpload() const;
     std::string setPath(std::string path) ;
-    std::string Route::getCgiPath(const std::string& request_path) const;
+    std::string getCgiPath(const std::string& request_path) const;
     void setIndex(std::string index);
     void setMethods(std::vector<std::string> methods);
     void setRoot(std::string root);
     void setRedirection(std::string redirection);
     void setAutoindex(bool autoindex);
-    void setCGI(std::map<std::string, std::string> &table);
+    void setCGI(std::map<std::string, std::string> table);
     void setUpload(std::string &path);
 };
 

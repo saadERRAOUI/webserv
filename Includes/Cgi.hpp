@@ -18,14 +18,14 @@ class Request {
     
     public:
         Request()
-            : method("GET"), path("/cgi-bin/script.py"), version("HTTP/1.1"), body("") {}
+            : method("GET"), path("/api/v1/script.py"), version("HTTP/1.1"), body("") {}
     
         // Getters
         std::string getMethod() const { return method; }
         std::string getPath() const { return path; }
         std::string getVersion() const { return version; }
         std::string getBody() const { return body; }
-        std::map<std::string, std::string> getHeaders() const { return headers; }
+        std::map<std::string, std::string> &getHeaders()  { return headers; }
         std::map<std::string, std::string> getQueryParams() const { return queryParams; }
     
         // Setters for mocking purposes
@@ -48,15 +48,32 @@ class Request {
             std::time_t start;
             std::vector<char*> envp;
             std::map<std::string, std::string> extension_table;
-            const Route& route;
-            const Request& request;
-        
+            Route& route;
+            Request& request;
+            std::string output;
+            std::string input;
+            int childPid;
+            
+            std::string binaryPath;
         public:
-            Cgi(const Route& route, const Request& req);
+
+            Cgi(Route &route, Request &req);
             Cgi(const Cgi& other);
             ~Cgi();
             Cgi& operator=(const Cgi& other);
-        
+            Cgi(Cgi &other);
+            void execute();
             void env_set_up();
+            std::string getResponse();
+            class CGIException : public std::exception
+            {
+                std::string reason;
+                public :
+                CGIException(std::string reason) : reason(reason){};
+                const char *what() const throw() 
+                {
+                    return this->reason.c_str();
+                }
+            };
         };
         

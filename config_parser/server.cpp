@@ -12,6 +12,7 @@ const Route &Route::operator=(const Route &other)
         this->root = other.root;
         this->redirection = other.redirection;
         this->autoindex = other.autoindex;
+        this->cgi_extensons = other.cgi_extensons;
     }
     return *this;
 }
@@ -24,6 +25,8 @@ Route::Route(const Route &other)
     this->root = other.root;
     this->redirection = other.redirection;
     this->autoindex = other.autoindex;
+    this->cgi_extensons = other.cgi_extensons;
+
 }
 
 std::string Route::getCgiPath(const std::string& request_path) const {
@@ -42,7 +45,7 @@ std::string Route::getIndex() const
     return this->index;
 }
 
-void Route::setCGI(std::map<std::string,std::string> &table)
+void Route::setCGI(std::map<std::string,std::string> table)
 {
     this->cgi_extensons = table;
 
