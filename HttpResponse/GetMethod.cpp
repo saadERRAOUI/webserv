@@ -183,22 +183,15 @@ std::string GetMethod(Connection *Infos)
               }
               // response with error an set the connection done
               else
-                  // std::cout << "Not Allowed .\n";
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
           }
           else if (Infos->Getserver().getRoutes()[result].getIndex().empty()){
               return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() +
                   Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
-              // Ser
-              // serve the index file.
-              // normale if found
           }
           else{
-              if (Infos->Getserver().getRoutes()[result].getAutoindex() == true){
-                  std::cout << "++++++++++++++++++++++++++\n";
+              if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
-                  // list all files
-              }
               else
                   return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
           }
@@ -209,7 +202,7 @@ std::string GetMethod(Connection *Infos)
         }
 
     }
-    return (std::string("empty"));
+    return (std::string(""));
     //Check for all routes and autoindex
 }
 
@@ -236,7 +229,6 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         if (code != 200)
             ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
         response += " " + tostring(code) + " ";
-        // std::cout << "--------------"
         response += Infos->GetResponse().GetStatusCode(code);
         response += "\r\n";
         for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
@@ -257,8 +249,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         Infos->GetRequest().ClearURI();
         return (response);
     }
-    std::cout << "------------------------------\n";
     std::string rt = OpenFile(ActualPath, false, Infos);
-    response +=  rt;
-    return (response);
+    return (std::string(""));
 }
+

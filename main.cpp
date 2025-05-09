@@ -132,10 +132,7 @@ void manage_connections(WebServ *web, int epollfd)
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLOUT))
-            {
-                    std::cout << "========================The third time here========================:  " << events[i].data.fd << "\n";
                     ResponseBuilder(&map_connections[events[i].data.fd]);
-            }
             MonitorConnection(&map_connections, epollfd);
         }
     }
