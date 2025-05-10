@@ -57,6 +57,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 			if (*it_sock == FdServer)
 			{
 				s = &(*it);
+				this->CGI = NULL;
 				Request = NULL;
 				Response = NULL;
 				timeout = get_current_time();
@@ -70,6 +71,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 }
 
 Connection::Connection(){
+	this->CGI = NULL;
 	Request = NULL;
 	s = NULL;
 	fd_client = 0;
@@ -107,6 +109,14 @@ Server& Connection::Getserver(){
 
 void Connection::SetBool(bool f){
 	this->done = f;
+}
+
+void Connection::SetCGI(Cgi *cgi){
+	this->CGI = cgi;
+}
+
+Cgi *Connection::getCGI(){
+	return this->CGI;
 }
 
 bool Connection::GetBool(){

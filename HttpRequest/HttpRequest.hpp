@@ -33,6 +33,7 @@ class HttpRequest {
         std::string                         _body;
         std::map<std::string, std::string>  _headers;
         int                                 _state;
+        bool                                isCGI;
         /*
             Parsers map handlers
         */
@@ -55,11 +56,14 @@ class HttpRequest {
         std::string                         getBody() const;
         std::map<std::string, std::string>  getHeaders() const;
         int                                 getState() const;
-
+        std::map<std::string, std::string>  getQueryParams() const;
+        std::string                         getHeader(std::string key) const;
+        bool                                getIsCGI();
         /*
             Setters
         */
         void            setMethod(std::string);
+        void            setIsCGI(bool iscgi);
         void            setRequestURI(std::string);
         void            setVersion(std::string);
         void            setBodyFd(int);

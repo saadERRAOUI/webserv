@@ -26,6 +26,22 @@ void ResponseBuilder(Connection *Infos){
 		Infos->SetBool(true);
 		return ;
 	}
+	else if (Infos->GetRequest().getIsCGI())
+	{
+		std::cout << "im in";
+			if (!Infos->getCGI())
+			{
+				std::cout << "first time, never again\n";
+				Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+				Cgi *cgi = new Cgi(matchedRoute, Infos->GetRequest());
+				cgi->env_set_up();
+				cgi->execute();
+				std::cout << cgi->getResponse();
+				Infos->SetCGI(cgi);
+				std::exit(0);
+			}	
+
+	}
 	else if (Infos->GetRequest().getMethod() == "GET"){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 

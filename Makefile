@@ -6,7 +6,7 @@ NAME = webserv
 
 SRCS = main.cpp ./config_parser/*.cpp ./config_parser/utilities/*.cpp ./Connection/Connection.cpp\
 		./HttpResponse/HttpResponse.cpp  ./HttpResponse/HttpResponseUtilities.cpp\
-		./HttpRequest/HttpRequest.cpp SetupServer/MultipSockets.cpp HttpResponse/GetMethod.cpp
+		./HttpRequest/HttpRequest.cpp SetupServer/MultipSockets.cpp HttpResponse/GetMethod.cpp CGI/Cgi.cpp
 
 $(NAME): $(SRCS)
 	$(CPP) $(CPPFLAGS) -I ./Includes $(SRCS) -o $(NAME)

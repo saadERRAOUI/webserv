@@ -1,14 +1,15 @@
 #include "Cgi.hpp"
+#include "../HttpRequest/HttpRequest.hpp"
 
 #include <unistd.h>
 #include <sys/wait.h>
-Cgi::Cgi(Route &route, Request &req) : extension_table(route.getCGI()), route(route), request(req), childPid(0)
+Cgi::Cgi(Route &route, HttpRequest &req) : extension_table(route.getCGI()), route(route), request(req), childPid(0)
 {
-    size_t pos = request.getPath().find_last_of(".");
+    size_t pos = request.getRequestURI().find_last_of(".");
     if (pos == std::string::npos)
         throw CGIException("No extension was found in path!");
-    std::cout << request.getPath().substr(pos + 1) << "\n";
-    std::map<std::string, std::string>::iterator val = this->extension_table.find(request.getPath().substr(pos + 1));
+    std::cout << request.getRequestURI().substr(pos + 1) << "\n";
+    std::map<std::string, std::string>::iterator val = this->extension_table.find(request.getRequestURI().substr(pos + 1));
 
     if (val == this->extension_table.end())
         throw CGIException("Extension Not Supported!");
@@ -55,12 +56,12 @@ void Cgi::execute()
     {
         std::cout << "here!";
         std::cout << "binaryPath: " << binaryPath << "\n";
-        std::cout << "script path: " << route.getCgiPath(this->request.getPath()) << "\n";
+        std::cout << "script path: " << route.getCgiPath(this->request.getRequestURI()) << "\n";
         freopen(output.c_str(), "w+", stdout);
         if (!this->request.getBody().empty())
             if (!this->input.empty() && freopen(this->input.c_str(), "r", stdin) == NULL)
                 std::exit(1);
-        std::string scriptPath = route.getCgiPath(this->request.getPath());
+        std::string scriptPath = route.getCgiPath(this->request.getRequestURI());
         char *argv[] = {
             const_cast<char *>(binaryPath.c_str()),
             const_cast<char *>(scriptPath.c_str()),
@@ -80,8 +81,8 @@ void Cgi::env_set_up()
     std::map<std::string, std::string> env;
 
     env["REQUEST_METHOD"] = request.getMethod();
-    env["SCRIPT_NAME"] = route.getCgiPath(this->request.getPath());
-    env["PATH_INFO"] = request.getPath();
+    env["SCRIPT_NAME"] = route.getCgiPath(this->request.getRequestURI());
+    env["PATH_INFO"] = request.getRequestURI();
     env["CONTENT_TYPE"] = request.getHeader("Content-Type");
     env["CONTENT_LENGTH"] = request.getHeader("Content-Length");
     env["SERVER_PROTOCOL"] = request.getVersion();
@@ -98,7 +99,7 @@ void Cgi::env_set_up()
     }
     env["QUERY_STRING"] = query.str();
 
-    std::map<std::string, std::string> &headers = request.getHeaders();
+    std::map<std::string, std::string> headers = request.getHeaders();
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
     {
         std::string key = it->first;

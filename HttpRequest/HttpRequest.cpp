@@ -53,10 +53,56 @@ std::map<std::string, std::string> HttpRequest::getHeaders() const {
     return _headers;
 }
 
+bool  HttpRequest::getIsCGI()
+{
+    return this->isCGI;
+}
+
 int             HttpRequest::getState() const {
     return _state;
 }
 
+void HttpRequest::setIsCGI(bool isCGI)
+{
+    this->isCGI = isCGI;
+}
+std::map<std::string, std::string> HttpRequest::getQueryParams() const {
+    std::map<std::string, std::string> queryParams;
+    size_t pos = _requestURI.find('?');
+    if (pos != std::string::npos) {
+        std::string queryString = _requestURI.substr(pos + 1);
+        size_t start = 0;
+        size_t end = queryString.find('&');
+        while (end != std::string::npos) {
+            std::string param = queryString.substr(start, end - start);
+            size_t equalPos = param.find('=');
+            if (equalPos != std::string::npos) {
+                std::string key = param.substr(0, equalPos);
+                std::string value = param.substr(equalPos + 1);
+                queryParams[key] = value;
+            }
+            start = end + 1;
+            end = queryString.find('&', start);
+        }
+        // Handle the last parameter
+        std::string param = queryString.substr(start);
+        size_t equalPos = param.find('=');
+        if (equalPos != std::string::npos) {
+            std::string key = param.substr(0, equalPos);
+            std::string value = param.substr(equalPos + 1);
+            queryParams[key] = value;
+        }
+    }
+    return queryParams;
+}
+
+std::string     HttpRequest::getHeader(std::string key) const {
+    std::map<std::string, std::string>::const_iterator it = _headers.find(key);
+    if (it != _headers.end()) {
+        return it->second;
+    }
+    return "";
+}
 /*
     Setters
 */

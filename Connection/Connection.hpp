@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server.hpp"
+#include "Cgi.hpp"
 #include "../HttpRequest/HttpRequest.hpp"
 // class connection containe the fd socket and class severe and
 class HttpRequest;
@@ -16,6 +17,7 @@ class Connection{
 	// object request
 		HttpRequest		*Request;
 		HttpResponse	*Response;
+		Cgi 			*CGI;
 		Server			*s;
 		std::string		path_optional;
 		int				fd_client;
@@ -34,7 +36,8 @@ class Connection{
 		bool			SetRedirect(std::string URI);
 		void			SetSize(int);
 		void			Setfile(std::ifstream &file);
-
+		void            SetCGI(Cgi *);
+		Cgi				*getCGI();
 		int				Getfd();
 		bool			GetBool();
 		HttpRequest&	GetRequest();

@@ -43,9 +43,9 @@ bool MethodAllowed(std::vector<std::string> list, std::string method)
     Date: 2025-04-24
 */
 
-std::string MatchRoutes(std::map<std::string, route> &TmpRoutes, HttpRequest &TmpRequest){
+std::string MatchRoutes(std::map<std::string, Route> &TmpRoutes, HttpRequest &TmpRequest){
     std::string URI = TmpRequest.getRequestURI();
-    std::map<std::string, route>::iterator it;
+    std::map<std::string, Route>::iterator it;
 
     for (it = TmpRoutes.begin();it != TmpRoutes.end(); it++){
         if (CompareRU(TmpRequest.getRequestURI(), it->first) == true){
@@ -155,7 +155,7 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
 
 std::string GetMethod(Connection *Infos)
 {
-    std::map<std::string, route> routes = Infos->Getserver().getRoutes();
+    std::map<std::string, Route> routes = Infos->Getserver().getRoutes();
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
