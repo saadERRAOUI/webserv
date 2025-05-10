@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
 /*   Updated: 2025/05/10 15:13:21 by serraoui         ###   ########.fr       */
@@ -18,6 +18,7 @@
 HttpRequest::HttpRequest() {
     _state = HTTP_METHOD_START;
     _endSequenceState = 0;
+
 }
 
 HttpRequest::~HttpRequest() {}
@@ -66,4 +67,28 @@ void            HttpRequest::setEndSequenceState(int endSequenceState) {this->_e
 
 void            HttpRequest::setState(int state) {this->_state = state;}
 
+
+/*
+    Author: BOUZID Hicham
+    Description: copy assignment operator
+    date: 2025-04-16
+*/
+HttpRequest &HttpRequest::operator=(const HttpRequest &copy_HttpRequest){
+    if (this != &copy_HttpRequest)
+    {
+        this->_method = copy_HttpRequest._method;
+        this->_requestURI = copy_HttpRequest._requestURI;
+        this->_version = copy_HttpRequest._version;
+        this->_body = copy_HttpRequest._body;
+        this->_headers = copy_HttpRequest._headers;
+        this->_state = copy_HttpRequest._state;
+        this->_methodHandlerMap = copy_HttpRequest._methodHandlerMap;
+    }
+    return (*this);
+}
+
+
+void HttpRequest::ClearURI(){
+    this->_version = "";
+}
 void            HttpRequest::setBody(std::string body) {this->_body = body;}

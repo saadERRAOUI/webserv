@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:00 by serraoui          #+#    #+#             */       
 /*   Updated: 2025/04/27 19:54:03 by serraoui         ###   ########.fr       */
@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include "../Includes/WebServ.hpp"
+#include "../Includes/Webserv.hpp"
 
 /* Add State enum */
 enum HttpRequestState {
@@ -92,6 +92,8 @@ class HttpRequest {
         */
         HttpRequest();
         ~HttpRequest();
+        HttpRequest &operator=(const HttpRequest &copy_HttpRequest);
+
 
         /*
             Getters
@@ -112,6 +114,9 @@ class HttpRequest {
         void            setRequestURI(std::string);
         void            setVersion(std::string);
         void            setBodyFd(int);
+
+        // added by hicham 2025-05-05 , used for response.
+        void            ClearURI();
         void            setHeaders(std::string, std::string);
         void            setHeaderKey(std::string);
         void            setHeaderValue(std::string);

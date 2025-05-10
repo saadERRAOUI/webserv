@@ -123,7 +123,7 @@ public:
   }
   // Update copy constructor
   TOMLValue(const TOMLValue &other)
-      : type(other.type), true_false(other.true_false), single(NULL), array(NULL), table(NULL)
+      : type(other.type), single(NULL), array(NULL), table(NULL), true_false(other.true_false)
   {
     switch (type)
     {
@@ -193,7 +193,6 @@ private:
   t_line_data line_data; /*the line to parse */
   std::string file_path; /*the file path*/
   std::ifstream file;
-  Section *current_section; /*current section scope */
   state_machine state;
   std::map<std::pair<e_substate, e_token>, int> valid_tokens_map;
   std::map<std::pair<context, e_token>, int> valid_context_map;
@@ -217,6 +216,19 @@ public:
   void parse();
   void debug_print_section(Section *section, int indent = 0);
   Section globalSection; // Make this public so main can access it
+  class SyntaxError : public std::exception
+{
+    std::string reason;
+  public:
+    SyntaxError(std::string reason) : reason(reason) {}
+    virtual ~SyntaxError() throw() {}
+    virtual const char* what() const throw()
+    {
+      return reason.c_str();
+    }
+};
+private : 
+  Section *current_section; /*current section scope */
 };
 
 #endif
