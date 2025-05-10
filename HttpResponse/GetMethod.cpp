@@ -240,7 +240,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        response += "Content-Type: image/jpeg\r\n";
+        // response += "Content-Type: image/jpeg\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
