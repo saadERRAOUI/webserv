@@ -3,17 +3,22 @@
 default_max_body_size = "123"
 
 [[server]]
-host = "127.0.0.1" 
-port = [12, -123]
-server_name = ["example.com"] 
+host = "127.0.0.1"
+port = [9090, 9091, 8080]
+server_name = ["example.com"]
 max_body_size = "23"
 
 [[server.error_pages]]
-404 = "404.html"
-505 = "505.html"
+301 = "301.html"
 400 = "400.html"
-
+403 = "403.html"
+404 = "404.html"
+405 = "405.html"
+500 = "500.html"
+505 = "505.html"
 [[server.route]]
-path = "/api/v1"
+path = "/api/v1/"
 methods = ["GET"]
 autoindex = true
+index = "index.html"
+root = "/www/html/pepe"
