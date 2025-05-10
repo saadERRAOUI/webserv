@@ -180,8 +180,9 @@ std::vector<int> &Server::getSocket(){
     return this->socket;
 }
 
-void Server::setSocket(std::vector<int> socket){
-    this->socket = socket;
+void Server::setSocket(int socket){
+    this->socket.push_back(socket);
+    // std::cout << this->socket.size() << "  " << socket << " ????????\n";
 }
 
 Server::Server(const Server &other) : webServ(other.webServ)

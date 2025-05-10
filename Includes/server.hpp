@@ -1,12 +1,15 @@
 #ifndef SERVER_H
-
 #define SERVER_H
 
+#include "parser.hpp"
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
-#include "parser.hpp"
+#include <unistd.h>
+#include <stdio.h>
+
+#define MAX_EPOLL_EVENT 64
 class WebServ;
 struct Route
 {
@@ -74,7 +77,7 @@ public:
     std::map<std::string, Route> &getRoutes();
     std::map<int, std::string> &getErrorPages();
     std::vector<int> &getSocket();
-    void setSocket(std::vector<int> socket);
+    void setSocket(int socket);
     int getMaxBodySize();
     void printServer();
 };

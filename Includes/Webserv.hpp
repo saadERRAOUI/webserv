@@ -4,7 +4,9 @@
 // Include std libraries
 // Add Macros
 // Add Constants
-
+#include "server.hpp"
+#include "parser.hpp"
+#include <vector>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -19,21 +21,15 @@
 #include <string>
 #include <algorithm>
 #include <map>
-// #include <stdlib.h>
-enum HttpRequestState
-{
-	HTTP_METHOD,
-	HTTP_REQUEST_URI,
-	HTTP_VERSION,
-	HTTP_HEADERS,
-	HTTP_BODY,
-	HTTP_COMPLETE,
-	HTTP_ERROR
-};
+#include <sys/time.h>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <fcntl.h>
+#include <dirent.h>
+#include <cstdio>
+// #include <algorithm>
 
-#include <vector>
-#include "server.hpp"
-#include "parser.hpp"
 class WebServ
 {
 private:
@@ -46,8 +42,8 @@ private:
 public:
 	WebServ(std::string config_file);
 	Server parseServer(Section &section);
-	Route parseRoute(Section &section);
-	std::vector<Server> &getServers();
+	route parseRoute(Section &section);
+	std::vector<Server> *getServers();
 	int getDefaultMaxBodySize();
 	std::map<int, std::string> &getErrorPages();
 };
