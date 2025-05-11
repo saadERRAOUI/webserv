@@ -33,7 +33,7 @@ class Connection;
             std::string input;
             
             std::string responseBuffer;
-            
+            bool encodingChunked;
             std::string binaryPath;
             int statusCode;
             Connection &connection;

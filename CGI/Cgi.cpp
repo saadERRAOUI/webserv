@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string>
+#include <algorithm>
 #include "../Connection/Connection.hpp"
 Cgi::Cgi(Route &route, HttpRequest &req, Connection *connection) : extension_table(route.getCGI()), route(route), request(req), childPid(0), outputProgress(0), inputProgress(0),
  state(IDLE), headersParsed(false), connection(*connection)
@@ -190,7 +191,7 @@ void Cgi::env_set_up()
 
 bool Cgi::processOutputChunk(int clientFd)
 {
-    char buffer[4096];
+    char buffer[8001];
 
     if (!outputFileStream.is_open())
         outputFileStream.open(output.c_str(), std::ios::in | std::ios::binary);
@@ -220,12 +221,25 @@ bool Cgi::processOutputChunk(int clientFd)
         std::string httpHeader = buildHttpResponseHeaders();
         std::cout << httpHeader << "\n";
         write(clientFd, httpHeader.c_str(), httpHeader.size());
-
+        if (cgiHeaders.find("content-length") == cgiHeaders.end() && cgiHeaders["transfer-encoding"] != "chunked" )
+        {
+            write(clientFd, (std::string("transfer-encoding") + " : chunked").c_str(), httpHeader.size());
+            encodingChunked = true;
+        }
+        write(clientFd, "\r\n", 2);
+        
         responseBuffer.erase(0, pos + 4);
     }
-
+    
     if (!responseBuffer.empty()) {
         std::cout << "\n---->" << responseBuffer.c_str() << "<----\n";
+        /*
+            if (flag == true)
+            {
+
+            }
+        */  
+    
         ssize_t written = write(clientFd, responseBuffer.c_str(), responseBuffer.size());
         std::cout << written << "<----\n";
         if (written > 0)
@@ -242,7 +256,8 @@ void Cgi::parseHeaders(const std::string& rawHeaders)
 
     statusCode = 200;
     statusMessage = "OK";
-    
+    cgiHeaders["content-type"] = "text/html";
+
     while (std::getline(stream, line) && line != "\r")
     {
         if (!line.empty() && line[line.size() - 1] == '\r') {
@@ -275,6 +290,7 @@ void Cgi::parseHeaders(const std::string& rawHeaders)
         }
         else
         {
+            transform(key.begin(), key.end(), key.begin(), ::tolower);
             cgiHeaders[key] = value;
         }
     }
@@ -290,7 +306,6 @@ std::string Cgi::buildHttpResponseHeaders() const
         response << it->first << ": " << it->second << "\r\n";
     }
 
-    response << "\r\n";
 
     return response.str();
 }
