@@ -27,21 +27,23 @@ void ResponseBuilder(Connection *Infos){
 		return ;
 	}
 	else if (Infos->GetRequest().getIsCGI())
-	{
-		std::cout << "im in";
-			if (!Infos->getCGI())
-			{
-				std::cout << "first time, never again\n";
-				Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
-				Cgi *cgi = new Cgi(matchedRoute, Infos->GetRequest());
-				cgi->env_set_up();
-				cgi->execute();
-				std::cout << cgi->getResponse();
-				Infos->SetCGI(cgi);
-				std::exit(0);
-			}	
+{
+    Cgi *cgi = Infos->getCGI(); // Check if CGI instance already exists
 
-	}
+    if (!cgi) // If not, create one and store it
+    {
+        std::cout << "first time, never again\n";
+        Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+        
+        cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
+        if (!cgi)
+            throw std::bad_alloc();
+
+        Infos->SetCGI(cgi); // Store it in Infos so it's reused next time
+    }
+
+    cgi->execute(); 
+}
 	else if (Infos->GetRequest().getMethod() == "GET"){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 
