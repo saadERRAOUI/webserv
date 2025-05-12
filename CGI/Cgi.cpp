@@ -14,16 +14,16 @@ Cgi::Cgi(Route &route, HttpRequest &req, Connection *connection) : extension_tab
     this->output = "";
     this->binaryPath = "";
     this->env_set_up();
-    std::cout << "Cgi constructor called\n";
-    std::cout << "request path: " << request.getRequestURI() << "\n";
-    std::cout << "request method: " << request.getMethod() << "\n";
-    std::cout << "request body: " << request.getBody() << "\n";
-    std::cout << "request content length: " << request.getHeader("Content-Length") << "\n"; 
+    // std::cout << "Cgi constructor called\n";
+    // std::cout << "request path: " << request.getRequestURI() << "\n";
+    // std::cout << "request method: " << request.getMethod() << "\n";
+    // std::cout << "request body: " << request.getBody() << "\n";
+    // std::cout << "request content length: " << request.getHeader("Content-Length") << "\n"; 
 
     size_t pos = request.getRequestURI().find_last_of(".");
     if (pos == std::string::npos)
         throw CGIException("No extension was found in path!");
-    std::cout << request.getRequestURI().substr(pos + 1) << "\n";
+    // std::cout << request.getRequestURI().substr(pos + 1) << "\n";
     std::map<std::string, std::string>::iterator val = this->extension_table.find(request.getRequestURI().substr(pos + 1));
 
     if (val == this->extension_table.end())
@@ -39,11 +39,11 @@ Cgi::Cgi(Route &route, HttpRequest &req, Connection *connection) : extension_tab
         if (!inputFileStream.is_open())
             throw CGIException("Error: CGI: Input file stream failed to open");
     }
-    std::cout << "binaryPath: " << binaryPath << "\n";
-    std::cout << "script path: " << route.getCgiPath(this->request.getRequestURI()) << "\n";
-    std::cout << "input: " << this->input << "\n";
-    std::cout << "output: " << this->output << "\n";
-    std::cout << "envp: \n";
+    // std::cout << "binaryPath: " << binaryPath << "\n";
+    // std::cout << "script path: " << route.getCgiPath(this->request.getRequestURI()) << "\n";
+    // std::cout << "input: " << this->input << "\n";
+    // std::cout << "output: " << this->output << "\n";
+    // std::cout << "envp: \n";
     this->state  = this->request.getMethod() == "POST" && !this->request.getBody().empty() ? WRITING : FORKING;
 }
 
@@ -100,7 +100,7 @@ void Cgi::execute()
         if ((childPid = fork()) == -1) {
             throw CGIException("Error: CGI: Fork failed");
         } else if (childPid == 0) {
-            std::cout << "ok im forking";
+            // std::cout << "ok im forking";
             freopen(output.c_str(), "w+", stdout);
             if (!input.empty())
                 freopen(input.c_str(), "r", stdin);
@@ -195,7 +195,7 @@ bool Cgi::processOutputChunk(int clientFd)
 
     if (!outputFileStream.is_open())
         outputFileStream.open(output.c_str(), std::ios::in | std::ios::binary);
-    std::cout << output.c_str();
+    // std::cout << output.c_str();
     if (!outputFileStream.is_open())
         return std::cout << "failed here", false;
 
@@ -208,12 +208,13 @@ bool Cgi::processOutputChunk(int clientFd)
     outputProgress += bytesRead;
     responseBuffer.append(buffer, bytesRead);
     if (!headersParsed) {
-        int pos = responseBuffer.find("\r\n\r\n");
-        std::cout << "\n" << pos << "<------\n";
+        int pos = responseBuffer.find("\n\r\n");
+        // std::cout << "\n" << pos << "<------\n";
         if (pos == -1)
             return true;
 
-        std::string headersPart = responseBuffer.substr(0, pos + 4);
+        std::string headersPart = responseBuffer.substr(0, pos + 3);
+        std::cout << "\n this is all the headers" << headersPart.c_str() << "end of headers<------\n";
         parseHeaders(headersPart);
 
         headersParsed = true;
@@ -223,12 +224,14 @@ bool Cgi::processOutputChunk(int clientFd)
         write(clientFd, httpHeader.c_str(), httpHeader.size());
         if (cgiHeaders.find("content-length") == cgiHeaders.end() && cgiHeaders["transfer-encoding"] != "chunked" )
         {
-            write(clientFd, (std::string("transfer-encoding") + " : chunked").c_str(), httpHeader.size());
+            std::cout << "no content length\n";
+            std::string w = (std::string("transfer-encoding") + " : chunked");
+            write(clientFd,  w.c_str(), w.size());
             encodingChunked = true;
         }
         write(clientFd, "\r\n", 2);
         
-        responseBuffer.erase(0, pos + 4);
+        responseBuffer.erase(0, pos + 3);
     }
     
     if (!responseBuffer.empty()) {
@@ -241,7 +244,6 @@ bool Cgi::processOutputChunk(int clientFd)
         */  
     
         ssize_t written = write(clientFd, responseBuffer.c_str(), responseBuffer.size());
-        std::cout << written << "<----\n";
         if (written > 0)
             responseBuffer.erase(0, written);
         state = DONE;

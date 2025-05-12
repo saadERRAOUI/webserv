@@ -103,7 +103,7 @@ void manage_connections(WebServ *web, int epollfd)
     while (true)
     {
         int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
-        std::cout << "number of event: " << n << '\n';
+        // std::cout << "number of event: " << n << '\n';
         if (n == -1)
         {
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';

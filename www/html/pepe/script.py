@@ -1,15 +1,21 @@
-def send_headers():
-	# Status should always be the first header
-	print("Status: 200 OK")
-	
-	# Content headers
-	# print("Content-Length: 222")
-	# print("Content-Type: text/html")
-	# print("Content-Disposition: attachment; filename=pic.py")
-	# print("Content-Type: page/html")
-	# Empty line to separate headers from body
-	print("\r\n\r\n")
-	print("123 \n hello world!")
+import sys
 
-# Call the function
-send_headers()
+def send_headers():
+    sys.stdout.write("Status: 200 OK\r\n")
+    sys.stdout.write("Content-Type: text/plain\r\n")
+    sys.stdout.write("Transfer-Encoding: chunked\r\n")
+    sys.stdout.write("\r\n")  # End of headers
+
+def send_chunk(data):
+    chunk = data.encode('utf-8')
+    size = f"{len(chunk):X}\r\n"
+    sys.stdout.write(size)
+    sys.stdout.write(data + "\r\n")
+def send_chunked_response():
+    send_headers()
+    send_chunk("hello world!")
+    send_chunk("i love me some pussy oh my god!!!")
+    sys.stdout.write("0\r\n\r\n")  # Proper ending
+    sys.stdout.flush()
+
+send_chunked_response()
