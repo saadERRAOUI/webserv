@@ -235,14 +235,14 @@ bool Cgi::processOutputChunk(int clientFd)
     }
     
     if (!responseBuffer.empty()) {
-        std::cout << "\n---->" << responseBuffer.c_str() << "<----\n";
-        /*
-            if (flag == true)
-            {
-
-            }
-        */  
-    
+        if (encodingChunked)
+        {std::stringstream a;
+        a << std::hex << responseBuffer.size();
+        std::string b;
+        a >> b;
+        b += "\r\n";
+            responseBuffer.append("\r\n");
+    }
         ssize_t written = write(clientFd, responseBuffer.c_str(), responseBuffer.size());
         if (written > 0)
             responseBuffer.erase(0, written);
