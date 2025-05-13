@@ -30,7 +30,8 @@ void ResponseBuilder(Connection *Infos){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 
 		std::string tmpstring = GetMethod(Infos);
-		write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
+		if (!tmpstring.empty())
+			write(Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
 	// else if (Infos->GetRequest().getMethod() == "POST"){
