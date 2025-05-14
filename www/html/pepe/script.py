@@ -4,7 +4,7 @@ def send_headers():
     sys.stdout.write("Status: 200 OK\r\n")
     sys.stdout.write("Content-Type: text/plain\r\n")
     sys.stdout.write("Transfer-Encoding: chunked\r\n")
-    sys.stdout.write("\r\n")  # End of headers
+    sys.stdout.write("\n\r\n")  # End of headers
 
 def send_chunk(data):
     chunk = data.encode('utf-8')

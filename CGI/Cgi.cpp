@@ -14,6 +14,7 @@ Cgi::Cgi(Route &route, HttpRequest &req, Connection *connection) : extension_tab
     this->output = "";
     this->binaryPath = "";
     this->env_set_up();
+    this->encodingChunked = false;
     // std::cout << "Cgi constructor called\n";
     // std::cout << "request path: " << request.getRequestURI() << "\n";
     // std::cout << "request method: " << request.getMethod() << "\n";
@@ -202,9 +203,16 @@ bool Cgi::processOutputChunk(int clientFd)
     outputFileStream.seekg(outputProgress);
     outputFileStream.read(buffer, sizeof(buffer));
     std::streamsize bytesRead = outputFileStream.gcount();
-
-    if (bytesRead <= 0) return std::cout << "failed here2", false;
-    
+    // std::cout << bytesRead << "\n";
+    if (bytesRead <= 0 && responseBuffer.empty()) {
+        if (encodingChunked)
+        {
+            std::string endChunk = "0\r\n\r\n";
+            write(clientFd, endChunk.c_str(), endChunk.size());
+        }
+        state = DONE;
+        return true;
+    }
     outputProgress += bytesRead;
     responseBuffer.append(buffer, bytesRead);
     if (!headersParsed) {
@@ -220,33 +228,32 @@ bool Cgi::processOutputChunk(int clientFd)
         headersParsed = true;
 
         std::string httpHeader = buildHttpResponseHeaders();
-        std::cout << httpHeader << "\n";
+        // std::cout << httpHeader << "\n";
         write(clientFd, httpHeader.c_str(), httpHeader.size());
-        if (cgiHeaders.find("content-length") == cgiHeaders.end() && cgiHeaders["transfer-encoding"] != "chunked" )
-        {
-            std::cout << "no content length\n";
-            std::string w = (std::string("transfer-encoding") + " : chunked");
-            write(clientFd,  w.c_str(), w.size());
-            encodingChunked = true;
-        }
         write(clientFd, "\r\n", 2);
-        
         responseBuffer.erase(0, pos + 3);
+        return true;
     }
-    
+
     if (!responseBuffer.empty()) {
         if (encodingChunked)
         {std::stringstream a;
+                    std::cout << "lmfao\n";
+
         a << std::hex << responseBuffer.size();
         std::string b;
         a >> b;
         b += "\r\n";
-            responseBuffer.append("\r\n");
-    }
+        write(clientFd, b.c_str(), b.size());
+        responseBuffer += "\r\n";
+        }
+        // std::cout << b;
+       
+        std::cout << "body :\n";
         ssize_t written = write(clientFd, responseBuffer.c_str(), responseBuffer.size());
+        std::cout << written << "\n";
         if (written > 0)
             responseBuffer.erase(0, written);
-        state = DONE;
     }
     return true;
 }
@@ -297,7 +304,7 @@ void Cgi::parseHeaders(const std::string& rawHeaders)
         }
     }
 }
-std::string Cgi::buildHttpResponseHeaders() const
+std::string Cgi::buildHttpResponseHeaders() 
 {
     std::ostringstream response;
 
@@ -307,7 +314,11 @@ std::string Cgi::buildHttpResponseHeaders() const
     {
         response << it->first << ": " << it->second << "\r\n";
     }
-
+    if ((cgiHeaders.find("content-length") == cgiHeaders.end()) && (cgiHeaders.find("transfer-encoding") == cgiHeaders.end()))
+    {
+        response << "Transfer-Encoding: chunked\r\n";
+        this->encodingChunked = true;
+    }
 
     return response.str();
 }

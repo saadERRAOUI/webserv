@@ -53,7 +53,7 @@ std::map<std::string, std::string> cgiHeaders;
             std::string getResponse();
             void parseHeaders(const std::string& rawHeaders);
             std::string generateRandomName() const;
-            std::string buildHttpResponseHeaders() const;
+            std::string buildHttpResponseHeaders() ;
             class CGIException : public std::exception
             {
                 std::string reason;
