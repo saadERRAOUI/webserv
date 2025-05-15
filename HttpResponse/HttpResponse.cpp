@@ -15,8 +15,21 @@ HttpResponse::HttpResponse(int fd_client)
 	this->status_code[500] = std::string("Internal Server Error");
 }
 
-
 void ResponseBuilder(Connection *Infos){
+
+    std::string version = Infos->GetRequest().getVersion();
+    if (version != "HTTP/1.1" && version != "HTTP/1.0") {
+        // Hardcoded minimal HTTP/1.1 400 Bad Request response
+        const char *bad_request =
+            "HTTP/1.1 400 Bad Request\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 45\r\n"
+            "\r\n"
+            "<html><body>400 Bad Request</body></html>";
+        write(Infos->Getfd(), bad_request, strlen(bad_request));
+        Infos->SetBool(true);
+        return;
+    }
 
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
@@ -27,11 +40,10 @@ void ResponseBuilder(Connection *Infos){
 		return ;
 	}
 	else if (Infos->GetRequest().getIsCGI())
-{
-    Cgi *cgi = Infos->getCGI(); // Check if CGI instance already exists
-
-    if (!cgi) // If not, create one and store it
-    {
+{try {
+    Cgi *cgi = Infos->getCGI();
+	
+    if (!cgi) {
         std::cout << "first time, never again\n";
         Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
         
@@ -39,11 +51,15 @@ void ResponseBuilder(Connection *Infos){
         if (!cgi)
             throw std::bad_alloc();
 
-        Infos->SetCGI(cgi); // Store it in Infos so it's reused next time
+        Infos->SetCGI(cgi);
     }
-
     cgi->execute(); 
-}
+}catch (const Cgi::CGIException &e) {
+	
+    std::string tmp =  ErrorBuilder(Infos, TmpServer, 500);
+    return;
+}}
+	
 	else if (Infos->GetRequest().getMethod() == "GET"){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 
