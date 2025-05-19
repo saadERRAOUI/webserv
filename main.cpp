@@ -47,7 +47,7 @@ HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
     // std::string method = "GET"
     request->setMethod(std::string("GET"));
-    request->setRequestURI(std::string("/api/v1/tree.jpg"));
+    request->setRequestURI(std::string("/api/v1/video.mp4"));
     request->setVersion(std::string("HTTP/1.1"));
     request->setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
     request->setHeaders(std::string("Accept"), std::string("*/*"));
