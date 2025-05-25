@@ -159,6 +159,7 @@ std::string GetMethod(Connection *Infos)
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
+    std::cout << "this is the result: " << result << "\n";
     // in ths condition i checked for error pages or somthing wrong
     if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
@@ -198,6 +199,8 @@ std::string GetMethod(Connection *Infos)
       }
         // serve file if have a right permition
         else{
+            std::cout << "_-------------------> " << result << "\n";
+            std::cout << "--------------------> " << Infos->GetRequest().getRequestURI() << "\n";
             return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
@@ -206,6 +209,16 @@ std::string GetMethod(Connection *Infos)
     //Check for all routes and autoindex
 }
 
+
+/*
+    Author: BOUZID Hicham
+    Description: this function will remou
+*/
+
+std::string RemovePrefix(std::string URI, std::string location, std::string root){
+    std::string Result = std::string(".") + root + URI.substr(location.size() - 1, URI.size());
+    return (Result);
+}
 
 /*
     Author: BOUZID Hicham
@@ -218,12 +231,11 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
     std::string response;
 
     response = std::string("");
-    std::cout << "THE URI is: " << URI << "\n";
-    std::cout << "THE ROUTE is :" << route << "\n";
     if (!Infos->GetRequest().getVersion().empty())
     {
-        ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
-        std::cout << "From this path we will serve: " << ActualPath << '\n';
+        RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+        ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+        std::cout << "From this path we will serve : " << ActualPath << '\n';
         if (access(ActualPath.c_str(), R_OK))
             return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
         std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
@@ -242,7 +254,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        response += "Content-Type: video/mp4\r\n";
+        response += "Content-Type: image/jpeg\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));

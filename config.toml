@@ -21,4 +21,4 @@ path = "/api/v1/"
 methods = ["GET"]
 autoindex = true
 index = "index.html"
-root = "/www/html/pepe"
+root = "/www/html"
