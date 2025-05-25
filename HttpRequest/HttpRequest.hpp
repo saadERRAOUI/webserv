@@ -24,6 +24,10 @@ enum HttpRequestState {
     HTTP_METHOD,
     HTTP_METHOD_SP,
     HTTP_REQUEST_URI,
+    HTTP_QUERY_STRING_START,
+	HTTP_QUERY_STRING,
+	HTTP_FRAGMENT_START,
+	HTTP_FRAGMENT,
     HTTP_REQUEST_URI_SP,
     HTTP_VERSION,
     HTTP_VERSION_CR,
@@ -33,8 +37,6 @@ enum HttpRequestState {
     HTTP_HEADER_VAL,
     HTTP_HEADER_CR,
     HTTP_HEADER_NL,
-    // HTTP_HEADER_CR2,
-    // HTTP_HEADER_NL2,
     HTTP_BODY_START,
     HTTP_BODY,
     HTTP_PARSE_ERROR //error_handling
@@ -80,11 +82,13 @@ class HttpRequest {
         
         /* utility variables */
         int                                 _state;
-        // bool                                _isChunked;
+        bool                                _isChunked;
         // int                                 _bodyFd;
         std::string                         _headerKey;
         std::string                         _headerValue;
         int                                 _endSequenceState;
+        std::string                         _queryString;
+        std::string                         _fragment;
 
     public :
         /*
@@ -107,6 +111,9 @@ class HttpRequest {
         std::string                         getHeaderKey() const;
         std::string                         getHeaderValue() const;
         int                                 getEndSequenceState() const;
+        bool                                getIsChunked() const;
+        std::string                         getQueryString() const;
+        std::string                         getFragment() const;
         /*
             Setters
         */
@@ -123,4 +130,9 @@ class HttpRequest {
         void            setEndSequenceState(int);
         void            setBody(std::string);
         void            setState(int);
+        void            setIsChunked(bool);
+        void            setQueryString(std::string);
+        void            setFragment(std::string);
+
+        void            showRequest() const;
 };

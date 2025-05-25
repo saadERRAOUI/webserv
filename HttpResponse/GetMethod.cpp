@@ -247,7 +247,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         std::string rt = OpenFile(ActualPath, true, Infos);
         response += rt;
         Infos->GetRequest().ClearURI();
-        return (response);
+        return (std::string(""));
     }
     std::string rt = OpenFile(ActualPath, false, Infos);
     return (std::string(""));
