@@ -222,6 +222,21 @@ std::string RemovePrefix(std::string URI, std::string location, std::string root
 
 /*
     Author: BOUZID Hicham
+    Description: function return the content type of file
+    Date: 2025-05-26
+*/
+
+std::string ContentType(Connetion *Info, std::string file){
+    int index = file.size();
+    // add map of extension and value content type
+    for (int i = index - 1; i != 0; i--){
+        if (file[i] == ".")
+            return (file.substr(i, index));
+    }
+}
+
+/*
+    Author: BOUZID Hicham
     Description: this function serve both small and hug file\
     Date: 2025-05-05
 */
