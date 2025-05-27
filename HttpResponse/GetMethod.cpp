@@ -199,8 +199,6 @@ std::string GetMethod(Connection *Infos)
       }
         // serve file if have a right permition
         else{
-            std::cout << "_-------------------> " << result << "\n";
-            std::cout << "--------------------> " << Infos->GetRequest().getRequestURI() << "\n";
             return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
@@ -217,6 +215,7 @@ std::string GetMethod(Connection *Infos)
 
 std::string RemovePrefix(std::string URI, std::string location, std::string root){
     std::string Result = std::string(".") + root + URI.substr(location.size() - 1, URI.size());
+    // std::cout << "This is suffex of file: " << Result << "\n" ;
     return (Result);
 }
 
@@ -226,13 +225,42 @@ std::string RemovePrefix(std::string URI, std::string location, std::string root
     Date: 2025-05-26
 */
 
-std::string ContentType(Connetion *Info, std::string file){
+std::string ContentType(std::string file){
     int index = file.size();
+    std::string result;
+    std::map<std::string, std::string> mimeTypes;
+
+    // Populate the map
+    mimeTypes[".html"] = "text/html";
+    mimeTypes[".htm"] = "text/html";
+    mimeTypes[".css"] = "text/css";
+    mimeTypes[".js"] = "application/javascript";
+    mimeTypes[".json"] = "application/json";
+    mimeTypes[".xml"] = "application/xml";
+    mimeTypes[".jpg"] = "image/jpeg";
+    mimeTypes[".jpeg"] = "image/jpeg";
+    mimeTypes[".png"] = "image/png";
+    mimeTypes[".gif"] = "image/gif";
+    mimeTypes[".svg"] = "image/svg+xml";
+    mimeTypes[".pdf"] = "application/pdf";
+    mimeTypes[".zip"] = "application/zip";
+    mimeTypes[".tar"] = "application/x-tar";
+    mimeTypes[".mp3"] = "audio/mpeg";
+    mimeTypes[".wav"] = "audio/wav";
+    mimeTypes[".mp4"] = "video/mp4";
+    mimeTypes[".avi"] = "video/x-msvideo";
+    mimeTypes[".txt"] = "text/plain";
+    mimeTypes[".csv"] = "text/csv";
+    mimeTypes[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
     // add map of extension and value content type
     for (int i = index - 1; i != 0; i--){
-        if (file[i] == ".")
-            return (file.substr(i, index));
+        if (file[i] == '.'){
+            result = file.substr(i, index);
+            break ;
+        }
     }
+    return (mimeTypes[result].size() ? mimeTypes[result] : std::string("text/html"));
 }
 
 /*
@@ -250,7 +278,9 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
     {
         RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
         ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+
         std::cout << "From this path we will serve : " << ActualPath << '\n';
+
         if (access(ActualPath.c_str(), R_OK))
             return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
         std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
@@ -269,7 +299,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        response += "Content-Type: image/jpeg\r\n";
+        response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
