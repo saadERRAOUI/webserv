@@ -1,5 +1,10 @@
 #include "Connection.hpp"
 
+Connection::~Connection(){
+	// delete this->Request;
+	// delete this->Response;
+}
+
 /*
 	Author: BOUZID Hicham
 	Description: function get the current
@@ -57,7 +62,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 			if (*it_sock == FdServer)
 			{
 				s = &(*it);
-				Request = NULL;
+				Request = new HttpRequest();
 				Response = NULL;
 				timeout = get_current_time();
 				path_optional = "";
@@ -70,7 +75,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 }
 
 Connection::Connection(){
-	Request = NULL;
+	Request = new HttpRequest();
 	s = NULL;
 	fd_client = 0;
 	size = 0;

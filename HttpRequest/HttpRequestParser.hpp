@@ -6,7 +6,7 @@
 /*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:35 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/10 13:56:33 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/05/24 18:31:08 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,11 @@ class HttpRequestParser {
 		bool	isControl(char) const;
 		bool	isSpecial(char) const;
 		bool	isDigit(char) const;
+        bool    isValidURIChar(char c) const;
         
         std::string getStateName(HttpRequestState state) const;
         /*
             Parser Member methods
         */
-        ParseResult            parse(HttpRequest&, char);
+        ParseResult            parse(HttpRequest& request, char buffer[], int size);
 };

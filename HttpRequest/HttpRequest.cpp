@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/10 15:13:21 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/05/25 17:11:16 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 HttpRequest::HttpRequest() {
     _state = HTTP_METHOD_START;
     _endSequenceState = 0;
-
+    _isChunked = false;
 }
 
 HttpRequest::~HttpRequest() {}
@@ -44,6 +44,12 @@ std::string     HttpRequest::getHeaderValue() const {return _headerValue;}
 
 int             HttpRequest::getEndSequenceState() const {return _endSequenceState;}
 
+bool            HttpRequest::getIsChunked() const {return _isChunked;}
+
+std::string     HttpRequest::getQueryString() const {return _queryString;}
+
+std::string     HttpRequest::getFragment() const {return _fragment;}
+
 /*
     Setters
 */
@@ -67,6 +73,11 @@ void            HttpRequest::setEndSequenceState(int endSequenceState) {this->_e
 
 void            HttpRequest::setState(int state) {this->_state = state;}
 
+void            HttpRequest::setIsChunked(bool isChunked) {this->_isChunked = isChunked;}
+
+void            HttpRequest::setQueryString(std::string queryString) {this->_queryString = queryString;}
+
+void            HttpRequest::setFragment(std::string fragment) {this->_fragment = fragment;}
 
 /*
     Author: BOUZID Hicham
@@ -82,7 +93,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy_HttpRequest){
         this->_body = copy_HttpRequest._body;
         this->_headers = copy_HttpRequest._headers;
         this->_state = copy_HttpRequest._state;
-        this->_methodHandlerMap = copy_HttpRequest._methodHandlerMap;
+        // this->_methodHandlerMap = copy_HttpRequest._methodHandlerMap;
     }
     return (*this);
 }
@@ -92,3 +103,19 @@ void HttpRequest::ClearURI(){
     this->_version = "";
 }
 void            HttpRequest::setBody(std::string body) {this->_body = body;}
+
+void            HttpRequest::showRequest() const {
+    std::cout << "Method: " << _method << std::endl;
+    std::cout << "Request URI: " << _requestURI << std::endl;
+    std::cout << "Version: " << _version << std::endl;
+    std::cout << "Headers:" << std::endl;
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = _headers.begin(); it != _headers.end(); ++it) {
+        std::cout << "  " << it->first << ": " << it->second << std::endl;
+    }
+    std::cout << "IsChunked: " << _isChunked << std::endl;
+    std::cout << "Query String: " << _queryString << std::endl;
+    std::cout << "Fragment: " << _fragment << std::endl;
+    std::cout << "Body: " << _body << std::endl;
+    std::cout << "State: " << _state << std::endl;
+}
