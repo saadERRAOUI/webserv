@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/27 22:53:12 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/05/27 23:26:39 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,13 @@
     Date        : 2024-12-22
     Description : main method
 */
-
-
 #include "Webserv.hpp"
 #include "server.hpp"
 #include "Connection/Connection.hpp"
 #include "HttpRequest/HttpRequest.hpp"
 #include "HttpResponse/HttpResponse.hpp"
+#include "HttpRequest/HttpRequestParser.hpp"
 #include "SetupServer/includes.hpp"
-
 
 /*
     Author: BOUZID Hicham
@@ -41,7 +39,6 @@ int is_server(int fdserver, std::vector<int> servers)
         return (1);
     return (0);
 }
-
 
 HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
@@ -82,6 +79,11 @@ void Print_static_Request(HttpRequest tmpReques){
 
 void manage_connections(WebServ *web, int epollfd)
 {
+    HttpRequestParser parser;
+    // todo remove this line
+    std::ofstream file("received_data.txt", std::ios::out | std::ios::app);
+    // todo remove this line
+
     struct epoll_event event;
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
@@ -102,7 +104,7 @@ void manage_connections(WebServ *web, int epollfd)
     while (true)
     {
         int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
-        std::cout << "number of event: " << n << '\n';
+        // std::cout << "number of event: " << n << '\n';
         if (n == -1)
         {
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
@@ -124,9 +126,26 @@ void manage_connections(WebServ *web, int epollfd)
                 if (size < 8000)
                 {
                     map_connections[events[i].data.fd].ChagenMode(epollfd, events[i].data.fd, EPOLLOUT);
+                    if (!file.is_open())
+                    {
+                        std::cerr << "Error opening file >>  " << strerror(errno) << '\n';
+                        return;
+                    }
+                    file.write(BUFFER, size);
+                    file.close();
                 }
-                HttpRequest *tmpRequest = ft_static_request();
-                map_connections[events[i].data.fd].SetHttpRequest(tmpRequest);
+
+                ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
+                if (result == PARSE_ERROR) {
+                    std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                    //todo : should build response error here
+                    return ;
+                }
+                std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                map_connections[events[i].data.fd].GetRequest().showRequest();
+                // return ;
+
+                // map_connections[events[i].data.fd].SetHttpRequest(map_connections[events[i].data.fd].GetRequest());
                 HttpResponse tmpHttpResponse(events[i].data.fd);
                 map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd]);

@@ -31,7 +31,7 @@ void ResponseBuilder(Connection *Infos){
 
 		std::string tmpstring = GetMethod(Infos);
 		if (!tmpstring.empty())
-			write(Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
+			write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
 	// else if (Infos->GetRequest().getMethod() == "POST"){
