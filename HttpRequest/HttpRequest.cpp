@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: serraoui <serraoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/25 17:11:16 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/05/25 19:12:03 by serraoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,5 +117,6 @@ void            HttpRequest::showRequest() const {
     std::cout << "Query String: " << _queryString << std::endl;
     std::cout << "Fragment: " << _fragment << std::endl;
     std::cout << "Body: " << _body << std::endl;
+    std::cout << "Body size: " << _body.length() << std::endl;
     std::cout << "State: " << _state << std::endl;
 }

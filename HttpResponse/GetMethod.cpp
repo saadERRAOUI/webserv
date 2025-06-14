@@ -209,7 +209,7 @@ std::string GetMethod(Connection *Infos)
 
 /*
     Author: BOUZID Hicham
-    Description: this function serve both small and hug file\
+    Description: this function serve both small and hug file
     Date: 2025-05-05
 */
 
@@ -240,9 +240,10 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        response += "Content-Type: image/jpeg\r\n";
+        response += "Content-Type: text/html\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
+        write (1, response.c_str(), strlen(response.c_str()));
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
         std::string rt = OpenFile(ActualPath, true, Infos);
         response += rt;

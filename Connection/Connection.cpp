@@ -98,7 +98,7 @@ HttpRequest &Connection::GetRequest(){
 	return (*this->Request);
 }
 
-void		Connection::SetHttpRespons(HttpResponse *Response){
+void		Connection::SetHttpResponse(HttpResponse *Response){
 	this->Response =  Response;
 }
 
@@ -152,7 +152,7 @@ int Connection::GetSize(){
 */
 void Connection::DefSize(int n){
 	this->size -= n;
-	if (this->size < 8000){
+	if (this->size < BUFFER_SIZE){
 		SetBool(true);
 		file->close();
 	}
