@@ -17,6 +17,7 @@
 #include <map>
 #include "../Includes/Webserv.hpp"
 
+#define BUFFER_SIZE 8000
 /* Add State enum */
 enum HttpRequestState {
     /* old */
@@ -38,38 +39,7 @@ enum HttpRequestState {
     HTTP_HEADER_CR,
     HTTP_HEADER_NL,
     HTTP_BODY_START,
-    HTTP_BODY,
-    HTTP_PARSE_ERROR //error_handling
-
-    /* new */
-	// REQUEST_METHOD_START,
-	// REQUEST_METHOD,
-	// URI_START,
-	// URI,
-	// QUERY_STRING_START,
-	// QUERY_STRING,
-	// FRAGMENT_START,
-	// FRAGMENT,
-	// HTTP_VERSION,
-	// HTTP_VERSION_CR,
-
-	// HEADER_LINE_START,
-	// HEADER_LWS,
-	// HEADER_KEY,
-	// SPACE_BEFORE_HEADER_VALUE,
-	// HEADER_VALUE,
-	// EXPECTING_NEWLINE_2,
-	// EXPECTING_NEWLINE_3,
-
-	// POST_BODY,
-	// CHUNKED_BODY_SIZE,
-	// CHUNKED_SIZE_NEWLINE,
-	// CHUNKED_SIZE_NEWLINE_2,
-	// CHUNKED_SIZE_NEWLINE_3,
-	
-	// CHUNKED_DATA_NEWLINE,
-	// CHUNKED_DATA_NEWLINE_2,
-	// CHUNKED_DATA
+    HTTP_BODY
 };
 
 class HttpRequest {

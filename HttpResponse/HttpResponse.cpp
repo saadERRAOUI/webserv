@@ -16,7 +16,9 @@ HttpResponse::HttpResponse(int fd_client)
 }
 
 
-void ResponseBuilder(Connection *Infos){
+void ResponseBuilder(Connection *Infos) {
+	HttpResponse response(Infos->Getfd());
+	Infos->SetHttpResponse(&response);
 
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
@@ -26,19 +28,18 @@ void ResponseBuilder(Connection *Infos){
 		Infos->SetBool(true);
 		return ;
 	}
-	else if (Infos->GetRequest().getMethod() == "GET"){
-		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
-
+	else if (Infos->GetRequest().getMethod() == "GET") {
+		std::cout << "GET" << std::endl;
 		std::string tmpstring = GetMethod(Infos);
 		if (!tmpstring.empty())
 			write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
-	// else if (Infos->GetRequest().getMethod() == "POST"){
-
-	// }
+	else if (Infos->GetRequest().getMethod() == "POST"){
+		std::cout << "POST" << std::endl;
+	}
 	else if (Infos->GetRequest().getMethod() == "DELETE"){
-
+		std::cout << "DELETE" << std::endl;
 	}
 }
 

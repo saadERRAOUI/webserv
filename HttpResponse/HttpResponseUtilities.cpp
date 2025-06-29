@@ -40,15 +40,17 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 			return (std::string(""));
 		}
 		Infos->Setfile(*fd);
-    	Infos->GetFile()->read(BUFFER, 8000);
+    	Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
 		write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
+		// write(1, BUFFER, Infos->GetFile()->gcount());
 		Infos->SetSize(Infos->GetFile()->gcount());
 		Infos->DefSize(0);
 		return (std::string(BUFFER, Infos->GetSize()));
 		// std::cout << "here.\n";
 	}
-    Infos->GetFile()->read(BUFFER, 8000);
+    Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
 	write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
+	// write(1, BUFFER, Infos->GetFile()->gcount());
 	Infos->SetSize(Infos->GetFile()->gcount());
 	Infos->DefSize(0);
 	// Infos->DefSize(std::string(BUFFER).size());

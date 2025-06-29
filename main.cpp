@@ -88,7 +88,7 @@ void manage_connections(WebServ *web, int epollfd)
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
     std::map<int , Connection> map_connections;
-    char BUFFER[8000] = {0};
+    char BUFFER[BUFFER_SIZE] = {0};
 
     for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
     {
@@ -116,20 +116,20 @@ void manage_connections(WebServ *web, int epollfd)
             {
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
                 map_connections[tmp.Getfd()] = tmp;
-                int to_check = tmp.Getfd();
-                std::cout << "fd client: " << to_check << '\n';
-                std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
+                // int to_check = tmp.Getfd();
+                // std::cout << "fd client: " << to_check << '\n';
+                // std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLIN))
             {
-                int size = read(events[i].data.fd, BUFFER, 8000);
-                if (size < 8000)
+                int size = read(events[i].data.fd, BUFFER, BUFFER_SIZE);
+                if (size < BUFFER_SIZE)
                 {
                     map_connections[events[i].data.fd].ChagenMode(epollfd, events[i].data.fd, EPOLLOUT);
                     if (!file.is_open())
                     {
-                        std::cerr << "Error opening file >>  " << strerror(errno) << '\n';
-                        return;
+                        std::cerr << "Error opening file >>  " << strerror(errno) << '\n'; // todo build error
+                        // return;
                     }
                     file.write(BUFFER, size);
                     file.close();
@@ -139,18 +139,18 @@ void manage_connections(WebServ *web, int epollfd)
                 if (result == PARSE_ERROR) {
                     std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                     //todo : should build response error here
-                    return ;
+                    // return ;
                 }
+                //! to remove     
                 std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
-                // return ;
-
-                // map_connections[events[i].data.fd].SetHttpRequest(map_connections[events[i].data.fd].GetRequest());
-                HttpResponse tmpHttpResponse(events[i].data.fd);
-                map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
-            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLOUT))
+            else if (
+                map_connections.size() &&
+                map_connections.find(events[i].data.fd) != map_connections.end() &&
+                (events[i].events & EPOLLOUT)
+            )
                     ResponseBuilder(&map_connections[events[i].data.fd]);
             MonitorConnection(&map_connections, epollfd);
         }
@@ -170,8 +170,6 @@ int main()
     catch (std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-
         throw e;
     }
-
 }

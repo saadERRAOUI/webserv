@@ -302,6 +302,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
+        write (1, response.c_str(), strlen(response.c_str()));
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
         std::string rt = OpenFile(ActualPath, true, Infos);
         response += rt;
