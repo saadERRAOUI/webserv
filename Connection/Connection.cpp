@@ -191,8 +191,8 @@ void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 	Date: 2025-05-24
 */
 
-Connection::~Connection(){
-	std::cout << "Distructor of connection class called.\n";
-	delete this->file;
-	delete this->Request;
-}
+// Connection::~Connection(){
+// 	std::cout << "Distructor of connection class called.\n";
+// 	delete this->file;
+// 	delete this->Request;
+// }

@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/27 23:26:39 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/06/29 14:56:40 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ void manage_connections(WebServ *web, int epollfd)
                     //todo : should build response error here
                     // return ;
                 }
-                //! to remove     
+                //! to remove
                 std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
                 ResponseBuilder(&map_connections[events[i].data.fd]);

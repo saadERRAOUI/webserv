@@ -192,7 +192,14 @@ std::string GetMethod(Connection *Infos)
           }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
+              {
+                //should serve the index file if found.
+                  std::cout << "Alert Alert Alert Alert\n";
+                  std::cout << "Result Result Result: "<< result<<"\n";
+                  if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
+                      return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
+              }
               else
                   return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
           }
