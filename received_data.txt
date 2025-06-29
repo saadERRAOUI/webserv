@@ -1,0 +1,338 @@
+GET /welcome?name=saad123 HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Transfer-encoding: chuncked
+Host: example.com
+Content-Type: application/json
+Connection: close
+
+{
+  "key1": "value1",
+  "key2": "value2",
+  "key3": "value3"
+}GET /welcome?name=saad123%23index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Transfer-encoding: chuncked
+Content-Type: application/json
+Host: 127.0.0.1:8080
+Connection: close
+
+{
+  "key1": "value1",
+  "key2": "value2",
+  "key3": "value3"
+}GET /welcome?name=saad123%23index.html HTTP/1.1
+content-length: 62
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Content-Type: application/json
+Connection: close
+
+{
+  "key1": "value1",
+  "key2": "value2",
+  "key3": "value3"
+}GET / HTTP/1.1
+content-length: 62
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Content-Type: application/json
+Connection: close
+
+{
+  "key1": "value1",
+  "key2": "value2",
+  "key3": "value3"
+}GET /api/v1/tree.jpg HTTP/1.1
+Host: example.com
+User-Agent: curl/8.12.1
+Accept: */*
+Connection: close
+accept-encoding: gzip, deflate, br
+
+GET /api/v1/tree.jpg HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: 127.0.0.1:8080
+Connection: close
+
+GET /api/v1/tree.jpg HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Cache-Control: max-age=0
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Cache-Control: max-age=0
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Cache-Control: max-age=0
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Cache-Control: max-age=0
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /api/v1/tree.jpg HTTP/1.1
+Host: example.com
+User-Agent: curl/7.81.0
+Accept: */*
+Connection: close
+accept-encoding: gzip, deflate, br
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /www/index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /www/index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /api/v1/index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Connection: close
+
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7
+
+GET / HTTP/1.1
+content-length: 1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: example.com
+Content-Type: application/json
+Connection: close
+
+2 á  İòâÑçÑÕ–8gÌ÷^V£ôĞúÑû€>1‰fÚnŸıxİ £5V==\şœ#[%ıT&Ø³?LY“–B™âc~]n $À/À+À0À,À'Ì©Ì¨À	ÀÀ
+À œ  / 5  p   ÿ   
+         #      3 & $   ‰§â9¤zl%³	œ"—ß‡®_ı)‚F7Y0 ®åW9$ -  +  á  İaĞ^€ºr(2ÂLÜy§Ñ´È&¸vØ@LŒ>4@¼ ¿›­~œ7;ÕÍf	Óèë2 K`$5Bæ”â|Õ $À/À+À0À,À'Ì©Ì¨À	ÀÀ
+À œ  / 5  p   ÿ   
+         #      3 & $   ™ä3\âşØ¸®‚™õoZ—÷J¦
+ğ;½¿#HDtà( -  + GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: 127.0.0.1:8080
+Connection: close
+
+GET /index.html HTTP/1.1
+accept-encoding: gzip, deflate, br
+Accept: */*
+User-Agent: Thunder Client (https://www.thunderclient.com)
+Host: 127.0.0.1:8080
+Connection: close
+

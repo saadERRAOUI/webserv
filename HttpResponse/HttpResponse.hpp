@@ -10,8 +10,8 @@
 					on the request parsing
 	Date: 2025-04-15
 */
-// class HttpRequest ;
 class Connection;
+
 class HttpResponse
 {
 	std::map<int, std::string> status_code;
