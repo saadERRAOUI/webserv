@@ -64,7 +64,10 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 		}
 	}
 	if (it != Connections->end())
+	{
+		// delete it->second.GetRequest;
 		Connections->erase(it->first);
+	}
 }
 
 std::string HttpResponse::GetStatusCode(int code_number){

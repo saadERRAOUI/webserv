@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/25 19:36:16 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/05/27 23:26:39 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void manage_connections(WebServ *web, int epollfd)
     // todo remove this line
     std::ofstream file("received_data.txt", std::ios::out | std::ios::app);
     // todo remove this line
-    
+
     struct epoll_event event;
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
@@ -134,7 +134,7 @@ void manage_connections(WebServ *web, int epollfd)
                     file.write(BUFFER, size);
                     file.close();
                 }
-                
+
                 ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
                 if (result == PARSE_ERROR) {
                     std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
@@ -144,7 +144,6 @@ void manage_connections(WebServ *web, int epollfd)
                 //! to remove     
                 std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
-                //! to remove                           
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
             else if (
