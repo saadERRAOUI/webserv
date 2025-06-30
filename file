@@ -1,0 +1,51 @@
+Suggested corrected code snippet for headers:
+Replace this part:
+
+cpp
+Copy
+Edit
+for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+{
+    response += it->first;
+    response += ": ";
+    response += it->second;
+    response += "\r\n";
+}
+with something like:
+
+cpp
+Copy
+Edit
+// Example response headers:
+response += "Content-Type: text/html\r\n";
+response += "Content-Length: " + tostring((int)rt.size()) + "\r\n";
+response += "Connection: close\r\n";  // or keep-alive if needed
+response += "\r\n";
+response += rt;
+Why?
+Response headers need to describe the response, not echo the request headers.
+
+The Content-Length must match the body size.
+
+Content-Type should be set according to the error page content (usually text/html).
+
+Connection header depends on your server's behavior.
+
+Other headers like Date, Server can be added as well.
+
+Summary
+Your function currently echoes request headers as response headers which is not valid HTTP behavior. Instead, build the response headers yourself based on the response you want to send.
+
+If you want, I can help you refactor the full ErrorBuilder function with proper response headers! Would you like me to do that?
+
+
+
+
+Ask ChatGPT
+
+
+
+Search
+
+
+ChatGPT can make mistakes. Check impo

@@ -46,3 +46,4 @@ get the lenght of file and if we must serve this file in chunked mode or not
 
 change the name of the file to serve by an image to check if an error can happen .
 - add a map of content type, and check if with deferent URI
+- Serve errors correctly .

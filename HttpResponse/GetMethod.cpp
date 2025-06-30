@@ -206,6 +206,9 @@ std::string GetMethod(Connection *Infos)
       }
         // serve file if have a right permition
         else{
+            std::cout << "should call error builder\n";
+            std::cout << "The request URI: " <<  Infos->GetRequest().getRequestURI() << "\n";
+            std::cout << "Path: "<< result << "\n";
             return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
@@ -287,10 +290,30 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
 
         std::cout << "From this path we will serve : " << ActualPath << '\n';
-
+        std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
-            return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
-        std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+        {
+            
+            std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
+            std::cout << Infos->Getfd() << "\n";
+            const char response[] =
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 113\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            "<html>"
+            "<head><title>404 Not Found</title></head>"
+            "<body>"
+            "<h1>Not Found</h1>"
+            "<p>The requested URL was not found on this server.</p>"
+            "</body>"
+            "</html>";
+            write (Infos->Getfd(), response, strlen(response));
+            std::cout << response << '\n';
+            return("");
+        }     
+            std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
         response = Infos->GetRequest().getVersion();
         if (code != 200)
             ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
