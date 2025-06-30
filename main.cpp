@@ -6,7 +6,7 @@
 /*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/08 15:36:38 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/06/29 14:56:40 by hitchman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,13 @@
     Date        : 2024-12-22
     Description : main method
 */
-
-
 #include "Webserv.hpp"
 #include "server.hpp"
 #include "Connection/Connection.hpp"
 #include "HttpRequest/HttpRequest.hpp"
 #include "HttpResponse/HttpResponse.hpp"
+#include "HttpRequest/HttpRequestParser.hpp"
 #include "SetupServer/includes.hpp"
-
 
 /*
     Author: BOUZID Hicham
@@ -41,7 +39,6 @@ int is_server(int fdserver, std::vector<int> servers)
         return (1);
     return (0);
 }
-
 
 HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
@@ -83,11 +80,16 @@ void Print_static_Request(HttpRequest tmpReques){
 
 void manage_connections(WebServ *web, int epollfd)
 {
+    HttpRequestParser parser;
+    // todo remove this line
+    std::ofstream file("received_data.txt", std::ios::out | std::ios::app);
+    // todo remove this line
+
     struct epoll_event event;
     struct epoll_event events[MAX_EPOLL_EVENT];
     std::vector<int> sockservers;
     std::map<int , Connection> map_connections;
-    char BUFFER[8000] = {0};
+    char BUFFER[BUFFER_SIZE] = {0};
 
     for (std::vector<Server>::iterator it = web->getServers()->begin(); it != web->getServers()->end(); it++)
     {
@@ -115,24 +117,41 @@ void manage_connections(WebServ *web, int epollfd)
             {
                 Connection tmp = Connection(events[i].data.fd, epollfd, web);
                 map_connections[tmp.Getfd()] = tmp;
-                int to_check = tmp.Getfd();
-                std::cout << "fd client: " << to_check << '\n';
-                std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
+                // int to_check = tmp.Getfd();
+                // std::cout << "fd client: " << to_check << '\n';
+                // std::cout << "fd cliend: " << map_connections[to_check].Getfd() << '\n';
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLIN))
             {
-                int size = read(events[i].data.fd, BUFFER, 8000);
-                if (size < 8000)
+                int size = read(events[i].data.fd, BUFFER, BUFFER_SIZE);
+                if (size < BUFFER_SIZE)
                 {
                     map_connections[events[i].data.fd].ChagenMode(epollfd, events[i].data.fd, EPOLLOUT);
+                    if (!file.is_open())
+                    {
+                        std::cerr << "Error opening file >>  " << strerror(errno) << '\n'; // todo build error
+                        // return;
+                    }
+                    file.write(BUFFER, size);
+                    file.close();
                 }
-                HttpRequest *tmpRequest = ft_static_request();
-                map_connections[events[i].data.fd].SetHttpRequest(tmpRequest);
-                HttpResponse tmpHttpResponse(events[i].data.fd);
-                map_connections[events[i].data.fd].SetHttpRespons(&tmpHttpResponse);
+
+                ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
+                if (result == PARSE_ERROR) {
+                    std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                    //todo : should build response error here
+                    // return ;
+                }
+                //! to remove
+                std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                map_connections[events[i].data.fd].GetRequest().showRequest();
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
-            else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLOUT))
+            else if (
+                map_connections.size() &&
+                map_connections.find(events[i].data.fd) != map_connections.end() &&
+                (events[i].events & EPOLLOUT)
+            )
                     ResponseBuilder(&map_connections[events[i].data.fd]);
             MonitorConnection(&map_connections, epollfd);
         }
@@ -152,8 +171,6 @@ int main()
     catch (std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-
         throw e;
     }
-
 }

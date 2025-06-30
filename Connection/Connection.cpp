@@ -1,5 +1,10 @@
 #include "Connection.hpp"
 
+Connection::~Connection(){
+	// delete this->Request;
+	// delete this->Response;
+}
+
 /*
 	Author: BOUZID Hicham
 	Description: function get the current
@@ -59,6 +64,7 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 				s = &(*it);
 				this->CGI = NULL;
 				Request = NULL;
+				Request = new HttpRequest();
 				Response = NULL;
 				timeout = get_current_time();
 				path_optional = "";
@@ -95,7 +101,7 @@ HttpRequest &Connection::GetRequest(){
 	return (*this->Request);
 }
 
-void		Connection::SetHttpRespons(HttpResponse *Response){
+void		Connection::SetHttpResponse(HttpResponse *Response){
 	this->Response =  Response;
 }
 
@@ -157,7 +163,7 @@ int Connection::GetSize(){
 */
 void Connection::DefSize(int n){
 	this->size -= n;
-	if (this->size < 8000){
+	if (this->size < BUFFER_SIZE){
 		SetBool(true);
 		file->close();
 	}
@@ -188,3 +194,16 @@ void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 	if (epoll_ctl(FdEpoll, EPOLL_CTL_MOD, fd_client, &event))
 		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
 }
+
+
+/*
+	Author: BOUZID Hicham
+	Description: distructor of connection class
+	Date: 2025-05-24
+*/
+
+// Connection::~Connection(){
+// 	std::cout << "Distructor of connection class called.\n";
+// 	delete this->file;
+// 	delete this->Request;
+// }

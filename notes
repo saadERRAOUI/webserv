@@ -23,3 +23,6 @@ the HTTP request or response containe three iteems:
 
 actualy in  our project we use a container for some missing functions on macos, and we bind some port of container with ours
 (device ports) and cannot make request oustid the container to check if the servers recieve connections.
+
+
+search on routs for autoindex

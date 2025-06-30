@@ -15,7 +15,10 @@ HttpResponse::HttpResponse(int fd_client)
 	this->status_code[500] = std::string("Internal Server Error");
 }
 
-void ResponseBuilder(Connection *Infos){
+
+void ResponseBuilder(Connection *Infos) {
+	HttpResponse response(Infos->Getfd());
+	Infos->SetHttpResponse(&response);
 
     std::string version = Infos->GetRequest().getVersion();
     if (version != "HTTP/1.1" && version != "HTTP/1.0") {
@@ -33,20 +36,21 @@ void ResponseBuilder(Connection *Infos){
 
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
-
+	const std::string url = Infos->GetRequest().getRequestURI();
+	const size_t pos = url.find_last_of(".");
+	Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+	const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
 	if (HostName(&Infos->Getserver(), host) == false){
 		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
 		Infos->SetBool(true);
 		return ;
 	}
-	else if (Infos->GetRequest().getIsCGI())
+	else if (isCGI)
 {try {
     Cgi *cgi = Infos->getCGI();
 	
     if (!cgi) {
-        std::cout << "first time, never again\n";
-        Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
-        
+        std::cout << "pepe should be once\n";
         cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
         if (!cgi)
             throw std::bad_alloc();
@@ -64,14 +68,15 @@ void ResponseBuilder(Connection *Infos){
 		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 
 		std::string tmpstring = GetMethod(Infos);
-		write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
+		if (!tmpstring.empty())
+			write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
 		return ;
 	}
-	// else if (Infos->GetRequest().getMethod() == "POST"){
-
-	// }
+	else if (Infos->GetRequest().getMethod() == "POST"){
+		std::cout << "POST" << std::endl;
+	}
 	else if (Infos->GetRequest().getMethod() == "DELETE"){
-
+		std::cout << "DELETE" << std::endl;
 	}
 }
 
@@ -96,7 +101,10 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 		}
 	}
 	if (it != Connections->end())
+	{
+		// delete it->second.GetRequest;
 		Connections->erase(it->first);
+	}
 }
 
 std::string HttpResponse::GetStatusCode(int code_number){

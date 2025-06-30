@@ -101,7 +101,7 @@ void Cgi::execute()
         if ((childPid = fork()) == -1) {
             throw CGIException("Error: CGI: Fork failed");
         } else if (childPid == 0) {
-            // std::cout << "ok im forking";
+            std::cout << "ok im forking";
             freopen(output.c_str(), "w+", stdout);
             if (!input.empty())
                 freopen(input.c_str(), "r", stdin);

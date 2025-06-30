@@ -30,8 +30,9 @@ class Connection{
 	public:
 		Connection(int FdServer, int FdEpoll,WebServ *MainObject);
 		Connection();
+		~Connection();
 		void 			SetHttpRequest(HttpRequest *Request);
-		void			SetHttpRespons(HttpResponse *Response);
+		void			SetHttpResponse(HttpResponse *Response);
 		void			SetBool(bool);
 		bool			SetRedirect(std::string URI);
 		void			SetSize(int);

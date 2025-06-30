@@ -13,6 +13,7 @@
 // class HttpRequest ;
 std::string MatchRoutes(std::map<std::string, Route> &TmpRoutes, HttpRequest &TmpRequest);
 class Connection;
+
 class HttpResponse
 {
 	std::map<int, std::string> status_code;

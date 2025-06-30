@@ -22,7 +22,7 @@ int SetUpServer(Server to_create, int port)
         fd = socket(iter->ai_family, iter->ai_socktype , iter->ai_protocol);
             if (fd == -1)
                 continue;
-            if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
+            if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
             {
                 std::cerr << "Error setsocketopt: " << strerror(errno) << '\n';
                 close(fd);
@@ -30,7 +30,7 @@ int SetUpServer(Server to_create, int port)
             }
             if(bind(fd, iter->ai_addr, iter->ai_addrlen) < 0)
             {
-                std::cerr << "ERROR BIND: " << strerror(errno) << "\n";
+                // std::cerr << "ERROR BIND: " << strerror(errno) << "\n";
                 close(fd);
                 continue;
             }

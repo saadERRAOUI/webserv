@@ -159,6 +159,7 @@ std::string GetMethod(Connection *Infos)
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
+    std::cout << "this is the result: " << result << "\n";
     // in ths condition i checked for error pages or somthing wrong
     if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
@@ -191,13 +192,23 @@ std::string GetMethod(Connection *Infos)
           }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
+              {
+                //should serve the index file if found.
+                  std::cout << "Alert Alert Alert Alert\n";
+                  std::cout << "Result Result Result: "<< result<<"\n";
+                  if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
+                      return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
+              }
               else
                   return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
           }
       }
         // serve file if have a right permition
         else{
+            std::cout << "should call error builder\n";
+            std::cout << "The request URI: " <<  Infos->GetRequest().getRequestURI() << "\n";
+            std::cout << "Path: "<< result << "\n";
             return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
@@ -206,6 +217,61 @@ std::string GetMethod(Connection *Infos)
     //Check for all routes and autoindex
 }
 
+
+/*
+    Author: BOUZID Hicham
+    Description: this function will remou
+*/
+
+std::string RemovePrefix(std::string URI, std::string location, std::string root){
+    std::string Result = std::string(".") + root + URI.substr(location.size() - 1, URI.size());
+    // std::cout << "This is suffex of file: " << Result << "\n" ;
+    return (Result);
+}
+
+/*
+    Author: BOUZID Hicham
+    Description: function return the content type of file
+    Date: 2025-05-26
+*/
+
+std::string ContentType(std::string file){
+    int index = file.size();
+    std::string result;
+    std::map<std::string, std::string> mimeTypes;
+
+    // Populate the map
+    mimeTypes[".html"] = "text/html";
+    mimeTypes[".htm"] = "text/html";
+    mimeTypes[".css"] = "text/css";
+    mimeTypes[".js"] = "application/javascript";
+    mimeTypes[".json"] = "application/json";
+    mimeTypes[".xml"] = "application/xml";
+    mimeTypes[".jpg"] = "image/jpeg";
+    mimeTypes[".jpeg"] = "image/jpeg";
+    mimeTypes[".png"] = "image/png";
+    mimeTypes[".gif"] = "image/gif";
+    mimeTypes[".svg"] = "image/svg+xml";
+    mimeTypes[".pdf"] = "application/pdf";
+    mimeTypes[".zip"] = "application/zip";
+    mimeTypes[".tar"] = "application/x-tar";
+    mimeTypes[".mp3"] = "audio/mpeg";
+    mimeTypes[".wav"] = "audio/wav";
+    mimeTypes[".mp4"] = "video/mp4";
+    mimeTypes[".avi"] = "video/x-msvideo";
+    mimeTypes[".txt"] = "text/plain";
+    mimeTypes[".csv"] = "text/csv";
+    mimeTypes[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    // add map of extension and value content type
+    for (int i = index - 1; i != 0; i--){
+        if (file[i] == '.'){
+            result = file.substr(i, index);
+            break ;
+        }
+    }
+    return (mimeTypes[result].size() ? mimeTypes[result] : std::string("text/html"));
+}
 
 /*
     Author: BOUZID Hicham
@@ -220,11 +286,34 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
     response = std::string("");
     if (!Infos->GetRequest().getVersion().empty())
     {
-        ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
-        std::cout << "From this path we will serve: " << ActualPath << '\n';
+        RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+        ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+
+        std::cout << "From this path we will serve : " << ActualPath << '\n';
+        std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
-            return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
-        std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+        {
+            
+            std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
+            std::cout << Infos->Getfd() << "\n";
+            const char response[] =
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 113\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            "<html>"
+            "<head><title>404 Not Found</title></head>"
+            "<body>"
+            "<h1>Not Found</h1>"
+            "<p>The requested URL was not found on this server.</p>"
+            "</body>"
+            "</html>";
+            write (Infos->Getfd(), response, strlen(response));
+            std::cout << response << '\n';
+            return("");
+        }     
+            std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
         response = Infos->GetRequest().getVersion();
         if (code != 200)
             ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
@@ -240,14 +329,15 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         }
         Infos->SetSize(GetLenght(ActualPath));
         std::cout << "the size of file is: " << Infos->GetSize() << "\n";
-        // response += "Content-Type: image/jpeg\r\n";
+        response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
+        write (1, response.c_str(), strlen(response.c_str()));
         write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
         std::string rt = OpenFile(ActualPath, true, Infos);
         response += rt;
         Infos->GetRequest().ClearURI();
-        return (response);
+        return (std::string(""));
     }
     std::string rt = OpenFile(ActualPath, false, Infos);
     return (std::string(""));
