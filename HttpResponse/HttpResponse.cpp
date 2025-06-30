@@ -20,16 +20,53 @@ void ResponseBuilder(Connection *Infos) {
 	HttpResponse response(Infos->Getfd());
 	Infos->SetHttpResponse(&response);
 
+    std::string version = Infos->GetRequest().getVersion();
+    if (version != "HTTP/1.1" && version != "HTTP/1.0") {
+        // Hardcoded minimal HTTP/1.1 400 Bad Request response
+        const char *bad_request =
+            "HTTP/1.1 400 Bad Request\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 45\r\n"
+            "\r\n"
+            "<html><body>400 Bad Request</body></html>";
+        write(Infos->Getfd(), bad_request, strlen(bad_request));
+        Infos->SetBool(true);
+        return;
+    }
+
 	std::string host = Infos->GetRequest().getHeaders()["Host"];
 	Server *TmpServer =  &Infos->Getserver();
-
+	const std::string url = Infos->GetRequest().getRequestURI();
+	const size_t pos = url.find_last_of(".");
+	Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+	const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
 	if (HostName(&Infos->Getserver(), host) == false){
 		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
 		Infos->SetBool(true);
 		return ;
 	}
-	else if (Infos->GetRequest().getMethod() == "GET") {
-		std::cout << "GET" << std::endl;
+	else if (isCGI)
+{try {
+    Cgi *cgi = Infos->getCGI();
+	
+    if (!cgi) {
+        std::cout << "pepe should be once\n";
+        cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
+        if (!cgi)
+            throw std::bad_alloc();
+
+        Infos->SetCGI(cgi);
+    }
+    cgi->execute(); 
+}catch (const Cgi::CGIException &e) {
+	
+    std::string tmp =  ErrorBuilder(Infos, TmpServer, 500);
+    return;
+}}
+	
+	else if (Infos->GetRequest().getMethod() == "GET"){
+		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
+
 		std::string tmpstring = GetMethod(Infos);
 		if (!tmpstring.empty())
 			write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));

@@ -10,6 +10,8 @@
 					on the request parsing
 	Date: 2025-04-15
 */
+// class HttpRequest ;
+std::string MatchRoutes(std::map<std::string, Route> &TmpRoutes, HttpRequest &TmpRequest);
 class Connection;
 
 class HttpResponse

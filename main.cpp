@@ -44,13 +44,14 @@ HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
     // std::string method = "GET"
     request->setMethod(std::string("GET"));
-    request->setRequestURI(std::string("/api/v1/tree.jpg"));
+    request->setRequestURI(std::string("/api/v1/script.s"));
     request->setVersion(std::string("HTTP/1.1"));
     request->setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
     request->setHeaders(std::string("Accept"), std::string("*/*"));
     request->setHeaders(std::string("User-Agent"), std::string("Thunder Client (https://www.thunderclient.com)"));
     request->setHeaders(std::string("Host"), std::string("example.com"));
     request->setHeaders(std::string("Connection"), std::string("close"));
+    request->setIsCGI(true);
     // Host
     return (request);
 

@@ -52,6 +52,11 @@ class HttpRequest {
         
         /* utility variables */
         int                                 _state;
+        bool                                isCGI;
+        /*
+            Parsers map handlers
+        */
+        std::map<HttpRequestState, void (HttpRequest::*)(char)> _methodHandlerMap;
         bool                                _isChunked;
         // int                                 _bodyFd;
         std::string                         _headerKey;
@@ -78,6 +83,9 @@ class HttpRequest {
         std::string                         getBody() const;
         std::map<std::string, std::string>  getHeaders() const;
         int                                 getState() const;
+        std::map<std::string, std::string>  getQueryParams() const;
+        std::string                         getHeader(std::string key) const;
+        bool                                getIsCGI();
         std::string                         getHeaderKey() const;
         std::string                         getHeaderValue() const;
         int                                 getEndSequenceState() const;
@@ -88,6 +96,7 @@ class HttpRequest {
             Setters
         */
         void            setMethod(std::string);
+        void            setIsCGI(bool iscgi);
         void            setRequestURI(std::string);
         void            setVersion(std::string);
         void            setBodyFd(int);

@@ -121,7 +121,6 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
         Infos->SetBool(true);
     return (response);
 }
-
 /*
 	Author: BOUZID Hicham
 	Description: convert number to std::string

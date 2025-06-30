@@ -62,6 +62,8 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 			if (*it_sock == FdServer)
 			{
 				s = &(*it);
+				this->CGI = NULL;
+				Request = NULL;
 				Request = new HttpRequest();
 				Response = NULL;
 				timeout = get_current_time();
@@ -75,7 +77,8 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 }
 
 Connection::Connection(){
-	Request = new HttpRequest();
+	this->CGI = NULL;
+	Request = NULL;
 	s = NULL;
 	fd_client = 0;
 	size = 0;
@@ -112,6 +115,14 @@ Server& Connection::Getserver(){
 
 void Connection::SetBool(bool f){
 	this->done = f;
+}
+
+void Connection::SetCGI(Cgi *cgi){
+	this->CGI = cgi;
+}
+
+Cgi *Connection::getCGI(){
+	return this->CGI;
 }
 
 bool Connection::GetBool(){
@@ -177,7 +188,7 @@ std::ifstream *Connection::GetFile(){
 void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 {
 	struct epoll_event event;
-
+	std::cout << "pepe\n";
 	event.events = mood;
 	event.data.fd = fd_client;
 	if (epoll_ctl(FdEpoll, EPOLL_CTL_MOD, fd_client, &event))
