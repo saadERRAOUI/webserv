@@ -36,3 +36,4 @@ Allowed_function
 .clangd-format
 compile_flags.txt
 .cursor/
+www/html/uploads

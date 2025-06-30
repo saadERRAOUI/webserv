@@ -1087,4 +1087,10 @@ Accept: */*
 Content-Type: image/jpeg
 Content-Length: 49
 
-/Users/hitchman/Desktop/webserv/www/html/tree.jpg
+/Users/hitchman/Desktop/webserv/www/html/tree.jpgPOST /upload HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Content-Type: image/jpeg
+Content-Length: 227381
+
