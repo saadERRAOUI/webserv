@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestParser.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:32 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/25 19:37:04 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/06/30 23:31:20 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,14 +313,8 @@ ParseResult HttpRequestParser::parseHttpBodyMethod(HttpRequest &request, char by
         break;
 
     case HTTP_BODY:
-        if (byte == '\r')
-        {
-            return PARSE_INPROGRESS;
-        }
-        else
-        {
-            request.setBody(request.getBody() + byte);
-        }
+        // Continue reading body data, including \r characters
+        request.setBody(request.getBody() + byte);
         break;
     }
     return PARSE_INPROGRESS;
