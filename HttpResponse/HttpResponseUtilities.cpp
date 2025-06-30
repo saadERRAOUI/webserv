@@ -96,30 +96,30 @@ std::string chose_one(std::string a, std::string b){
 
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
-	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
-	std::string response = Infos->GetRequest().getVersion();
-	std::string DefaultOrOurs;
+    std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+    std::string response = Infos->GetRequest().getVersion();
+    std::string DefaultOrOurs;
 
-	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
-	response += " " + tostring(code) + " ";
-	response += Infos->GetResponse().GetStatusCode(code);
-	response += "\r\n";
-	// for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-	// {
-	// 	response += it->first;
-	// 	response += ": ";
-	// 	response += it->second;
-	// 	response += "\r\n";
-	// }
-	std::string rt = OpenFile(DefaultOrOurs, true, Infos);
-	response += "Content-Type: text/html\r\n";
-	response += "Content-Length: " + tostring((int)rt.size()) + std::string("\r\n");
-	response += "Connection: close";
-	response += "\r\n\r\n";
-	response += rt;
-	if (code != 301)
-		Infos->SetBool(true);
-	return (response);
+    DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
+    response += " " + tostring(code) + " ";
+    response += Infos->GetResponse().GetStatusCode(code);
+    response += "\r\n";
+    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
+    {
+        response += it->first;
+        response += ": ";
+        response += it->second;
+        response += "\r\n";
+    }
+    response += "Content-Length: " + tostring(GetLenght(DefaultOrOurs));
+    response += "\r\n\r\n";
+    write(Infos->Getfd(), response.c_str(), strlen(response.c_str()));
+    // write();
+    std::string rt = OpenFile(DefaultOrOurs, true, Infos);
+    response += rt;
+    if (code != 301)
+        Infos->SetBool(true);
+    return (response);
 }
 
 /*
