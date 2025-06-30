@@ -13,6 +13,7 @@ const Route &Route::operator=(const Route &other)
         this->redirection = other.redirection;
         this->autoindex = other.autoindex;
         this->cgi_extensons = other.cgi_extensons;
+        this->upload_path = other.upload_path;
     }
     return *this;
 }
@@ -26,13 +27,14 @@ Route::Route(const Route &other)
     this->redirection = other.redirection;
     this->autoindex = other.autoindex;
     this->cgi_extensons = other.cgi_extensons;
+    this->upload_path = other.upload_path;
 
 }
 
 std::string Route::getCgiPath(const std::string& request_path) const {
     std::string relative_path = request_path.substr(this->path.size());
-    
-    return this->root  + relative_path; 
+
+    return this->root  + relative_path;
 }
 
 std::string Route::getPath() const
@@ -84,7 +86,7 @@ bool Route::getAutoindex() const
     return this->autoindex;
 }
 
-std::string Route::setPath(std::string path) 
+std::string Route::setPath(std::string path)
 {
     this->path = path;
     return this->path;

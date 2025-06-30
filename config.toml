@@ -23,3 +23,4 @@ autoindex = true
 index = "index.html"
 root = "./www/html/pepe/"
 CGI_extensions = {py =  "/usr/bin/python3", php = "/usr/bin/php"}
+upload = "./www/html/uploads/"

@@ -293,7 +293,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
         {
-            
+
             std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
             std::cout << Infos->Getfd() << "\n";
             const char response[] =
@@ -312,7 +312,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
             write (Infos->Getfd(), response, strlen(response));
             std::cout << response << '\n';
             return("");
-        }     
+        }
             std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
         response = Infos->GetRequest().getVersion();
         if (code != 200)

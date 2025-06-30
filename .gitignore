@@ -35,3 +35,4 @@ Allowed_function
 .vscode
 .clangd-format
 compile_flags.txt
+.cursor/
