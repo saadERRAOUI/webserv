@@ -68,7 +68,7 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 {
     std::string ActualPath;
 
-    ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    ActualPath = Infos->Getserver().getRoutes()[route].getRoot() + URI;
     std::cout << "From this path we will serve: " << ActualPath << '\n';
     if (access(ActualPath.c_str(), R_OK))
         return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
@@ -110,7 +110,7 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     struct dirent *dp;
 
     // std::cout << "ENTER into list files: " << '\n';
-    ActualPath = std::string(".") + Infos->Getserver().getRoutes()[route].getRoot() + URI;
+    ActualPath = Infos->Getserver().getRoutes()[route].getRoot() + URI;
     std::cout << "From this path we will serve: " << ActualPath << '\n';
     if ((dir = opendir(ActualPath.c_str())) == NULL)
         return (ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403 : 404)));
@@ -224,7 +224,7 @@ std::string GetMethod(Connection *Infos)
 */
 
 std::string RemovePrefix(std::string URI, std::string location, std::string root){
-    std::string Result = std::string(".") + root + URI.substr(location.size() - 1, URI.size());
+    std::string Result =  root + URI.substr(location.size() - 1, URI.size());
     // std::cout << "This is suffex of file: " << Result << "\n" ;
     return (Result);
 }

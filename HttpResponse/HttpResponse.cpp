@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
+std::string RemovePrefix(std::string URI, std::string location, std::string root);
 HttpResponse::HttpResponse(int fd_client)
 {
 	// std::cout << "need to remove just for check Response builder\n";
@@ -74,6 +75,31 @@ void ResponseBuilder(Connection *Infos) {
 			std::string tmp =  ErrorBuilder(Infos, TmpServer, 500);
 			return;
 		}
+	}
+
+	// Enforce allowed methods per route
+	std::vector<std::string> allowed_methods = matchedRoute.getMethods();
+	std::string req_method = Infos->GetRequest().getMethod();
+	bool method_allowed = false;
+	for (size_t i = 0; i < allowed_methods.size(); ++i) {
+		if (allowed_methods[i] == req_method) {
+			method_allowed = true;
+			break;
+		}
+	}
+	if (!method_allowed) {
+		std::ostringstream oss;
+		oss << "HTTP/1.1 405 Method Not Allowed\r\n";
+		oss << "Allow: ";
+		for (size_t i = 0; i < allowed_methods.size(); ++i) {
+			if (i > 0) oss << ", ";
+			oss << allowed_methods[i];
+		}
+		oss << "\r\nContent-Type: text/plain\r\nContent-Length: 23\r\nConnection: close\r\n\r\nMethod Not Allowed\n";
+		std::string response = oss.str();
+		write(Infos->Getfd(), response.c_str(), response.size());
+		Infos->SetBool(true);
+		return;
 	}
 
 	else if (Infos->GetRequest().getMethod() == "GET"){
@@ -324,7 +350,64 @@ void ResponseBuilder(Connection *Infos) {
 		return;
 	}
 	else if (Infos->GetRequest().getMethod() == "DELETE"){
-		std::cout << "DELETE" << std::endl;
+		std::cout << "[DEBUG] DELETE method received for URI: " << Infos->GetRequest().getRequestURI() << std::endl;
+		std::string route = MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest());
+		if (route == "404" || route == "405") {
+			std::string err = ErrorBuilder(Infos, TmpServer, atoi(route.c_str()));
+			Infos->SetBool(true);
+			return;
+		}
+		std::string file_path = RemovePrefix(Infos->GetRequest().getRequestURI(), route, Infos->Getserver().getRoutes()[route].getRoot());
+		std::cout << "[DEBUG] DELETE resolved file path: " << file_path << std::endl;
+		struct stat st;
+		if (stat(file_path.c_str(), &st) != 0) {
+			// File does not exist
+			std::string err = ErrorBuilder(Infos, TmpServer, 404);
+			Infos->SetBool(true);
+			return;
+		}
+		if (unlink(file_path.c_str()) == 0) {
+			// Success: 204 No Content
+			std::ostringstream oss;
+			oss << "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+			std::string response = oss.str();
+			write(Infos->Getfd(), response.c_str(), response.size());
+			Infos->SetBool(true);
+			return;
+		} else {
+			if (errno == EACCES || errno == EPERM) {
+				std::string err = ErrorBuilder(Infos, TmpServer, 403);
+				Infos->SetBool(true);
+				return;
+			} else {
+				std::string err = ErrorBuilder(Infos, TmpServer, 500);
+				Infos->SetBool(true);
+				return;
+			}
+		}
+	}
+	else if (Infos->GetRequest().getRequestURI() == "/cookie-test") {
+		Infos->GetRequest().parseCookies();
+		std::string cookieVal = Infos->GetRequest().getCookie("mycookie");
+		std::string response_body;
+		if (cookieVal.empty()) {
+			Infos->GetResponse().addSetCookie("mycookie=webserv; Path=/; HttpOnly");
+			response_body = "Cookie set! Reload to see it echoed.";
+		} else {
+			response_body = "Cookie value: " + cookieVal;
+		}
+		std::ostringstream oss;
+		oss << "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " << response_body.size() << "\r\n";
+		// Add Set-Cookie headers
+		const std::vector<std::string>& cookies = Infos->GetResponse().getSetCookies();
+		for (size_t i = 0; i < cookies.size(); ++i) {
+			oss << "Set-Cookie: " << cookies[i] << "\r\n";
+		}
+		oss << "Connection: close\r\n\r\n" << response_body;
+		std::string response = oss.str();
+		write(Infos->Getfd(), response.c_str(), response.size());
+		Infos->SetBool(true);
+		return;
 	}
 	else {
 		std::cout << "[DEBUG] No matching method branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
@@ -360,4 +443,8 @@ void MonitorConnection(std::map<int, Connection> *Connections,int epollFd){
 
 std::string HttpResponse::GetStatusCode(int code_number){
 	return status_code[code_number];
+}
+
+void HttpResponse::addSetCookie(const std::string& cookie) {
+    set_cookies.push_back(cookie);
 }

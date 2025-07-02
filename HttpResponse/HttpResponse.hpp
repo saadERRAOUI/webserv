@@ -19,10 +19,12 @@ class HttpResponse
 	std::map<int, std::string> status_code;
 	int offset;
 	int fd_client;
+	std::vector<std::string> set_cookies;
 	public:
 	HttpResponse(int fd_client);
-
+	void addSetCookie(const std::string& cookie);
 	std::string			GetStatusCode(int);
+	const std::vector<std::string>& getSetCookies() const { return set_cookies; }
 };
 
 void			ResponseBuilder(Connection *);

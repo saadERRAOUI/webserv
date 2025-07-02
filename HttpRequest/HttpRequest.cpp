@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/02 19:18:30 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/02 21:03:22 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,4 +172,29 @@ void            HttpRequest::showRequest() const {
     std::cout << "Body: " << _body << std::endl;
     std::cout << "Body size: " << _body.length() << std::endl;
     std::cout << "State: " << _state << std::endl;
+}
+
+void HttpRequest::parseCookies() {
+    _cookies.clear();
+    std::string cookieHeader = getHeader("Cookie");
+    size_t pos = 0;
+    while (pos < cookieHeader.size()) {
+        size_t eq = cookieHeader.find('=', pos);
+        if (eq == std::string::npos) break;
+        size_t sc = cookieHeader.find(';', eq);
+        std::string name = cookieHeader.substr(pos, eq - pos);
+        std::string value = (sc == std::string::npos) ? cookieHeader.substr(eq + 1) : cookieHeader.substr(eq + 1, sc - eq - 1);
+        // Trim whitespace
+        while (!name.empty() && (name[0] == ' ' || name[0] == '\t')) name.erase(0, 1);
+        while (!value.empty() && (value[0] == ' ' || value[0] == '\t')) value.erase(0, 1);
+        _cookies[name] = value;
+        if (sc == std::string::npos) break;
+        pos = sc + 1;
+    }
+}
+
+std::string HttpRequest::getCookie(const std::string& name) const {
+    std::map<std::string, std::string>::const_iterator it = _cookies.find(name);
+    if (it != _cookies.end()) return it->second;
+    return "";
 }

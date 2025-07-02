@@ -1238,3 +1238,287 @@ Second chunk here
 Third and final chunk
 0
 
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+GET /cookie-test HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Cookie: mycookie=webserv
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+GET / HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Cookie: auth_session=623rx2z4hxoktuf5s23m3th6zdfws3apwko4zudp; wp-settings-time-1=1745135755
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+GET / HTTP/1.1
+Host: 127.0.0.1:1234
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+GET / HTTP/1.1
+Host: 127.0.0.1:1234
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+POST /test HTTP/1.1
+Host: 127.0.0.1:8080
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+13
+First chunk of data
+11
+Second chunk here
+15
+Third and final chunk
+0
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+GET /tree.jpg HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+DELETE /treee.png HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: curl/7.81.0
+Accept: */*
+

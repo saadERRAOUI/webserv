@@ -18,9 +18,9 @@ max_body_size = "23"
 505 = "505.html"
 [[server.route]]
 path = "/"
-methods = ["GET"]
+methods = ["GET","DELETE"]
 autoindex = true
 index = "index.html"
-root = "./www/html/pepe/"
+root = "./www/html/pepe/api/v1"
 CGI_extensions = {py =  "/usr/bin/python3", php = "/usr/bin/php"}
 upload = "./www/html/uploads/"

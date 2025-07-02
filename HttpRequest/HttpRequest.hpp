@@ -49,6 +49,7 @@ class HttpRequest {
         std::string                         _version; //"1.1, 1.0"
         std::string                         _body; //"content"
         std::map<std::string, std::string>  _headers; // <Host, example.com>
+        std::map<std::string, std::string>  _cookies;
         
         /* utility variables */
         int                                 _state;
@@ -114,4 +115,7 @@ class HttpRequest {
         void            setFragment(std::string);
 
         void            showRequest() const;
+
+        void parseCookies();
+        std::string getCookie(const std::string& name) const;
 };
