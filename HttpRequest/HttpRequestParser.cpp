@@ -6,11 +6,18 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:32 by serraoui          #+#    #+#             */
-/*   Updated: 2025/06/30 23:31:20 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/02 19:18:19 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequestParser.hpp"
+
+// Helper to convert a string to lowercase
+std::string to_lower(const std::string& s) {
+    std::string out = s;
+    for (size_t i = 0; i < out.size(); ++i) out[i] = std::tolower(out[i]);
+    return out;
+}
 
 HttpRequestParser::HttpRequestParser()
 {
@@ -281,12 +288,11 @@ ParseResult HttpRequestParser::parseHttpHeadersMethod(HttpRequest &request, char
         if (byte == '\n')
         {
             request.setState(HTTP_HEADER_START);
-            if (
-                request.getMethod() == "POST" &&
-                request.getHeaderKey() == "Transfer-encoding" &&
-                request.getHeaderValue() == "chuncked")
+            std::string key_lower = to_lower(request.getHeaderKey());
+            std::string val_lower = to_lower(request.getHeaderValue());
+            request.setHeaders(key_lower, request.getHeaderValue());
+            if (key_lower == "transfer-encoding" && val_lower.find("chunked") != std::string::npos)
                 request.setIsChunked(true);
-            request.setHeaders(request.getHeaderKey(), request.getHeaderValue());
             request.setHeaderKey("");
             request.setHeaderValue("");
         }
@@ -381,4 +387,25 @@ std::string HttpRequestParser::getStateName(HttpRequestState state) const
     default:
         return "UNKNOWN_STATE";
     }
+}
+
+// Utility to decode chunked transfer encoding
+std::string decode_chunked_body(const std::string& raw_body) {
+    std::cout << "[DEBUG] Raw chunked body received (size=" << raw_body.size() << "):\n" << raw_body << std::endl;
+    std::string decoded;
+    size_t pos = 0;
+    while (pos < raw_body.size()) {
+        // Find the next CRLF for the chunk size
+        size_t crlf = raw_body.find("\r\n", pos);
+        if (crlf == std::string::npos) break;
+        std::string size_str = raw_body.substr(pos, crlf - pos);
+        int chunk_size = strtol(size_str.c_str(), NULL, 16);
+        if (chunk_size == 0) break;
+        pos = crlf + 2;
+        if (pos + chunk_size > raw_body.size()) break;
+        decoded.append(raw_body.substr(pos, chunk_size));
+        pos += chunk_size + 2; // skip chunk and trailing CRLF
+    }
+    std::cout << "[DEBUG] Decoded chunked body (size=" << decoded.size() << "):\n" << decoded << std::endl;
+    return decoded;
 }

@@ -1,4 +1,5 @@
 #include "HttpResponse.hpp"
+#include "../HttpRequest/HttpRequestParser.hpp"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -42,7 +43,7 @@ void ResponseBuilder(Connection *Infos) {
     //     return;
     // }
 
-	std::string host = Infos->GetRequest().getHeaders()["Host"];
+	std::string host = Infos->GetRequest().getHeaders()["host"];
 	Server *TmpServer =  &Infos->Getserver();
 	const std::string url = Infos->GetRequest().getRequestURI();
 	const size_t pos = url.find_last_of(".");
@@ -87,9 +88,101 @@ void ResponseBuilder(Connection *Infos) {
 		std::cout << "[DEBUG] Method string: '" << Infos->GetRequest().getMethod() << "' length: " << Infos->GetRequest().getMethod().size() << std::endl;
 		std::cout << "POST" << std::endl;
 
-		// Read Content-Length header
+		if (Infos->GetRequest().getIsChunked()) {
+			std::string raw_body = Infos->GetRequest().getBody();
+			if (raw_body.size() < 5 || raw_body.substr(raw_body.size() - 5) != "0\r\n\r\n") {
+				std::cout << "[DEBUG] Waiting for full chunked body, current size=" << raw_body.size() << std::endl;
+				return;
+			}
+			std::cout << "[DEBUG] Detected chunked transfer encoding for POST" << std::endl;
+			std::string decoded_body = decode_chunked_body(raw_body);
+			Infos->GetRequest().setBody(decoded_body);
+			std::cout << "[DEBUG] Decoded chunked body, size=" << decoded_body.size() << std::endl;
+			// Continue with the rest of the POST logic as if body is ready
+			// Save uploaded file if upload directory is set
+			std::string upload_dir = matchedRoute.getUpload();
+			std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
+			if (!upload_dir.empty()) {
+				// MIME type to extension map
+				std::map<std::string, std::string> mimeTypes;
+				mimeTypes["text/html"] = ".html";
+				mimeTypes["text/css"] = ".css";
+				mimeTypes["application/javascript"] = ".js";
+				mimeTypes["application/json"] = ".json";
+				mimeTypes["application/xml"] = ".xml";
+				mimeTypes["image/jpeg"] = ".jpg";
+				mimeTypes["image/png"] = ".png";
+				mimeTypes["image/gif"] = ".gif";
+				mimeTypes["image/svg+xml"] = ".svg";
+				mimeTypes["application/pdf"] = ".pdf";
+				mimeTypes["application/zip"] = ".zip";
+				mimeTypes["application/x-tar"] = ".tar";
+				mimeTypes["audio/mpeg"] = ".mp3";
+				mimeTypes["audio/wav"] = ".wav";
+				mimeTypes["video/mp4"] = ".mp4";
+				mimeTypes["video/x-msvideo"] = ".avi";
+				mimeTypes["text/plain"] = ".txt";
+				mimeTypes["text/csv"] = ".csv";
+				mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
+
+				// Ensure directory exists (mkdir -p style, but only one level for C++98)
+				struct stat st;
+				if (stat(upload_dir.c_str(), &st) != 0) {
+					if (mkdir(upload_dir.c_str(), 0777) != 0) {
+						std::cerr << "[DEBUG] Failed to create upload directory: " << upload_dir << std::endl;
+					}
+				}
+				// Get Content-Type header
+				std::string content_type = Infos->GetRequest().getHeader("Content-Type");
+				std::string ext = ".bin";
+				if (mimeTypes.find(content_type) != mimeTypes.end()) {
+					ext = mimeTypes[content_type];
+				}
+				// Generate a filename (upload_TIMESTAMP.ext)
+				char filename[128];
+				time_t now = time(0);
+				sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
+				std::string full_path = upload_dir + filename;
+				std::ofstream outfile(full_path.c_str(), std::ios::binary);
+				if (outfile.is_open()) {
+					outfile.write(decoded_body.c_str(), decoded_body.size());
+					outfile.close();
+					std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
+					// Respond with 201 Created
+					std::string response_body = "File uploaded to: " + full_path + "\n";
+					char header[256];
+					sprintf(header,
+						"HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
+						(unsigned long)response_body.size());
+					std::string response = std::string(header) + response_body;
+					write(Infos->Getfd(), response.c_str(), response.size());
+					Infos->SetBool(true);
+					return;
+				} else {
+					std::cerr << "[DEBUG] Failed to open file for upload: " << full_path << std::endl;
+				}
+			}
+			// Send a simple 200 OK response after reading the POST body
+			std::cout << "[DEBUG] About to send 200 OK response for POST (chunked)" << std::endl;
+			std::string response_body = "POST received!\n";
+			std::ostringstream oss;
+			oss << "HTTP/1.1 200 OK\r\n"
+				<< "Content-Type: text/plain\r\n"
+				<< "Content-Length: " << response_body.size() << "\r\n"
+				<< "Connection: close\r\n"
+				<< "\r\n"
+				<< response_body;
+			std::string response = oss.str();
+			int w = write(Infos->Getfd(), response.c_str(), response.size());
+			std::cout << "[DEBUG] Sent 200 OK response for POST (chunked), write returned: " << w << std::endl;
+			Infos->SetBool(true);
+			std::cout << "[DEBUG] SetBool(true) called, returning from POST branch (chunked)" << std::endl;
+			return;
+		}
+
+		// Only check for Content-Length if not chunked
 		std::map<std::string, std::string> headers = Infos->GetRequest().getHeaders();
-		std::map<std::string, std::string>::iterator it = headers.find("Content-Length");
+		std::map<std::string, std::string>::iterator it = headers.find("content-length");
 		if (it == headers.end()) {
 			std::cerr << "No Content-Length header in POST request" << std::endl;
 			const char *length_required =

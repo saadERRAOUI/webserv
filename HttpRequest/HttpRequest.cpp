@@ -3,14 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/25 19:12:03 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/07/02 19:18:30 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequest.hpp"
+#include <cctype>
+#include <string>
+
+// Declaration for to_lower utility
+std::string to_lower(const std::string& s);
 
 /*
     Constructors & Destructors
@@ -91,7 +96,8 @@ std::map<std::string, std::string> HttpRequest::getQueryParams() const {
 }
 
 std::string     HttpRequest::getHeader(std::string key) const {
-    std::map<std::string, std::string>::const_iterator it = _headers.find(key);
+    std::string key_lower = to_lower(key);
+    std::map<std::string, std::string>::const_iterator it = _headers.find(key_lower);
     if (it != _headers.end()) {
         return it->second;
     }
