@@ -46,7 +46,7 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 		Infos->SetSize(Infos->GetFile()->gcount());
 		Infos->DefSize(0);
 		return (std::string(BUFFER, Infos->GetSize()));
-		// std::cout << "here.\n";
+		std::cout << "here.\n";
 	}
     Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
 	write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
@@ -66,8 +66,8 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 */
 bool HostName(Server *tmpServer, std::string name)
 {
-	// std::cout << "the name of server is : " << name << '\n';
-	// std::cout << "the first server name is: " << *(tmpServer->getServerName().begin()) << '\n';
+	std::cout << "the name of server is : " << name << '\n';
+	std::cout << "the first server name is: " << *(tmpServer->getServerName().begin()) << '\n';
 	std::vector<std::string>::iterator it = find(tmpServer->getServerName().begin(), tmpServer->getServerName().end(), name);
 	if (it == tmpServer->getServerName().end())
 		return (false);

@@ -391,7 +391,7 @@ std::string HttpRequestParser::getStateName(HttpRequestState state) const
 
 // Utility to decode chunked transfer encoding
 std::string decode_chunked_body(const std::string& raw_body) {
-    // std::cout << "[DEBUG] Raw chunked body received (size=" << raw_body.size() << "):\n" << raw_body << std::endl;
+    std::cout << "[DEBUG] Raw chunked body received (size=" << raw_body.size() << "):\n" << raw_body << std::endl;
     std::string decoded;
     size_t pos = 0;
     while (pos < raw_body.size()) {
@@ -406,6 +406,6 @@ std::string decode_chunked_body(const std::string& raw_body) {
         decoded.append(raw_body.substr(pos, chunk_size));
         pos += chunk_size + 2; // skip chunk and trailing CRLF
     }
-    // std::cout << "[DEBUG] Decoded chunked body (size=" << decoded.size() << "):\n" << decoded << std::endl;
+    std::cout << "[DEBUG] Decoded chunked body (size=" << decoded.size() << "):\n" << decoded << std::endl;
     return decoded;
 }

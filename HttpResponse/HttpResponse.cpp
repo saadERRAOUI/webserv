@@ -5,30 +5,268 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+
 std::string RemovePrefix(std::string URI, std::string location, std::string root);
-HttpResponse::HttpResponse(int fd_client)
-{
-	std::cout << "need to remove just for check Response builder\n";
-	this->fd_client = fd_client;
-	offset = 0;
-	this->status_code[200] = std::string("OK");
-	this->status_code[301] = std::string("Moved Permanently");
-	this->status_code[400] = std::string("Bad Request");
-	this->status_code[403] = std::string("Forbidden");
-	this->status_code[404] = std::string("Not Found");
-	this->status_code[405] = std::string("Method Not Allowed");
-	this->status_code[413] = std::string("Payload Too Large");
-	this->status_code[500] = std::string("Internal Server Error");
+
+// --- Helper Functions ---
+
+static void sendErrorResponse(Connection *Infos, Server *TmpServer, int code) {
+    std::string err = ErrorBuilder(Infos, TmpServer, code);
+    write(Infos->Getfd(), err.c_str(), err.size());
+    Infos->SetBool(true);
 }
 
+static void send405(Connection *Infos, const std::vector<std::string>& allowed_methods) {
+    std::ostringstream oss;
+    oss << "HTTP/1.1 405 Method Not Allowed\r\n";
+    oss << "Allow: ";
+    for (size_t i = 0; i < allowed_methods.size(); ++i) {
+        if (i > 0) oss << ", ";
+        oss << allowed_methods[i];
+    }
+    oss << "\r\nContent-Type: text/plain\r\nContent-Length: 23\r\nConnection: close\r\n\r\nMethod Not Allowed\n";
+    std::string response = oss.str();
+    write(Infos->Getfd(), response.c_str(), response.size());
+    Infos->SetBool(true);
+}
+
+static std::string getMimeExtension(const std::string& content_type) {
+    static std::map<std::string, std::string> mimeTypes;
+    if (mimeTypes.empty()) {
+        mimeTypes["text/html"] = ".html";
+        mimeTypes["text/css"] = ".css";
+        mimeTypes["application/javascript"] = ".js";
+        mimeTypes["application/json"] = ".json";
+        mimeTypes["application/xml"] = ".xml";
+        mimeTypes["image/jpeg"] = ".jpg";
+        mimeTypes["image/png"] = ".png";
+        mimeTypes["image/gif"] = ".gif";
+        mimeTypes["image/svg+xml"] = ".svg";
+        mimeTypes["application/pdf"] = ".pdf";
+        mimeTypes["application/zip"] = ".zip";
+        mimeTypes["application/x-tar"] = ".tar";
+        mimeTypes["audio/mpeg"] = ".mp3";
+        mimeTypes["audio/wav"] = ".wav";
+        mimeTypes["video/mp4"] = ".mp4";
+        mimeTypes["video/x-msvideo"] = ".avi";
+        mimeTypes["text/plain"] = ".txt";
+        mimeTypes["text/csv"] = ".csv";
+        mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
+    }
+    std::map<std::string, std::string>::iterator it = mimeTypes.find(content_type);
+    return (it != mimeTypes.end()) ? it->second : ".bin";
+}
+
+static bool ensureDirectoryExists(const std::string& dir) {
+    struct stat st;
+    if (stat(dir.c_str(), &st) != 0) {
+        if (mkdir(dir.c_str(), 0777) != 0) {
+            std::cerr << "[DEBUG] Failed to create upload directory: " << dir << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool saveUploadedFile(const std::string& upload_dir, const std::string& content_type, const std::string& body, std::string& out_path) {
+    if (!ensureDirectoryExists(upload_dir)) return false;
+    std::string ext = getMimeExtension(content_type);
+    char filename[128];
+    time_t now = time(0);
+    sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
+    out_path = upload_dir + filename;
+    std::ofstream outfile(out_path.c_str(), std::ios::binary);
+    if (outfile.is_open()) {
+        outfile.write(body.c_str(), body.size());
+        outfile.close();
+        return true;
+    }
+    std::cerr << "[DEBUG] Failed to open file for upload: " << out_path << std::endl;
+    return false;
+}
+
+// --- Method Handlers ---
+
+static void handleGet(Connection *Infos) {
+    // Default GET handler
+    std::string tmpstring = GetMethod(Infos);
+    if (!tmpstring.empty())
+        write(Infos->Getfd(), tmpstring.c_str(), tmpstring.size());
+}
+
+static void handlePost(Connection *Infos, Route& matchedRoute) {
+    if (Infos->GetRequest().getIsChunked()) {
+        std::string raw_body = Infos->GetRequest().getBody();
+        if (raw_body.size() < 5 || raw_body.substr(raw_body.size() - 5) != "0\r\n\r\n") {
+            return;
+        }
+        std::string decoded_body = decode_chunked_body(raw_body);
+        Infos->GetRequest().setBody(decoded_body);
+        std::string upload_dir = matchedRoute.getUpload();
+        if (!upload_dir.empty()) {
+            std::string content_type = Infos->GetRequest().getHeader("Content-Type");
+            std::string full_path;
+            if (saveUploadedFile(upload_dir, content_type, decoded_body, full_path)) {
+                std::string response_body = "File uploaded to: " + full_path + "\n";
+                char header[256];
+                sprintf(header,
+                    "HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
+                    (unsigned long)response_body.size());
+                std::string response = std::string(header) + response_body;
+                write(Infos->Getfd(), response.c_str(), response.size());
+                Infos->SetBool(true);
+                return;
+            }
+        }
+        std::string response_body = "POST received!\n";
+        std::ostringstream oss;
+        oss << "HTTP/1.1 200 OK\r\n"
+            << "Content-Type: text/plain\r\n"
+            << "Content-Length: " << response_body.size() << "\r\n"
+            << "Connection: close\r\n"
+            << "\r\n"
+            << response_body;
+        std::string response = oss.str();
+        write(Infos->Getfd(), response.c_str(), response.size());
+        Infos->SetBool(true);
+        return;
+    }
+    std::map<std::string, std::string> headers = Infos->GetRequest().getHeaders();
+    std::map<std::string, std::string>::iterator it = headers.find("content-length");
+    if (it == headers.end()) {
+        const char *length_required =
+            "HTTP/1.1 411 Length Required\r\nContent-Type: text/html\r\nContent-Length: 53\r\n\r\n<html><body>411 Length Required</body></html>";
+        write(Infos->Getfd(), length_required, strlen(length_required));
+        Infos->SetBool(true);
+        return;
+    }
+    int content_length = atoi(it->second.c_str());
+    if (content_length <= 0) {
+        const char *bad_request =
+            "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
+        write(Infos->Getfd(), bad_request, strlen(bad_request));
+        Infos->SetBool(true);
+        return;
+    }
+    std::string body = Infos->GetRequest().getBody();
+    char buffer[8000];
+    int total_read = body.size();
+    while (total_read < content_length) {
+        int to_read = content_length - total_read;
+        if (to_read > 8000) to_read = 8000;
+        int n = recv(Infos->Getfd(), buffer, to_read, MSG_DONTWAIT);
+        if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            Infos->GetRequest().setBody(body);
+            return;
+        }
+        if (n == 0) {
+            const char *bad_request =
+                "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
+            write(Infos->Getfd(), bad_request, strlen(bad_request));
+            Infos->SetBool(true);
+            return;
+        }
+        if (n < 0) {
+            break;
+        }
+        body.append(buffer, n);
+        total_read += n;
+    }
+    if (total_read < content_length) {
+        Infos->GetRequest().setBody(body);
+        return;
+    }
+    Infos->GetRequest().setBody(body);
+    std::string upload_dir = matchedRoute.getUpload();
+    if (!upload_dir.empty()) {
+        std::string content_type = Infos->GetRequest().getHeader("Content-Type");
+        std::string full_path;
+        if (saveUploadedFile(upload_dir, content_type, body, full_path)) {
+            std::string response_body = "File uploaded to: " + full_path + "\n";
+            char header[256];
+            sprintf(header,
+                "HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
+                (unsigned long)response_body.size());
+            std::string response = std::string(header) + response_body;
+            write(Infos->Getfd(), response.c_str(), response.size());
+            Infos->SetBool(true);
+            return;
+        }
+    }
+    std::string response_body = "POST received!\n";
+    std::ostringstream oss;
+    oss << "HTTP/1.1 200 OK\r\n"
+        << "Content-Type: text/plain\r\n"
+        << "Content-Length: " << response_body.size() << "\r\n"
+        << "Connection: close\r\n"
+        << "\r\n"
+        << response_body;
+    std::string response = oss.str();
+    write(Infos->Getfd(), response.c_str(), response.size());
+    Infos->SetBool(true);
+}
+
+static void handleDelete(Connection *Infos, Server *TmpServer, Route& matchedRoute) {
+    std::string route = MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest());
+    if (route == "404" || route == "405") {
+        sendErrorResponse(Infos, TmpServer, atoi(route.c_str()));
+        return;
+    }
+    std::string file_path = RemovePrefix(Infos->GetRequest().getRequestURI(), route, matchedRoute.getRoot());
+    struct stat st;
+    if (stat(file_path.c_str(), &st) != 0) {
+        sendErrorResponse(Infos, TmpServer, 404);
+        return;
+    }
+    if (unlink(file_path.c_str()) == 0) {
+        std::ostringstream oss;
+        oss << "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+        std::string response = oss.str();
+        write(Infos->Getfd(), response.c_str(), response.size());
+        Infos->SetBool(true);
+        return;
+    } else {
+        if (errno == EACCES || errno == EPERM) {
+            sendErrorResponse(Infos, TmpServer, 403);
+            return;
+        } else {
+            sendErrorResponse(Infos, TmpServer, 500);
+            return;
+        }
+    }
+}
+
+// --- Main ResponseBuilder ---
+
+HttpResponse::HttpResponse(int fd_client)
+{
+    this->fd_client = fd_client;
+    offset = 0;
+    this->status_code[200] = std::string("OK");
+    this->status_code[301] = std::string("Moved Permanently");
+    this->status_code[400] = std::string("Bad Request");
+    this->status_code[403] = std::string("Forbidden");
+    this->status_code[404] = std::string("Not Found");
+    this->status_code[405] = std::string("Method Not Allowed");
+    this->status_code[413] = std::string("Payload Too Large");
+    this->status_code[500] = std::string("Internal Server Error");
+}
 
 void ResponseBuilder(Connection *Infos) {
-	// std::cout << "[DEBUG] Entered ResponseBuilder, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
-	HttpResponse response(Infos->Getfd());
-	Infos->SetHttpResponse(&response);
+    HttpResponse response(Infos->Getfd());
+    Infos->SetHttpResponse(&response);
+
+    // Parse cookies for all requests
+    Infos->GetRequest().parseCookies();
 
     if (Infos->GetRequest().getMethod().empty()) {
         std::cerr << "[ERROR] Empty HTTP method received, sending 400 Bad Request" << std::endl;
@@ -43,374 +281,58 @@ void ResponseBuilder(Connection *Infos) {
         return;
     }
 
-	std::string host = Infos->GetRequest().getHeaders()["host"];
-	Server *TmpServer =  &Infos->Getserver();
-	const std::string url = Infos->GetRequest().getRequestURI();
-	const size_t pos = url.find_last_of(".");
-	Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
-	const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
-	if (HostName(&Infos->Getserver(), host) == false){
-		// std::cout << "[DEBUG] Entered HostName branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
-		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
-		Infos->SetBool(true);
-		return ;
-	}
-	else if (isCGI) {
-		// std::cout << "[DEBUG] Entered CGI branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
-		try {
-			Cgi *cgi = Infos->getCGI();
+    std::string host = Infos->GetRequest().getHeaders()["host"];
+    Server *TmpServer =  &Infos->Getserver();
+    const std::string url = Infos->GetRequest().getRequestURI();
+    const size_t pos = url.find_last_of(".");
+    Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+    const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
+    if (HostName(&Infos->Getserver(), host) == false){
+        sendErrorResponse(Infos, TmpServer, 400);
+        return ;
+    }
+    else if (isCGI) {
+        try {
+            Cgi *cgi = Infos->getCGI();
+            if (!cgi) {
+                cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
+                if (!cgi)
+                    throw std::bad_alloc();
+                Infos->SetCGI(cgi);
+            }
+            cgi->execute();
+        }catch (const Cgi::CGIException &e) {
+            sendErrorResponse(Infos, TmpServer, 500);
+            return;
+        }
+    }
 
-			if (!cgi) {
-				// std::cout << "pepe should be once\n";
-				cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
-				if (!cgi)
-					throw std::bad_alloc();
+    // Enforce allowed methods per route
+    std::vector<std::string> allowed_methods = matchedRoute.getMethods();
+    std::string req_method = Infos->GetRequest().getMethod();
+    bool method_allowed = false;
+    for (size_t i = 0; i < allowed_methods.size(); ++i) {
+        if (allowed_methods[i] == req_method) {
+            method_allowed = true;
+            break;
+        }
+    }
+    if (!method_allowed) {
+        send405(Infos, allowed_methods);
+        return;
+    }
 
-				Infos->SetCGI(cgi);
-			}
-			cgi->execute();
-		}catch (const Cgi::CGIException &e) {
-
-			std::string tmp =  ErrorBuilder(Infos, TmpServer, 500);
-			return;
-		}
-	}
-
-	// Enforce allowed methods per route
-	std::vector<std::string> allowed_methods = matchedRoute.getMethods();
-	std::string req_method = Infos->GetRequest().getMethod();
-	bool method_allowed = false;
-	for (size_t i = 0; i < allowed_methods.size(); ++i) {
-		if (allowed_methods[i] == req_method) {
-			method_allowed = true;
-			break;
-		}
-	}
-	if (!method_allowed) {
-		std::ostringstream oss;
-		oss << "HTTP/1.1 405 Method Not Allowed\r\n";
-		oss << "Allow: ";
-		for (size_t i = 0; i < allowed_methods.size(); ++i) {
-			if (i > 0) oss << ", ";
-			oss << allowed_methods[i];
-		}
-		oss << "\r\nContent-Type: text/plain\r\nContent-Length: 23\r\nConnection: close\r\n\r\nMethod Not Allowed\n";
-		std::string response = oss.str();
-		write(Infos->Getfd(), response.c_str(), response.size());
-		Infos->SetBool(true);
-		return;
-	}
-
-	else if (Infos->GetRequest().getMethod() == "GET"){
-		// std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
-
-		std::string tmpstring = GetMethod(Infos);
-		if (!tmpstring.empty())
-			write (Infos->Getfd(), tmpstring.c_str(), strlen(tmpstring.c_str()));
-		return ;
-	}
-	else if (Infos->GetRequest().getMethod() == "POST"){
-		// std::cout << "[DEBUG] Method string: '" << Infos->GetRequest().getMethod() << "' length: " << Infos->GetRequest().getMethod().size() << std::endl;
-		// std::cout << "POST" << std::endl;
-
-		if (Infos->GetRequest().getIsChunked()) {
-			std::string raw_body = Infos->GetRequest().getBody();
-			if (raw_body.size() < 5 || raw_body.substr(raw_body.size() - 5) != "0\r\n\r\n") {
-				// std::cout << "[DEBUG] Waiting for full chunked body, current size=" << raw_body.size() << std::endl;
-				return;
-			}
-			// std::cout << "[DEBUG] Detected chunked transfer encoding for POST" << std::endl;
-			std::string decoded_body = decode_chunked_body(raw_body);
-			Infos->GetRequest().setBody(decoded_body);
-			// std::cout << "[DEBUG] Decoded chunked body, size=" << decoded_body.size() << std::endl;
-			// Continue with the rest of the POST logic as if body is ready
-			// Save uploaded file if upload directory is set
-			std::string upload_dir = matchedRoute.getUpload();
-			// std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
-			if (!upload_dir.empty()) {
-				// MIME type to extension map
-				std::map<std::string, std::string> mimeTypes;
-				mimeTypes["text/html"] = ".html";
-				mimeTypes["text/css"] = ".css";
-				mimeTypes["application/javascript"] = ".js";
-				mimeTypes["application/json"] = ".json";
-				mimeTypes["application/xml"] = ".xml";
-				mimeTypes["image/jpeg"] = ".jpg";
-				mimeTypes["image/png"] = ".png";
-				mimeTypes["image/gif"] = ".gif";
-				mimeTypes["image/svg+xml"] = ".svg";
-				mimeTypes["application/pdf"] = ".pdf";
-				mimeTypes["application/zip"] = ".zip";
-				mimeTypes["application/x-tar"] = ".tar";
-				mimeTypes["audio/mpeg"] = ".mp3";
-				mimeTypes["audio/wav"] = ".wav";
-				mimeTypes["video/mp4"] = ".mp4";
-				mimeTypes["video/x-msvideo"] = ".avi";
-				mimeTypes["text/plain"] = ".txt";
-				mimeTypes["text/csv"] = ".csv";
-				mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
-
-				// Ensure directory exists (mkdir -p style, but only one level for C++98)
-				struct stat st;
-				if (stat(upload_dir.c_str(), &st) != 0) {
-					if (mkdir(upload_dir.c_str(), 0777) != 0) {
-						std::cerr << "[DEBUG] Failed to create upload directory: " << upload_dir << std::endl;
-					}
-				}
-				// Get Content-Type header
-				std::string content_type = Infos->GetRequest().getHeader("Content-Type");
-				std::string ext = ".bin";
-				if (mimeTypes.find(content_type) != mimeTypes.end()) {
-					ext = mimeTypes[content_type];
-				}
-				// Generate a filename (upload_TIMESTAMP.ext)
-				char filename[128];
-				time_t now = time(0);
-				sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
-				std::string full_path = upload_dir + filename;
-				std::ofstream outfile(full_path.c_str(), std::ios::binary);
-				if (outfile.is_open()) {
-					outfile.write(decoded_body.c_str(), decoded_body.size());
-					outfile.close();
-					// std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
-					// Respond with 201 Created
-					std::string response_body = "File uploaded to: " + full_path + "\n";
-					char header[256];
-					sprintf(header,
-						"HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
-						(unsigned long)response_body.size());
-					std::string response = std::string(header) + response_body;
-					write(Infos->Getfd(), response.c_str(), response.size());
-					Infos->SetBool(true);
-					return;
-				} else {
-					std::cerr << "[DEBUG] Failed to open file for upload: " << full_path << std::endl;
-				}
-			}
-			// Send a simple 200 OK response after reading the POST body
-			// std::cout << "[DEBUG] About to send 200 OK response for POST (chunked)" << std::endl;
-			std::string response_body = "POST received!\n";
-			std::ostringstream oss;
-			oss << "HTTP/1.1 200 OK\r\n"
-				<< "Content-Type: text/plain\r\n"
-				<< "Content-Length: " << response_body.size() << "\r\n"
-				<< "Connection: close\r\n"
-				<< "\r\n"
-				<< response_body;
-			std::string response = oss.str();
-			int w = write(Infos->Getfd(), response.c_str(), response.size());
-			// std::cout << "[DEBUG] Sent 200 OK response for POST (chunked), write returned: " << w << std::endl;
-			Infos->SetBool(true);
-			// std::cout << "[DEBUG] SetBool(true) called, returning from POST branch (chunked)" << std::endl;
-			return;
-		}
-
-		// Only check for Content-Length if not chunked
-		std::map<std::string, std::string> headers = Infos->GetRequest().getHeaders();
-		std::map<std::string, std::string>::iterator it = headers.find("content-length");
-		if (it == headers.end()) {
-			std::cerr << "No Content-Length header in POST request" << std::endl;
-			const char *length_required =
-				"HTTP/1.1 411 Length Required\r\nContent-Type: text/html\r\nContent-Length: 53\r\n\r\n<html><body>411 Length Required</body></html>";
-			write(Infos->Getfd(), length_required, strlen(length_required));
-			Infos->SetBool(true);
-			return;
-		}
-		int content_length = atoi(it->second.c_str());
-		if (content_length <= 0) {
-			std::cerr << "Invalid Content-Length value in POST request" << std::endl;
-			const char *bad_request =
-				"HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
-			write(Infos->Getfd(), bad_request, strlen(bad_request));
-			Infos->SetBool(true);
-			return;
-		}
-		std::string body = Infos->GetRequest().getBody();
-		char buffer[8000];
-		int total_read = body.size();
-		while (total_read < content_length) {
-			int to_read = content_length - total_read;
-			if (to_read > 8000) to_read = 8000;
-			int n = recv(Infos->Getfd(), buffer, to_read, MSG_DONTWAIT);
-			if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-				// Not enough data yet, save what we have and return
-				Infos->GetRequest().setBody(body);
-				// std::cout << "[DEBUG] Not enough POST body data yet, read " << total_read << " of " << content_length << std::endl;
-				return;
-			}
-			if (n == 0) {
-				// Connection closed by client
-				std::cerr << "[DEBUG] Connection closed by client, read " << total_read << " of " << content_length << std::endl;
-				if (total_read < content_length) {
-					// Incomplete upload, respond with 400
-					const char *bad_request =
-						"HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
-					write(Infos->Getfd(), bad_request, strlen(bad_request));
-					Infos->SetBool(true);
-					return;
-				}
-				break;
-			}
-			if (n < 0) {
-				std::cerr << "Error reading POST body from socket or connection closed" << std::endl;
-				break;
-			}
-			body.append(buffer, n);
-			total_read += n;
-		}
-		if (total_read < content_length) {
-			// Still not enough data, wait for more
-			// std::cout << "[DEBUG] Still waiting for full POST body, have " << total_read << " of " << content_length << std::endl;
-			Infos->GetRequest().setBody(body);
-			return;
-		}
-		Infos->GetRequest().setBody(body);
-		// std::cout << "[DEBUG] POST body fully read: size=" << body.size() << std::endl;
-
-		// Save uploaded file if upload directory is set
-		std::string upload_dir = matchedRoute.getUpload();
-		// std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
-		if (!upload_dir.empty()) {
-			// MIME type to extension map
-			std::map<std::string, std::string> mimeTypes;
-			mimeTypes["text/html"] = ".html";
-			mimeTypes["text/css"] = ".css";
-			mimeTypes["application/javascript"] = ".js";
-			mimeTypes["application/json"] = ".json";
-			mimeTypes["application/xml"] = ".xml";
-			mimeTypes["image/jpeg"] = ".jpg";
-			mimeTypes["image/png"] = ".png";
-			mimeTypes["image/gif"] = ".gif";
-			mimeTypes["image/svg+xml"] = ".svg";
-			mimeTypes["application/pdf"] = ".pdf";
-			mimeTypes["application/zip"] = ".zip";
-			mimeTypes["application/x-tar"] = ".tar";
-			mimeTypes["audio/mpeg"] = ".mp3";
-			mimeTypes["audio/wav"] = ".wav";
-			mimeTypes["video/mp4"] = ".mp4";
-			mimeTypes["video/x-msvideo"] = ".avi";
-			mimeTypes["text/plain"] = ".txt";
-			mimeTypes["text/csv"] = ".csv";
-			mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
-
-			// Ensure directory exists (mkdir -p style, but only one level for C++98)
-			struct stat st;
-			if (stat(upload_dir.c_str(), &st) != 0) {
-				if (mkdir(upload_dir.c_str(), 0777) != 0) {
-					std::cerr << "[DEBUG] Failed to create upload directory: " << upload_dir << std::endl;
-				}
-			}
-			// Get Content-Type header
-			std::string content_type = Infos->GetRequest().getHeader("Content-Type");
-			std::string ext = ".bin";
-			if (mimeTypes.find(content_type) != mimeTypes.end()) {
-				ext = mimeTypes[content_type];
-			}
-			// Generate a filename (upload_TIMESTAMP.ext)
-			char filename[128];
-			time_t now = time(0);
-			sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
-			std::string full_path = upload_dir + filename;
-			std::ofstream outfile(full_path.c_str(), std::ios::binary);
-			if (outfile.is_open()) {
-				outfile.write(body.c_str(), body.size());
-				outfile.close();
-				// std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
-				// Respond with 201 Created
-				std::string response_body = "File uploaded to: " + full_path + "\n";
-				char header[256];
-				sprintf(header,
-					"HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
-					(unsigned long)response_body.size());
-				std::string response = std::string(header) + response_body;
-				write(Infos->Getfd(), response.c_str(), response.size());
-				Infos->SetBool(true);
-				return;
-			} else {
-				std::cerr << "[DEBUG] Failed to open file for upload: " << full_path << std::endl;
-			}
-		}
-
-		// Send a simple 200 OK response after reading the POST body
-		// std::cout << "[DEBUG] About to send 200 OK response for POST" << std::endl;
-		std::string response_body = "POST received!\n";
-		std::ostringstream oss;
-		oss << "HTTP/1.1 200 OK\r\n"
-			<< "Content-Type: text/plain\r\n"
-			<< "Content-Length: " << response_body.size() << "\r\n"
-			<< "Connection: close\r\n"
-			<< "\r\n"
-			<< response_body;
-		std::string response = oss.str();
-		int w = write(Infos->Getfd(), response.c_str(), response.size());
-		// std::cout << "[DEBUG] Sent 200 OK response for POST, write returned: " << w << std::endl;
-		Infos->SetBool(true);
-		// std::cout << "[DEBUG] SetBool(true) called, returning from POST branch" << std::endl;
-		return;
-	}
-	else if (Infos->GetRequest().getMethod() == "DELETE"){
-		// std::cout << "[DEBUG] DELETE method received for URI: " << Infos->GetRequest().getRequestURI() << std::endl;
-		std::string route = MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest());
-		if (route == "404" || route == "405") {
-			std::string err = ErrorBuilder(Infos, TmpServer, atoi(route.c_str()));
-			Infos->SetBool(true);
-			return;
-		}
-		std::string file_path = RemovePrefix(Infos->GetRequest().getRequestURI(), route, Infos->Getserver().getRoutes()[route].getRoot());
-		// std::cout << "[DEBUG] DELETE resolved file path: " << file_path << std::endl;
-		struct stat st;
-		if (stat(file_path.c_str(), &st) != 0) {
-			// File does not exist
-			std::string err = ErrorBuilder(Infos, TmpServer, 404);
-			Infos->SetBool(true);
-			return;
-		}
-		if (unlink(file_path.c_str()) == 0) {
-			// Success: 204 No Content
-			std::ostringstream oss;
-			oss << "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-			std::string response = oss.str();
-			write(Infos->Getfd(), response.c_str(), response.size());
-			Infos->SetBool(true);
-			return;
-		} else {
-			if (errno == EACCES || errno == EPERM) {
-				std::string err = ErrorBuilder(Infos, TmpServer, 403);
-				Infos->SetBool(true);
-				return;
-			} else {
-				std::string err = ErrorBuilder(Infos, TmpServer, 500);
-				Infos->SetBool(true);
-				return;
-			}
-		}
-	}
-	else if (Infos->GetRequest().getRequestURI() == "/cookie-test") {
-		Infos->GetRequest().parseCookies();
-		std::string cookieVal = Infos->GetRequest().getCookie("mycookie");
-		std::string response_body;
-		if (cookieVal.empty()) {
-			Infos->GetResponse().addSetCookie("mycookie=webserv; Path=/; HttpOnly");
-			response_body = "Cookie set! Reload to see it echoed.";
-		} else {
-			response_body = "Cookie value: " + cookieVal;
-		}
-		std::ostringstream oss;
-		oss << "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " << response_body.size() << "\r\n";
-		// Add Set-Cookie headers
-		const std::vector<std::string>& cookies = Infos->GetResponse().getSetCookies();
-		for (size_t i = 0; i < cookies.size(); ++i) {
-			oss << "Set-Cookie: " << cookies[i] << "\r\n";
-		}
-		oss << "Connection: close\r\n\r\n" << response_body;
-		std::string response = oss.str();
-		write(Infos->Getfd(), response.c_str(), response.size());
-		Infos->SetBool(true);
-		return;
-	}
-	else {
-		// std::cout << "[DEBUG] No matching method branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
-	}
+    if (req_method == "GET") {
+        handleGet(Infos);
+        return;
+    } else if (req_method == "POST") {
+        handlePost(Infos, matchedRoute);
+        return;
+    } else if (req_method == "DELETE") {
+        handleDelete(Infos, TmpServer, matchedRoute);
+        return;
+    }
+    // else: no matching method branch
 }
 
 /*

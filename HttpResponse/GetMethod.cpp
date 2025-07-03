@@ -109,9 +109,9 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     DIR *dir;
     struct dirent *dp;
 
-    // std::cout << "ENTER into list files: " << '\n';
+    std::cout << "ENTER into list files: " << '\n';
     ActualPath = Infos->Getserver().getRoutes()[route].getRoot() + URI;
-    // std::cout << "From this path we will serve: " << ActualPath << '\n';
+    std::cout << "From this path we will serve: " << ActualPath << '\n';
     if ((dir = opendir(ActualPath.c_str())) == NULL)
         return (ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403 : 404)));
     RListing =  "<!DOCTYPE html><html><head><title>Index of " + URI + "</title></head><body>\n";
@@ -159,7 +159,7 @@ std::string GetMethod(Connection *Infos)
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
-    // std::cout << "this is the result: " << result << "\n";
+    std::cout << "this is the result: " << result << "\n";
     // in ths condition i checked for error pages or somthing wrong
     if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
@@ -177,7 +177,7 @@ std::string GetMethod(Connection *Infos)
           if (!Infos->Getserver().getRoutes()[result].getRedirection().empty())
           {
               if (Infos->SetRedirect(Infos->Getserver().getRoutes()[result].getRedirection()) == true){
-                //   std::cout <<  "this is the path of redirection: " << Infos->Getserver().getRoutes()[result].getRedirection() << '\n';
+                  std::cout <<  "this is the path of redirection: " << Infos->Getserver().getRoutes()[result].getRedirection() << '\n';
                   Infos->GetRequest().setHeaders(std::string("Location"),
                      Infos->Getserver().getRoutes()[result].getRedirection());
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
@@ -194,8 +194,8 @@ std::string GetMethod(Connection *Infos)
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
               {
                 //should serve the index file if found.
-                //   std::cout << "Alert Alert Alert Alert\n";
-                //   std::cout << "Result Result Result: "<< result<<"\n";
+                  std::cout << "Alert Alert Alert Alert\n";
+                  std::cout << "Result Result Result: "<< result<<"\n";
                   if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
                       return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
@@ -206,9 +206,9 @@ std::string GetMethod(Connection *Infos)
       }
         // serve file if have a right permition
         else{
-            // std::cout << "should call error builder\n";
-            // std::cout << "The request URI: " <<  Infos->GetRequest().getRequestURI() << "\n";
-            // std::cout << "Path: "<< result << "\n";
+            std::cout << "should call error builder\n";
+            std::cout << "The request URI: " <<  Infos->GetRequest().getRequestURI() << "\n";
+            std::cout << "Path: "<< result << "\n";
             return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
         }
 
@@ -225,7 +225,7 @@ std::string GetMethod(Connection *Infos)
 
 std::string RemovePrefix(std::string URI, std::string location, std::string root){
     std::string Result =  root + URI.substr(location.size() - 1, URI.size());
-    // std::cout << "This is suffex of file: " << Result << "\n" ;
+    std::cout << "This is suffex of file: " << Result << "\n" ;
     return (Result);
 }
 
@@ -289,13 +289,13 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
         ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
 
-        // std::cout << "From this path we will serve : " << ActualPath << '\n';
-        // std::cout << "============> " << ActualPath.c_str() << "\n";
+        std::cout << "From this path we will serve : " << ActualPath << '\n';
+        std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
         {
 
             std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
-            // std::cout << Infos->Getfd() << "\n";
+            std::cout << Infos->Getfd() << "\n";
             const char response[] =
             "HTTP/1.1 404 Not Found\r\n"
             "Content-Type: text/html\r\n"
@@ -310,7 +310,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
             "</body>"
             "</html>";
             write (Infos->Getfd(), response, strlen(response));
-            // std::cout << response << '\n';
+            std::cout << response << '\n';
             return("");
         }
             std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();

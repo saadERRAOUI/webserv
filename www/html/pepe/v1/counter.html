@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cookie Counter</title>
+    <script>
+        function getCookie(name) {
+            let value = "; " + document.cookie;
+            let parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return "";
+        }
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days*24*60*60*1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+        window.onload = function() {
+            let visits = parseInt(getCookie("visits") || "0", 10) + 1;
+            setCookie("visits", visits, 365);
+            document.getElementById("counter").innerText = visits;
+        }
+    </script>
+</head>
+<body>
+    <h1>Cookie Visit Counter</h1>
+    <p>You have visited this page <b id="counter">?</b> times.</p>
+    <p>Refresh the page to increment the counter.</p>
+</body>
+</html> 
