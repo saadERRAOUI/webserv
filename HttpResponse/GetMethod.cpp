@@ -86,7 +86,7 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
 		response += it->second;
 		response += "\r\n";
 	}
-	std::string rt = OpenFile(ActualPath, true, Infos);
+	std::string rt = OpenFile(ActualPath, true, Infos, response);
 	response += "Content-Length: " + tostring((int)rt.size());
 	response += "\r\n\r\n";
 	response += rt;
@@ -108,7 +108,7 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     std::string RListing;
     DIR *dir;
     struct dirent *dp;
-
+    std::cout << "-------------------------------------------------------------------------\n";
     std::cout << "ENTER into list files: " << '\n';
     ActualPath = Infos->Getserver().getRoutes()[route].getRoot() + URI;
     std::cout << "From this path we will serve: " << ActualPath << '\n';
@@ -317,14 +317,14 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
-        write (1, response.c_str(), strlen(response.c_str()));
-        write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
-        std::string rt = OpenFile(ActualPath, true, Infos);
-        response += rt;
+        // write (1, response.c_str(), strlen(response.c_str()));
+        OpenFile(ActualPath, true, Infos, response);
+        // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
         Infos->GetRequest().ClearURI();
         return (std::string(""));
     }
-    std::string rt = OpenFile(ActualPath, false, Infos);
+    OpenFile(ActualPath, false, Infos, response);
+        // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
     return (std::string(""));
 }
 

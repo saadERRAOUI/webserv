@@ -25,36 +25,54 @@ long GetLenght(std::string PathFile){
 	Date: 2025-05-21
 */
 
-std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
+std::string    OpenFile(std::string PathFile, bool status, Connection* Infos, const std::string prefix)
 {
-	char BUFFER[8001] = {0};
-	std::string line, rt;
+    char BUFFER[8001] = {0};
+    std::string line, rt;
 
-	if(status == true)
-	{
-		std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
+    const char* BUFFER1 = prefix.c_str();  // Use the passed prefix
 
-		if (!fd->is_open())
-		{
-			std::cerr << "Error file : " << strerror(errno) << '\n';
-			return (std::string(""));
-		}
-		Infos->Setfile(*fd);
-    	Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
-		write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
-		// write(1, BUFFER, Infos->GetFile()->gcount());
-		Infos->SetSize(Infos->GetFile()->gcount());
-		Infos->DefSize(0);
-		return (std::string(BUFFER, Infos->GetSize()));
-		std::cout << "here.\n";
-	}
-    Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
-	write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
-	// write(1, BUFFER, Infos->GetFile()->gcount());
-	Infos->SetSize(Infos->GetFile()->gcount());
-	Infos->DefSize(0);
-	// Infos->DefSize(std::string(BUFFER).size());
-	return (std::string(BUFFER, Infos->GetSize()));
+    if (status == true)
+    {
+        std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
+
+        if (!fd->is_open())
+        {
+            std::cerr << "Error opening file: " << strerror(errno) << '\n';
+            return (std::string(""));
+        }
+
+        Infos->Setfile(*fd);
+        Infos->GetFile()->read(BUFFER, sizeof(BUFFER));
+
+        // Using std::vector<char> to concatenate BUFFER1 (prefix) and BUFFER (binary content)
+        std::vector<char> combined;
+        combined.insert(combined.end(), BUFFER1, BUFFER1 + strlen(BUFFER1));  // Insert prefix
+        combined.insert(combined.end(), BUFFER, BUFFER + Infos->GetFile()->gcount());  // Insert file content
+
+        // Write the combined buffer to the connection
+        write(Infos->Getfd(), combined.data(), combined.size());
+
+        Infos->SetSize(Infos->GetFile()->gcount());
+        Infos->DefSize(0);
+
+        return std::string(combined.begin(), combined.end());  // Return the combined result as a string
+    }
+
+    Infos->GetFile()->read(BUFFER, sizeof(BUFFER));
+
+    // Using std::vector<char> to concatenate BUFFER1 (prefix) and BUFFER (binary content)
+    std::vector<char> combined;
+    combined.insert(combined.end(), BUFFER1, BUFFER1 + strlen(BUFFER1));  // Insert prefix
+    combined.insert(combined.end(), BUFFER, BUFFER + Infos->GetFile()->gcount());  // Insert file content
+
+    // Write the combined buffer to the connection
+    write(Infos->Getfd(), combined.data(), combined.size());
+
+    Infos->SetSize(Infos->GetFile()->gcount());
+    Infos->DefSize(0);
+
+    return std::string(combined.begin(), combined.end());  // Return the combined result as a string
 }
 
 
@@ -113,10 +131,9 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
     }
     response += "Content-Length: " + tostring(GetLenght(DefaultOrOurs));
     response += "\r\n\r\n";
-    write(Infos->Getfd(), response.c_str(), strlen(response.c_str()));
     // write();
-    std::string rt = OpenFile(DefaultOrOurs, true, Infos);
-    response += rt;
+	OpenFile(DefaultOrOurs, true, Infos, response);
+    // write(Infos->Getfd(), response.c_str(), strlen(response.c_str()));
     if (code != 301)
         Infos->SetBool(true);
     return (response);
