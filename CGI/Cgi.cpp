@@ -101,7 +101,7 @@ void Cgi::execute()
         if ((childPid = fork()) == -1) {
             throw CGIException("Error: CGI: Fork failed");
         } else if (childPid == 0) {
-            std::cout << "ok im forking";
+            // std::cout << "ok im forking";
             freopen(output.c_str(), "w+", stdout);
             if (!input.empty())
                 freopen(input.c_str(), "r", stdin);
@@ -222,7 +222,7 @@ bool Cgi::processOutputChunk(int clientFd)
             return true;
 
         std::string headersPart = responseBuffer.substr(0, pos + 3);
-        std::cout << "\n this is all the headers" << headersPart.c_str() << "end of headers<------\n";
+        // std::cout << "\n this is all the headers" << headersPart.c_str() << "end of headers<------\n";
         parseHeaders(headersPart);
 
         headersParsed = true;
@@ -238,7 +238,7 @@ bool Cgi::processOutputChunk(int clientFd)
     if (!responseBuffer.empty()) {
         if (encodingChunked)
         {std::stringstream a;
-                    std::cout << "lmfao\n";
+                    // std::cout << "lmfao\n";
 
         a << std::hex << responseBuffer.size();
         std::string b;
@@ -249,9 +249,9 @@ bool Cgi::processOutputChunk(int clientFd)
         }
         // std::cout << b;
        
-        std::cout << "body :\n";
+        // std::cout << "body :\n";
         ssize_t written = write(clientFd, responseBuffer.c_str(), responseBuffer.size());
-        std::cout << written << "\n";
+        // std::cout << written << "\n";
         if (written > 0)
             responseBuffer.erase(0, written);
     }

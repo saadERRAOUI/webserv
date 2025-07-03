@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/02 21:03:22 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/03 13:16:17 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,20 +158,20 @@ void HttpRequest::ClearURI(){
 void            HttpRequest::setBody(std::string body) {this->_body = body;}
 
 void            HttpRequest::showRequest() const {
-    std::cout << "Method: " << _method << std::endl;
-    std::cout << "Request URI: " << _requestURI << std::endl;
-    std::cout << "Version: " << _version << std::endl;
-    std::cout << "Headers:" << std::endl;
+    // std::cout << "Method: " << _method << std::endl;
+    // std::cout << "Request URI: " << _requestURI << std::endl;
+    // std::cout << "Version: " << _version << std::endl;
+    // std::cout << "Headers:" << std::endl;
     std::map<std::string, std::string>::const_iterator it;
     for (it = _headers.begin(); it != _headers.end(); ++it) {
-        std::cout << "  " << it->first << ": " << it->second << std::endl;
+        // std::cout << "  " << it->first << ": " << it->second << std::endl;
     }
-    std::cout << "IsChunked: " << _isChunked << std::endl;
-    std::cout << "Query String: " << _queryString << std::endl;
-    std::cout << "Fragment: " << _fragment << std::endl;
-    std::cout << "Body: " << _body << std::endl;
-    std::cout << "Body size: " << _body.length() << std::endl;
-    std::cout << "State: " << _state << std::endl;
+    // std::cout << "IsChunked: " << _isChunked << std::endl;
+    // std::cout << "Query String: " << _queryString << std::endl;
+    // std::cout << "Fragment: " << _fragment << std::endl;
+    // std::cout << "Body: " << _body << std::endl;
+    // std::cout << "Body size: " << _body.length() << std::endl;
+    // std::cout << "State: " << _state << std::endl;
 }
 
 void HttpRequest::parseCookies() {

@@ -188,7 +188,7 @@ std::ifstream *Connection::GetFile(){
 void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 {
 	struct epoll_event event;
-	std::cout << "pepe\n";
+	// std::cout << "pepe\n";
 	event.events = mood;
 	event.data.fd = fd_client;
 	if (epoll_ctl(FdEpoll, EPOLL_CTL_MOD, fd_client, &event))

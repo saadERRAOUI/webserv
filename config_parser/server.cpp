@@ -184,7 +184,7 @@ std::vector<int> &Server::getSocket(){
 
 void Server::setSocket(int socket){
     this->socket.push_back(socket);
-    // std::cout << this->socket.size() << "  " << socket << " ????????\n";
+    std::cout << this->socket.size() << "  " << socket << " ????????\n";
 }
 
 Server::Server(const Server &other) : webServ(other.webServ)
@@ -215,34 +215,34 @@ const Server &Server::operator=(const Server &other)
 
 void Server::printServer()
 {
-    std::cout << "Server name : ";
+    // std::cout << "Server name : ";
     for (std::vector<std::string>::iterator it = this->server_name.begin(); it != this->server_name.end(); it++)
-        std::cout << *it << " ";
-    std::cout << std::endl;
-    std::cout << "Ports : ";
+        // std::cout << *it << " ";
+    // std::cout << std::endl;
+    // std::cout << "Ports : ";
     for (std::vector<int>::iterator it = this->port.begin(); it != this->port.end(); it++)
-        std::cout << *it << " ";
-    std::cout << std::endl;
-    std::cout << "Max body size : ";
-    std::cout << this->max_body_size << std::endl;
-    std::cout << "Routes : " << std::endl;
+        // std::cout << *it << " ";
+    // std::cout << std::endl;
+    // std::cout << "Max body size : ";
+    // std::cout << this->max_body_size << std::endl;
+    // std::cout << "Routes : " << std::endl;
     for (std::map<std::string, Route>::iterator it = this->routes.begin(); it != this->routes.end(); it++)
     {
-        std::cout << " Path: " << it->second.getPath() << std::endl;
-        std::cout << " Index: " << it->second.getIndex() << std::endl;
-        std::cout << " Methods : " << std::endl;
-        for (std::vector<std::string>::const_iterator it2 = it->second.getMethods().begin(); it2 != it->second.getMethods().end(); it2++)
-            std::cout << "          " <<*it2 << " ";
-        std::cout << std::endl;
-        std::cout << " Root : "  << it->second.getRoot() << std::endl;
-        std::cout <<  " Redirection" << it->second.getRedirection() << std::endl;
-        std::cout << " Auto index: " << it->second.getAutoindex() << std::endl;
+        // std::cout << " Path: " << it->second.getPath() << std::endl;
+        // std::cout << " Index: " << it->second.getIndex() << std::endl;
+        // std::cout << " Methods : " << std::endl;
+        // for (std::vector<std::string>::const_iterator it2 = it->second.getMethods().begin(); it2 != it->second.getMethods().end(); it2++)
+            // std::cout << "          " <<*it2 << " ";
+        // std::cout << std::endl;
+        // std::cout << " Root : "  << it->second.getRoot() << std::endl;
+        // std::cout <<  " Redirection" << it->second.getRedirection() << std::endl;
+        // std::cout << " Auto index: " << it->second.getAutoindex() << std::endl;
     }
-    std::cout << "Error pages" << std::endl;
+    // std::cout << "Error pages" << std::endl;
     for (std::map<int, std::string>::iterator it = this->error_pages.begin(); it != this->error_pages.end(); it++)
     {
-        std::cout <<  " Error code : " <<it->first << std::endl;
-        std::cout << " Path : " << it->second << std::endl;
+        // std::cout <<  " Error code : " <<it->first << std::endl;
+        // std::cout << " Path : " << it->second << std::endl;
     }
 
 }

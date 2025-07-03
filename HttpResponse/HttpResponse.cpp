@@ -11,7 +11,7 @@
 std::string RemovePrefix(std::string URI, std::string location, std::string root);
 HttpResponse::HttpResponse(int fd_client)
 {
-	// std::cout << "need to remove just for check Response builder\n";
+	std::cout << "need to remove just for check Response builder\n";
 	this->fd_client = fd_client;
 	offset = 0;
 	this->status_code[200] = std::string("OK");
@@ -26,23 +26,22 @@ HttpResponse::HttpResponse(int fd_client)
 
 
 void ResponseBuilder(Connection *Infos) {
-	std::cout << "[DEBUG] Entered ResponseBuilder, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
+	// std::cout << "[DEBUG] Entered ResponseBuilder, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
 	HttpResponse response(Infos->Getfd());
 	Infos->SetHttpResponse(&response);
 
-    std::string version = Infos->GetRequest().getVersion();
-    // if (version != "HTTP/1.1" && version != "HTTP/1.0") {
-    //     // Hardcoded minimal HTTP/1.1 400 Bad Request response
-    //     const char *bad_request =
-    //         "HTTP/1.1 400 Bad Request\r\n"
-    //         "Content-Type: text/html\r\n"
-    //         "Content-Length: 45\r\n"
-    //         "\r\n"
-    //         "<html><body>400 Bad Request</body></html>";
-    //     write(Infos->Getfd(), bad_request, strlen(bad_request));
-    //     Infos->SetBool(true);
-    //     return;
-    // }
+    if (Infos->GetRequest().getMethod().empty()) {
+        std::cerr << "[ERROR] Empty HTTP method received, sending 400 Bad Request" << std::endl;
+        std::string bad_request =
+            "HTTP/1.1 400 Bad Request\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 45\r\n"
+            "\r\n"
+            "<html><body>400 Bad Request</body></html>";
+        write(Infos->Getfd(), bad_request.c_str(), bad_request.size());
+        Infos->SetBool(true);
+        return;
+    }
 
 	std::string host = Infos->GetRequest().getHeaders()["host"];
 	Server *TmpServer =  &Infos->Getserver();
@@ -51,18 +50,18 @@ void ResponseBuilder(Connection *Infos) {
 	Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
 	const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
 	if (HostName(&Infos->Getserver(), host) == false){
-		std::cout << "[DEBUG] Entered HostName branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
+		// std::cout << "[DEBUG] Entered HostName branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
 		write (Infos->Getfd(), ErrorBuilder(Infos, TmpServer, 400).c_str(), strlen(ErrorBuilder(Infos, TmpServer, 400).c_str()));
 		Infos->SetBool(true);
 		return ;
 	}
 	else if (isCGI) {
-		std::cout << "[DEBUG] Entered CGI branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
+		// std::cout << "[DEBUG] Entered CGI branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
 		try {
 			Cgi *cgi = Infos->getCGI();
 
 			if (!cgi) {
-				std::cout << "pepe should be once\n";
+				// std::cout << "pepe should be once\n";
 				cgi = new Cgi(matchedRoute, Infos->GetRequest(), Infos);
 				if (!cgi)
 					throw std::bad_alloc();
@@ -103,7 +102,7 @@ void ResponseBuilder(Connection *Infos) {
 	}
 
 	else if (Infos->GetRequest().getMethod() == "GET"){
-		std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
+		// std::cout << "Client requested to : " << Infos->GetRequest().getRequestURI() << '\n';
 
 		std::string tmpstring = GetMethod(Infos);
 		if (!tmpstring.empty())
@@ -111,23 +110,23 @@ void ResponseBuilder(Connection *Infos) {
 		return ;
 	}
 	else if (Infos->GetRequest().getMethod() == "POST"){
-		std::cout << "[DEBUG] Method string: '" << Infos->GetRequest().getMethod() << "' length: " << Infos->GetRequest().getMethod().size() << std::endl;
-		std::cout << "POST" << std::endl;
+		// std::cout << "[DEBUG] Method string: '" << Infos->GetRequest().getMethod() << "' length: " << Infos->GetRequest().getMethod().size() << std::endl;
+		// std::cout << "POST" << std::endl;
 
 		if (Infos->GetRequest().getIsChunked()) {
 			std::string raw_body = Infos->GetRequest().getBody();
 			if (raw_body.size() < 5 || raw_body.substr(raw_body.size() - 5) != "0\r\n\r\n") {
-				std::cout << "[DEBUG] Waiting for full chunked body, current size=" << raw_body.size() << std::endl;
+				// std::cout << "[DEBUG] Waiting for full chunked body, current size=" << raw_body.size() << std::endl;
 				return;
 			}
-			std::cout << "[DEBUG] Detected chunked transfer encoding for POST" << std::endl;
+			// std::cout << "[DEBUG] Detected chunked transfer encoding for POST" << std::endl;
 			std::string decoded_body = decode_chunked_body(raw_body);
 			Infos->GetRequest().setBody(decoded_body);
-			std::cout << "[DEBUG] Decoded chunked body, size=" << decoded_body.size() << std::endl;
+			// std::cout << "[DEBUG] Decoded chunked body, size=" << decoded_body.size() << std::endl;
 			// Continue with the rest of the POST logic as if body is ready
 			// Save uploaded file if upload directory is set
 			std::string upload_dir = matchedRoute.getUpload();
-			std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
+			// std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
 			if (!upload_dir.empty()) {
 				// MIME type to extension map
 				std::map<std::string, std::string> mimeTypes;
@@ -173,7 +172,7 @@ void ResponseBuilder(Connection *Infos) {
 				if (outfile.is_open()) {
 					outfile.write(decoded_body.c_str(), decoded_body.size());
 					outfile.close();
-					std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
+					// std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
 					// Respond with 201 Created
 					std::string response_body = "File uploaded to: " + full_path + "\n";
 					char header[256];
@@ -189,7 +188,7 @@ void ResponseBuilder(Connection *Infos) {
 				}
 			}
 			// Send a simple 200 OK response after reading the POST body
-			std::cout << "[DEBUG] About to send 200 OK response for POST (chunked)" << std::endl;
+			// std::cout << "[DEBUG] About to send 200 OK response for POST (chunked)" << std::endl;
 			std::string response_body = "POST received!\n";
 			std::ostringstream oss;
 			oss << "HTTP/1.1 200 OK\r\n"
@@ -200,9 +199,9 @@ void ResponseBuilder(Connection *Infos) {
 				<< response_body;
 			std::string response = oss.str();
 			int w = write(Infos->Getfd(), response.c_str(), response.size());
-			std::cout << "[DEBUG] Sent 200 OK response for POST (chunked), write returned: " << w << std::endl;
+			// std::cout << "[DEBUG] Sent 200 OK response for POST (chunked), write returned: " << w << std::endl;
 			Infos->SetBool(true);
-			std::cout << "[DEBUG] SetBool(true) called, returning from POST branch (chunked)" << std::endl;
+			// std::cout << "[DEBUG] SetBool(true) called, returning from POST branch (chunked)" << std::endl;
 			return;
 		}
 
@@ -236,7 +235,7 @@ void ResponseBuilder(Connection *Infos) {
 			if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 				// Not enough data yet, save what we have and return
 				Infos->GetRequest().setBody(body);
-				std::cout << "[DEBUG] Not enough POST body data yet, read " << total_read << " of " << content_length << std::endl;
+				// std::cout << "[DEBUG] Not enough POST body data yet, read " << total_read << " of " << content_length << std::endl;
 				return;
 			}
 			if (n == 0) {
@@ -261,16 +260,16 @@ void ResponseBuilder(Connection *Infos) {
 		}
 		if (total_read < content_length) {
 			// Still not enough data, wait for more
-			std::cout << "[DEBUG] Still waiting for full POST body, have " << total_read << " of " << content_length << std::endl;
+			// std::cout << "[DEBUG] Still waiting for full POST body, have " << total_read << " of " << content_length << std::endl;
 			Infos->GetRequest().setBody(body);
 			return;
 		}
 		Infos->GetRequest().setBody(body);
-		std::cout << "[DEBUG] POST body fully read: size=" << body.size() << std::endl;
+		// std::cout << "[DEBUG] POST body fully read: size=" << body.size() << std::endl;
 
 		// Save uploaded file if upload directory is set
 		std::string upload_dir = matchedRoute.getUpload();
-		std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
+		// std::cout << "[DEBUG] Upload directory: " << upload_dir << std::endl;
 		if (!upload_dir.empty()) {
 			// MIME type to extension map
 			std::map<std::string, std::string> mimeTypes;
@@ -316,7 +315,7 @@ void ResponseBuilder(Connection *Infos) {
 			if (outfile.is_open()) {
 				outfile.write(body.c_str(), body.size());
 				outfile.close();
-				std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
+				// std::cout << "[DEBUG] Uploaded file saved to: " << full_path << std::endl;
 				// Respond with 201 Created
 				std::string response_body = "File uploaded to: " + full_path + "\n";
 				char header[256];
@@ -333,7 +332,7 @@ void ResponseBuilder(Connection *Infos) {
 		}
 
 		// Send a simple 200 OK response after reading the POST body
-		std::cout << "[DEBUG] About to send 200 OK response for POST" << std::endl;
+		// std::cout << "[DEBUG] About to send 200 OK response for POST" << std::endl;
 		std::string response_body = "POST received!\n";
 		std::ostringstream oss;
 		oss << "HTTP/1.1 200 OK\r\n"
@@ -344,13 +343,13 @@ void ResponseBuilder(Connection *Infos) {
 			<< response_body;
 		std::string response = oss.str();
 		int w = write(Infos->Getfd(), response.c_str(), response.size());
-		std::cout << "[DEBUG] Sent 200 OK response for POST, write returned: " << w << std::endl;
+		// std::cout << "[DEBUG] Sent 200 OK response for POST, write returned: " << w << std::endl;
 		Infos->SetBool(true);
-		std::cout << "[DEBUG] SetBool(true) called, returning from POST branch" << std::endl;
+		// std::cout << "[DEBUG] SetBool(true) called, returning from POST branch" << std::endl;
 		return;
 	}
 	else if (Infos->GetRequest().getMethod() == "DELETE"){
-		std::cout << "[DEBUG] DELETE method received for URI: " << Infos->GetRequest().getRequestURI() << std::endl;
+		// std::cout << "[DEBUG] DELETE method received for URI: " << Infos->GetRequest().getRequestURI() << std::endl;
 		std::string route = MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest());
 		if (route == "404" || route == "405") {
 			std::string err = ErrorBuilder(Infos, TmpServer, atoi(route.c_str()));
@@ -358,7 +357,7 @@ void ResponseBuilder(Connection *Infos) {
 			return;
 		}
 		std::string file_path = RemovePrefix(Infos->GetRequest().getRequestURI(), route, Infos->Getserver().getRoutes()[route].getRoot());
-		std::cout << "[DEBUG] DELETE resolved file path: " << file_path << std::endl;
+		// std::cout << "[DEBUG] DELETE resolved file path: " << file_path << std::endl;
 		struct stat st;
 		if (stat(file_path.c_str(), &st) != 0) {
 			// File does not exist
@@ -410,7 +409,7 @@ void ResponseBuilder(Connection *Infos) {
 		return;
 	}
 	else {
-		std::cout << "[DEBUG] No matching method branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
+		// std::cout << "[DEBUG] No matching method branch, method: '" << Infos->GetRequest().getMethod() << "'" << std::endl;
 	}
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/06/29 14:56:40 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/07/03 13:17:40 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "HttpResponse/HttpResponse.hpp"
 #include "HttpRequest/HttpRequestParser.hpp"
 #include "SetupServer/includes.hpp"
+#include <signal.h>
 
 /*
     Author: BOUZID Hicham
@@ -59,9 +60,10 @@ HttpRequest *ft_static_request(){
 
 
 void Print_static_Request(HttpRequest tmpReques){
-    std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
-    std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
-    std::cout << "Version : " << tmpReques.getVersion() << '\n';
+    (void)tmpReques;
+    // std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
+    // std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
+    // std::cout << "Version : " << tmpReques.getVersion() << '\n';
     // std::cout << "=================== PRINT HEADERS ===================\n";
     // std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
     // for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
@@ -138,12 +140,12 @@ void manage_connections(WebServ *web, int epollfd)
 
                 ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
                 if (result == PARSE_ERROR) {
-                    std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                    // std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                     //todo : should build response error here
                     // return ;
                 }
                 //! to remove
-                std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
+                // std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
@@ -162,6 +164,8 @@ int main()
 {
     try
     {
+            signal(SIGPIPE, SIG_IGN);
+
         WebServ web("./config.toml");
         // web.getServers()[0].printServer();
         Socketcreate(&web);
