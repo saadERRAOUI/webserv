@@ -143,17 +143,13 @@ static void handlePost(Connection *Infos, Route& matchedRoute) {
     std::map<std::string, std::string> headers = Infos->GetRequest().getHeaders();
     std::map<std::string, std::string>::iterator it = headers.find("content-length");
     if (it == headers.end()) {
-        const char *length_required =
-            "HTTP/1.1 411 Length Required\r\nContent-Type: text/html\r\nContent-Length: 53\r\n\r\n<html><body>411 Length Required</body></html>";
-        write(Infos->Getfd(), length_required, strlen(length_required));
+        ErrorBuilder(Infos, &Infos->Getserver(), 411);
         Infos->SetBool(true);
         return;
     }
     int content_length = atoi(it->second.c_str());
     if (content_length <= 0) {
-        const char *bad_request =
-            "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
-        write(Infos->Getfd(), bad_request, strlen(bad_request));
+        ErrorBuilder(Infos, &Infos->Getserver(), 400);
         Infos->SetBool(true);
         return;
     }
@@ -169,9 +165,7 @@ static void handlePost(Connection *Infos, Route& matchedRoute) {
             return;
         }
         if (n == 0) {
-            const char *bad_request =
-                "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body>400 Bad Request</body></html>";
-            write(Infos->Getfd(), bad_request, strlen(bad_request));
+            ErrorBuilder(Infos, &Infos->Getserver(), 400);
             Infos->SetBool(true);
             return;
         }
@@ -270,13 +264,7 @@ void ResponseBuilder(Connection *Infos) {
 
     if (Infos->GetRequest().getMethod().empty()) {
         std::cerr << "[ERROR] Empty HTTP method received, sending 400 Bad Request" << std::endl;
-        std::string bad_request =
-            "HTTP/1.1 400 Bad Request\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 45\r\n"
-            "\r\n"
-            "<html><body>400 Bad Request</body></html>";
-        write(Infos->Getfd(), bad_request.c_str(), bad_request.size());
+        ErrorBuilder(Infos, &Infos->Getserver(), 400);
         Infos->SetBool(true);
         return;
     }

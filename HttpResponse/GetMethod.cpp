@@ -293,24 +293,9 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
         {
-
             std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
             std::cout << Infos->Getfd() << "\n";
-            const char response[] =
-            "HTTP/1.1 404 Not Found\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 113\r\n"
-            "Connection: close\r\n"
-            "\r\n"
-            "<html>"
-            "<head><title>404 Not Found</title></head>"
-            "<body>"
-            "<h1>Not Found</h1>"
-            "<p>The requested URL was not found on this server.</p>"
-            "</body>"
-            "</html>";
-            write (Infos->Getfd(), response, strlen(response));
-            std::cout << response << '\n';
+            // Removed hardcoded 404 response, ErrorBuilder already sends the error
             return("");
         }
             std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();

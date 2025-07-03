@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/03 13:17:40 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/03 22:45:28 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,12 +140,11 @@ void manage_connections(WebServ *web, int epollfd)
 
                 ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
                 if (result == PARSE_ERROR) {
-                    // std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
-                    //todo : should build response error here
-                    // return ;
+                    ErrorBuilder(&map_connections[events[i].data.fd], &map_connections[events[i].data.fd].Getserver(), 400);
+                    close(events[i].data.fd);
+                    map_connections.erase(events[i].data.fd);
+                    continue;
                 }
-                //! to remove
-                // std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
