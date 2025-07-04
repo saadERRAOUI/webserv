@@ -72,27 +72,21 @@ std::string ServerNormal(Connection *Infos, std::string URI, std::string route, 
     std::cout << "From this path we will serve: " << ActualPath << '\n';
     if (access(ActualPath.c_str(), R_OK))
         return(ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404)));
-    std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
-	std::string response = Infos->GetRequest().getVersion();
+    std::string response = Infos->GetRequest().getVersion();
     if (code != 200)
-	    ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
-	response += " " + tostring(code) + " ";
-	response += Infos->GetResponse().GetStatusCode(code);
-	response += "\r\n";
-	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-	{
-		response += it->first;
-		response += ": ";
-		response += it->second;
-		response += "\r\n";
-	}
-	std::string rt = OpenFile(ActualPath, true, Infos, response);
-	response += "Content-Length: " + tostring((int)rt.size());
-	response += "\r\n\r\n";
-	response += rt;
-	if (code != 301)
-		Infos->SetBool(true);
-	return (response);
+        ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
+    response += " " + tostring(code) + " ";
+    response += Infos->GetResponse().GetStatusCode(code);
+    response += "\r\n";
+    std::string rt = OpenFile(ActualPath, true, Infos, response);
+    response += "Content-Type: text/html\r\n";
+    response += "Content-Length: " + tostring((int)rt.size()) + "\r\n";
+    response += "Connection: close\r\n";
+    response += "\r\n";
+    response += rt;
+    if (code != 301)
+        Infos->SetBool(true);
+    return (response);
 }
 
 /*
@@ -108,10 +102,7 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     std::string RListing;
     DIR *dir;
     struct dirent *dp;
-    std::cout << "-------------------------------------------------------------------------\n";
-    std::cout << "ENTER into list files: " << '\n';
     ActualPath = Infos->Getserver().getRoutes()[route].getRoot() + URI;
-    std::cout << "From this path we will serve: " << ActualPath << '\n';
     if ((dir = opendir(ActualPath.c_str())) == NULL)
         return (ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403 : 404)));
     RListing =  "<!DOCTYPE html><html><head><title>Index of " + URI + "</title></head><body>\n";
@@ -126,20 +117,11 @@ std::string ListFiles(Connection *Infos, std::string URI, std::string route, int
     closedir(dir);
     std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
     std::string response = Infos->GetRequest().getVersion();
-    if (code != 200)
-        ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
-    response += " " + tostring(code) + " ";
-    response += Infos->GetResponse().GetStatusCode(code);
+    response += " 200 OK\r\n";
+    response += "Content-Type: text/html\r\n";
+    response += "Content-Length: " + tostring((int)RListing.size()) + "\r\n";
+    response += "Connection: close\r\n";
     response += "\r\n";
-    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-    {
-        response += it->first;
-        response += ": ";
-        response += it->second;
-        response += "\r\n";
-    }
-    response += "Content-Length: " + tostring((int)RListing.size());
-    response += "\r\n\r\n";
     response += RListing;
     if (code != 301)
         Infos->SetBool(true);
@@ -159,7 +141,6 @@ std::string GetMethod(Connection *Infos)
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
-    std::cout << "this is the result: " << result << "\n";
     // in ths condition i checked for error pages or somthing wrong
     if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
@@ -186,22 +167,34 @@ std::string GetMethod(Connection *Infos)
               else
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
           }
-          else if (Infos->Getserver().getRoutes()[result].getIndex().empty()){
-              return (ServerNormal(Infos, Infos->GetRequest().getRequestURI() +
-                  Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
-          }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
               {
-                //should serve the index file if found.
-                  std::cout << "Alert Alert Alert Alert\n";
-                  std::cout << "Result Result Result: "<< result<<"\n";
+                  // First try to serve the index file if it exists
                   if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
-                      return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
+                  {
+                      std::string indexPath = Infos->Getserver().getRoutes()[result].getRoot() + Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex();
+                      if (access(indexPath.c_str(), R_OK) == 0)
+                      {
+                          return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
+                      }
+                  }
+                  // If no index file or index file doesn't exist, list directory
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
               }
               else
+              {
+                  // Autoindex is OFF, try to serve index file if configured
+                  if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
+                  {
+                      std::string indexPath = Infos->Getserver().getRoutes()[result].getRoot() + Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex();
+                      if (access(indexPath.c_str(), R_OK) == 0)
+                      {
+                          return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
+                      }
+                  }
                   return (ErrorBuilder(Infos, &Infos->Getserver(), 403));
+              }
           }
       }
         // serve file if have a right permition
@@ -305,13 +298,6 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         response += " " + tostring(code) + " ";
         response += Infos->GetResponse().GetStatusCode(code);
         response += "\r\n";
-        for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-        {
-            response += it->first;
-        	response += ": ";
-        	response += it->second;
-        	response += "\r\n";
-        }
         Infos->SetSize(GetLenght(ActualPath));
         //  std::cout << "the size of file is: " << Infos->GetSize() << "\n";
         response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
@@ -321,10 +307,19 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         OpenFile(ActualPath, true, Infos, response);
         // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
         Infos->GetRequest().ClearURI();
+        Infos->SetBool(true);  // Mark connection as done to prevent multiple serving
         return (std::string(""));
     }
     OpenFile(ActualPath, false, Infos, response);
         // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
+    Infos->SetBool(true);  // Mark connection as done to prevent multiple serving
     return (std::string(""));
+}
+
+static void handleGet(Connection *Infos) {
+    // Default GET handler
+    std::string tmpstring = GetMethod(Infos);
+    if (!tmpstring.empty())
+        write(Infos->Getfd(), tmpstring.c_str(), tmpstring.size());
 }
 
