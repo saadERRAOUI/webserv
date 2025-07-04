@@ -1,6 +1,6 @@
 CPP = c++
 
-CPPFLAGS = -std=c++98  -O3
+CPPFLAGS = -std=c++98  -g3 -fsanitize=address
 
 NAME = webserv
 

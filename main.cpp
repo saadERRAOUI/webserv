@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/03 22:45:28 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/04 20:34:51 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,11 @@ void manage_connections(WebServ *web, int epollfd)
 
                 ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
                 if (result == PARSE_ERROR) {
+                    // Create a proper HttpResponse for error handling
+                    HttpResponse *error_response = new HttpResponse(events[i].data.fd);
+                    map_connections[events[i].data.fd].SetHttpResponse(error_response);
                     ErrorBuilder(&map_connections[events[i].data.fd], &map_connections[events[i].data.fd].Getserver(), 400);
+                    delete error_response;
                     close(events[i].data.fd);
                     map_connections.erase(events[i].data.fd);
                     continue;

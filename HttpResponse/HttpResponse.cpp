@@ -22,7 +22,7 @@ std::string RemovePrefix(std::string URI, std::string location, std::string root
 static void sendErrorResponse(Connection *Infos, Server *TmpServer, int code) {
     std::string err = ErrorBuilder(Infos, TmpServer, code);
     write(Infos->Getfd(), err.c_str(), err.size());
-    Infos->SetBool(true);
+		Infos->SetBool(true);
 }
 
 static void send405(Connection *Infos, const std::vector<std::string>& allowed_methods) {
@@ -36,38 +36,38 @@ static void send405(Connection *Infos, const std::vector<std::string>& allowed_m
     oss << "\r\nContent-Type: text/plain\r\nContent-Length: 23\r\nConnection: close\r\n\r\nMethod Not Allowed\n";
     std::string response = oss.str();
     write(Infos->Getfd(), response.c_str(), response.size());
-    Infos->SetBool(true);
+					Infos->SetBool(true);
 }
 
 static std::string getMimeExtension(const std::string& content_type) {
     static std::map<std::string, std::string> mimeTypes;
     if (mimeTypes.empty()) {
-        mimeTypes["text/html"] = ".html";
-        mimeTypes["text/css"] = ".css";
-        mimeTypes["application/javascript"] = ".js";
-        mimeTypes["application/json"] = ".json";
-        mimeTypes["application/xml"] = ".xml";
-        mimeTypes["image/jpeg"] = ".jpg";
-        mimeTypes["image/png"] = ".png";
-        mimeTypes["image/gif"] = ".gif";
-        mimeTypes["image/svg+xml"] = ".svg";
-        mimeTypes["application/pdf"] = ".pdf";
-        mimeTypes["application/zip"] = ".zip";
-        mimeTypes["application/x-tar"] = ".tar";
-        mimeTypes["audio/mpeg"] = ".mp3";
-        mimeTypes["audio/wav"] = ".wav";
-        mimeTypes["video/mp4"] = ".mp4";
-        mimeTypes["video/x-msvideo"] = ".avi";
-        mimeTypes["text/plain"] = ".txt";
-        mimeTypes["text/csv"] = ".csv";
-        mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
+			mimeTypes["text/html"] = ".html";
+			mimeTypes["text/css"] = ".css";
+			mimeTypes["application/javascript"] = ".js";
+			mimeTypes["application/json"] = ".json";
+			mimeTypes["application/xml"] = ".xml";
+			mimeTypes["image/jpeg"] = ".jpg";
+			mimeTypes["image/png"] = ".png";
+			mimeTypes["image/gif"] = ".gif";
+			mimeTypes["image/svg+xml"] = ".svg";
+			mimeTypes["application/pdf"] = ".pdf";
+			mimeTypes["application/zip"] = ".zip";
+			mimeTypes["application/x-tar"] = ".tar";
+			mimeTypes["audio/mpeg"] = ".mp3";
+			mimeTypes["audio/wav"] = ".wav";
+			mimeTypes["video/mp4"] = ".mp4";
+			mimeTypes["video/x-msvideo"] = ".avi";
+			mimeTypes["text/plain"] = ".txt";
+			mimeTypes["text/csv"] = ".csv";
+			mimeTypes["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
     }
     std::map<std::string, std::string>::iterator it = mimeTypes.find(content_type);
     return (it != mimeTypes.end()) ? it->second : ".bin";
 }
 
 static bool ensureDirectoryExists(const std::string& dir) {
-    struct stat st;
+			struct stat st;
     if (stat(dir.c_str(), &st) != 0) {
         if (mkdir(dir.c_str(), 0777) != 0) {
             std::cerr << "[DEBUG] Failed to create upload directory: " << dir << std::endl;
@@ -80,14 +80,14 @@ static bool ensureDirectoryExists(const std::string& dir) {
 static bool saveUploadedFile(const std::string& upload_dir, const std::string& content_type, const std::string& body, std::string& out_path) {
     if (!ensureDirectoryExists(upload_dir)) return false;
     std::string ext = getMimeExtension(content_type);
-    char filename[128];
-    time_t now = time(0);
-    sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
+			char filename[128];
+			time_t now = time(0);
+			sprintf(filename, "upload_%ld%s", (long)now, ext.c_str());
     out_path = upload_dir + filename;
     std::ofstream outfile(out_path.c_str(), std::ios::binary);
-    if (outfile.is_open()) {
-        outfile.write(body.c_str(), body.size());
-        outfile.close();
+			if (outfile.is_open()) {
+				outfile.write(body.c_str(), body.size());
+				outfile.close();
         return true;
     }
     std::cerr << "[DEBUG] Failed to open file for upload: " << out_path << std::endl;
@@ -104,27 +104,42 @@ static void handleGet(Connection *Infos) {
 }
 
 static void handlePost(Connection *Infos, Route& matchedRoute) {
+    // Check body size limits before processing
+    int server_max_body = Infos->Getserver().getMaxBodySize();
+    int global_max_body = Infos->Getserver().webServ.getDefaultMaxBodySize();
+    
+    // Use server-specific limit if set, otherwise use global default
+    int max_body_size = (server_max_body > 0) ? server_max_body : global_max_body;
+    
     if (Infos->GetRequest().getIsChunked()) {
         std::string raw_body = Infos->GetRequest().getBody();
         if (raw_body.size() < 5 || raw_body.substr(raw_body.size() - 5) != "0\r\n\r\n") {
             return;
         }
         std::string decoded_body = decode_chunked_body(raw_body);
+        
+        // Check decoded body size against limit
+        if (max_body_size > 0 && (int)decoded_body.size() > max_body_size) {
+            ErrorBuilder(Infos, &Infos->Getserver(), 413);
+            Infos->SetBool(true);
+            return;
+        }
+        
         Infos->GetRequest().setBody(decoded_body);
         std::string upload_dir = matchedRoute.getUpload();
         if (!upload_dir.empty()) {
             std::string content_type = Infos->GetRequest().getHeader("Content-Type");
             std::string full_path;
             if (saveUploadedFile(upload_dir, content_type, decoded_body, full_path)) {
-                std::string response_body = "File uploaded to: " + full_path + "\n";
-                char header[256];
-                sprintf(header,
-                    "HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
-                    (unsigned long)response_body.size());
-                std::string response = std::string(header) + response_body;
-                write(Infos->Getfd(), response.c_str(), response.size());
-                Infos->SetBool(true);
-                return;
+				std::string response_body = "File uploaded to: " + full_path + "\n";
+				char header[256];
+				sprintf(header,
+					"HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\nConnection: close\r\n\r\n",
+					(unsigned long)response_body.size());
+				std::string response = std::string(header) + response_body;
+				write(Infos->Getfd(), response.c_str(), response.size());
+				Infos->SetBool(true);
+				return;
             }
         }
         std::string response_body = "POST received!\n";
@@ -153,6 +168,14 @@ static void handlePost(Connection *Infos, Route& matchedRoute) {
         Infos->SetBool(true);
         return;
     }
+    
+    // Check Content-Length against body size limit
+    if (max_body_size > 0 && content_length > max_body_size) {
+        ErrorBuilder(Infos, &Infos->Getserver(), 413);
+        Infos->SetBool(true);
+        return;
+    }
+    
     std::string body = Infos->GetRequest().getBody();
     char buffer[8000];
     int total_read = body.size();
@@ -174,6 +197,13 @@ static void handlePost(Connection *Infos, Route& matchedRoute) {
         }
         body.append(buffer, n);
         total_read += n;
+        
+        // Check accumulated body size against limit during reading
+        if (max_body_size > 0 && total_read > max_body_size) {
+            ErrorBuilder(Infos, &Infos->Getserver(), 413);
+            Infos->SetBool(true);
+            return;
+        }
     }
     if (total_read < content_length) {
         Infos->GetRequest().setBody(body);
@@ -196,17 +226,17 @@ static void handlePost(Connection *Infos, Route& matchedRoute) {
             return;
         }
     }
-    std::string response_body = "POST received!\n";
-    std::ostringstream oss;
-    oss << "HTTP/1.1 200 OK\r\n"
-        << "Content-Type: text/plain\r\n"
-        << "Content-Length: " << response_body.size() << "\r\n"
-        << "Connection: close\r\n"
-        << "\r\n"
-        << response_body;
-    std::string response = oss.str();
+		std::string response_body = "POST received!\n";
+		std::ostringstream oss;
+		oss << "HTTP/1.1 200 OK\r\n"
+			<< "Content-Type: text/plain\r\n"
+			<< "Content-Length: " << response_body.size() << "\r\n"
+			<< "Connection: close\r\n"
+			<< "\r\n"
+			<< response_body;
+		std::string response = oss.str();
     write(Infos->Getfd(), response.c_str(), response.size());
-    Infos->SetBool(true);
+		Infos->SetBool(true);
 }
 
 static void handleDelete(Connection *Infos, Server *TmpServer, Route& matchedRoute) {
@@ -219,8 +249,8 @@ static void handleDelete(Connection *Infos, Server *TmpServer, Route& matchedRou
     struct stat st;
     if (stat(file_path.c_str(), &st) != 0) {
         sendErrorResponse(Infos, TmpServer, 404);
-        return;
-    }
+		return;
+	}
     if (unlink(file_path.c_str()) == 0) {
         std::ostringstream oss;
         oss << "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";

@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:32 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/03 13:16:27 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/04 20:24:59 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 
 // Helper to convert a string to lowercase
 std::string to_lower(const std::string& s) {
+    if (s.empty()) return s;
     std::string out = s;
-    for (size_t i = 0; i < out.size(); ++i) out[i] = std::tolower(out[i]);
+    for (size_t i = 0; i < out.size() && i < s.size(); ++i) {
+        out[i] = std::tolower(static_cast<unsigned char>(out[i]));
+    }
     return out;
 }
 
@@ -248,6 +251,11 @@ ParseResult HttpRequestParser::parseHttpHeadersMethod(HttpRequest &request, char
         {
             request.setState(HTTP_HEADER_SP);
         }
+        else if (byte == ' ' || byte == '\t')
+        {
+            // Space or tab in header key is invalid - return error immediately
+            return PARSE_ERROR;
+        }
         else if (!std::isalnum(byte) && byte != '-' && byte != '_')
         {
             return PARSE_ERROR;
@@ -288,11 +296,17 @@ ParseResult HttpRequestParser::parseHttpHeadersMethod(HttpRequest &request, char
         if (byte == '\n')
         {
             request.setState(HTTP_HEADER_START);
-            std::string key_lower = to_lower(request.getHeaderKey());
-            std::string val_lower = to_lower(request.getHeaderValue());
-            request.setHeaders(key_lower, request.getHeaderValue());
-            if (key_lower == "transfer-encoding" && val_lower.find("chunked") != std::string::npos)
-                request.setIsChunked(true);
+            // Only process headers if both key and value are not empty
+            if (!request.getHeaderKey().empty()) {
+                std::string key_lower = to_lower(request.getHeaderKey());
+                std::string val_lower = to_lower(request.getHeaderValue());
+                // Additional safety check - only set headers if key is not empty after to_lower
+                if (!key_lower.empty()) {
+                    request.setHeaders(key_lower, request.getHeaderValue());
+                    if (key_lower == "transfer-encoding" && val_lower.find("chunked") != std::string::npos)
+                        request.setIsChunked(true);
+                }
+            }
             request.setHeaderKey("");
             request.setHeaderValue("");
         }
