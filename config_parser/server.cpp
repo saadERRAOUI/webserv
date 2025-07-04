@@ -34,7 +34,7 @@ Route::Route(const Route &other)
 std::string Route::getCgiPath(const std::string& request_path) const {
     std::string relative_path = request_path.substr(this->path.size());
 
-    return this->root  + relative_path;
+    return this->root + "/" + relative_path;
 }
 
 std::string Route::getPath() const

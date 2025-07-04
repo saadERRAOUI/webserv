@@ -289,6 +289,7 @@ void ResponseBuilder(Connection *Infos) {
                 Infos->SetCGI(cgi);
             }
             cgi->execute();
+            return;
         }catch (const Cgi::CGIException &e) {
             sendErrorResponse(Infos, TmpServer, 500);
             return;
