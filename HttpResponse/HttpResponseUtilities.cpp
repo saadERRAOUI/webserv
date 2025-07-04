@@ -9,8 +9,8 @@ long GetLenght(std::string PathFile){
 	std::ifstream file(PathFile.c_str(), std::ios::binary);
 
 	if (!file.is_open()){
-		std::cerr << "Error file: " << strerror(errno) << '\n';
-		return (-1);
+		std::cerr << "Error opening file: " << PathFile << " - " << strerror(errno) << '\n';
+		return (0);
 	}
 	file.seekg(0, std::ios::end);
 	long size = file.tellg();
@@ -43,22 +43,36 @@ std::string    OpenFile(std::string PathFile, bool status, Connection* Infos, co
         }
 
         Infos->Setfile(*fd);
-        Infos->GetFile()->read(BUFFER, sizeof(BUFFER));
-
-        // Using std::vector<char> to concatenate BUFFER1 (prefix) and BUFFER (binary content)
-        std::vector<char> combined;
-        combined.insert(combined.end(), BUFFER1, BUFFER1 + strlen(BUFFER1));  // Insert prefix
-        combined.insert(combined.end(), BUFFER, BUFFER + Infos->GetFile()->gcount());  // Insert file content
-
-        // Write the combined buffer to the connection
-        write(Infos->Getfd(), combined.data(), combined.size());
-
-        Infos->SetSize(Infos->GetFile()->gcount());
+        
+        // First, send the HTTP headers
+        write(Infos->Getfd(), BUFFER1, strlen(BUFFER1));
+        
+        // Then read and send the file content in chunks
+        long totalBytesRead = 0;
+        long fileSize = GetLenght(PathFile);
+        
+        while (totalBytesRead < fileSize) {
+            long remainingBytes = fileSize - totalBytesRead;
+            long bytesToRead = (remainingBytes < sizeof(BUFFER)) ? remainingBytes : sizeof(BUFFER);
+            
+            Infos->GetFile()->read(BUFFER, bytesToRead);
+            std::streamsize bytesRead = Infos->GetFile()->gcount();
+            
+            if (bytesRead <= 0) break;
+            
+            write(Infos->Getfd(), BUFFER, bytesRead);
+            totalBytesRead += bytesRead;
+        }
+        
+        Infos->GetFile()->close();
+        delete fd;
+        Infos->SetSize(0);
         Infos->DefSize(0);
 
-        return std::string(combined.begin(), combined.end());  // Return the combined result as a string
+        return std::string("");  // Return empty string since we've already sent everything
     }
 
+    // For non-status case (shouldn't be used for file serving)
     Infos->GetFile()->read(BUFFER, sizeof(BUFFER));
 
     // Using std::vector<char> to concatenate BUFFER1 (prefix) and BUFFER (binary content)
@@ -114,26 +128,21 @@ std::string chose_one(std::string a, std::string b){
 
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
-    std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+    // Create a simple error response without external files
+    std::string errorBody = "<html><body><h1>" + tostring(code) + " " + Infos->GetResponse().GetStatusCode(code) + "</h1><p>Error occurred while processing your request.</p></body></html>";
+    
     std::string response = Infos->GetRequest().getVersion();
-    std::string DefaultOrOurs;
-
-    DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
     response += " " + tostring(code) + " ";
     response += Infos->GetResponse().GetStatusCode(code);
     response += "\r\n";
-    for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-    {
-        response += it->first;
-        response += ": ";
-        response += it->second;
-        response += "\r\n";
-    }
-    response += "Content-Length: " + tostring(GetLenght(DefaultOrOurs));
-    response += "\r\n\r\n";
-    // write();
-	OpenFile(DefaultOrOurs, true, Infos, response);
-    // write(Infos->Getfd(), response.c_str(), strlen(response.c_str()));
+    response += "Content-Type: text/html\r\n";
+    response += "Content-Length: " + tostring(errorBody.length()) + "\r\n";
+    response += "Connection: close\r\n";
+    response += "\r\n";
+    response += errorBody;
+    
+    write(Infos->Getfd(), response.c_str(), response.length());
+    
     if (code != 301)
         Infos->SetBool(true);
     return (response);
