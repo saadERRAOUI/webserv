@@ -114,7 +114,8 @@ Server& Connection::Getserver(){
 }
 
 void Connection::SetBool(bool f){
-	this->done = f;
+    std::cout << "[SetBool] called with value: " << f << std::endl;
+    this->done = f;
 }
 
 void Connection::SetCGI(Cgi *cgi){

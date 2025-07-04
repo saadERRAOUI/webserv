@@ -1,4 +1,5 @@
 #include "HttpResponse.hpp"
+#include <sstream>
 
 /*
     Author: BOUZID Hicham
@@ -148,43 +149,48 @@ std::string GetMethod(Connection *Infos)
     // here we check for ace
     else
     {
-      // Build  add to request URI slash + build response 301
-      if (result  == (Infos->GetRequest().getRequestURI() + std::string("/"))){
-          Infos->GetRequest().setHeaders(std::string("Location"),
-              Infos->GetRequest().getRequestURI() + std::string("/"));
+      // Check if we need to redirect to add trailing slash
+      std::string requestURI = Infos->GetRequest().getRequestURI();
+      if (!requestURI.empty() && requestURI[requestURI.size()-1] != '/') {
+          std::string withSlash = requestURI + "/";
+          // Check if there's a route that matches with the trailing slash
+          if (routes.find(withSlash) != routes.end()) {
+              Infos->GetRequest().setHeaders("Location", withSlash);
               return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
+          }
       }
-      else if (result == Infos->GetRequest().getRequestURI()){
+      // Directory/index.html/autoindex logic for exact match
+      if (requestURI == result) {
           if (!Infos->Getserver().getRoutes()[result].getRedirection().empty())
           {
               if (Infos->SetRedirect(Infos->Getserver().getRoutes()[result].getRedirection()) == true){
-                  std::cout <<  "this is the path of redirection: " << Infos->Getserver().getRoutes()[result].getRedirection() << '\n';
                   Infos->GetRequest().setHeaders(std::string("Location"),
                      Infos->Getserver().getRoutes()[result].getRedirection());
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 301));
               }
-              // response with error an set the connection done
               else
                       return (ErrorBuilder(Infos, &Infos->Getserver(), 404));
           }
           else{
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
               {
-                  // First try to serve the index file if it exists
                   if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
                   {
-                      std::string indexPath = Infos->Getserver().getRoutes()[result].getRoot() + Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex();
+                      std::string root = Infos->Getserver().getRoutes()[result].getRoot();
+                      std::string index = Infos->Getserver().getRoutes()[result].getIndex();
+                      std::string indexPath = root;
+                      if (!root.empty() && root[root.size()-1] != '/')
+                          indexPath += "/";
+                      indexPath += index;
                       if (access(indexPath.c_str(), R_OK) == 0)
                       {
-                          return (ft_Get(Infos, Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex(), result, 200));
+                          return (ft_Get(Infos, "/" + index, result, 200));
                       }
                   }
-                  // If no index file or index file doesn't exist, list directory
                   return (ListFiles(Infos, Infos->GetRequest().getRequestURI(), result, 200));
               }
               else
               {
-                  // Autoindex is OFF, try to serve index file if configured
                   if (!Infos->Getserver().getRoutes()[result].getIndex().empty())
                   {
                       std::string indexPath = Infos->Getserver().getRoutes()[result].getRoot() + Infos->GetRequest().getRequestURI() + Infos->Getserver().getRoutes()[result].getIndex();
@@ -197,15 +203,13 @@ std::string GetMethod(Connection *Infos)
               }
           }
       }
-        // serve file if have a right permition
-        else{
-            std::cout << "should call error builder\n";
-            std::cout << "The request URI: " <<  Infos->GetRequest().getRequestURI() << "\n";
-            std::cout << "Path: "<< result << "\n";
-            return (ft_Get(Infos, Infos->GetRequest().getRequestURI(), result, 200));
-        }
-
+      // Serve file logic for any file under the route
+      else if (requestURI.find(result) == 0) {
+          return (ft_Get(Infos, requestURI, result, 200));
+      }
+      return std::string("");
     }
+    std::cout << "the result is: " << result << '\n';
     return (std::string(""));
     //Check for all routes and autoindex
 }
@@ -217,7 +221,29 @@ std::string GetMethod(Connection *Infos)
 */
 
 std::string RemovePrefix(std::string URI, std::string location, std::string root){
-    std::string Result =  root + URI.substr(location.size() - 1, URI.size());
+    std::string Result;
+    
+    // If URI starts with "/" and doesn't contain the location path, it's likely an index file
+    if (URI[0] == '/' && URI.find(location) == std::string::npos) {
+        // This is an index file, just append to root
+        Result = root + URI;
+    } else {
+        // Normal case: remove the location prefix from URI
+        // Handle both "/root/" and "/root" cases
+        std::string locationWithoutSlash = location;
+        if (!locationWithoutSlash.empty() && locationWithoutSlash[locationWithoutSlash.size()-1] == '/') {
+            locationWithoutSlash = locationWithoutSlash.substr(0, locationWithoutSlash.size()-1);
+        }
+        
+        if (URI.find(locationWithoutSlash) == 0) {
+            // URI starts with location (without trailing slash)
+            Result = root + URI.substr(locationWithoutSlash.size());
+        } else {
+            // Fallback to original logic
+            Result = root + URI.substr(location.size() - 1, URI.size());
+        }
+    }
+    
     std::cout << "This is suffex of file: " << Result << "\n" ;
     return (Result);
 }
@@ -275,23 +301,30 @@ std::string ContentType(std::string file){
 std::string ft_Get(Connection *Infos, std::string URI, std::string route, int code){
     std::string ActualPath;
     std::string response;
-
+    std::cout << "the request URI is: " << Infos->GetRequest().getRequestURI() << '\n';
     response = std::string("");
     if (!Infos->GetRequest().getVersion().empty())
     {
-        RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
-        ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+        // If URI ends with '/', append the index file
+        std::string root = Infos->Getserver().getRoutes()[route].getRoot();
+        std::string index = Infos->Getserver().getRoutes()[route].getIndex();
+        if (!URI.empty() && URI[URI.size()-1] == '/' && !index.empty()) {
+            if (!root.empty() && root[root.size()-1] != '/')
+                ActualPath = root + "/" + index;
+            else
+                ActualPath = root + index;
+        } else {
+            ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
+        }
 
         std::cout << "From this path we will serve : " << ActualPath << '\n';
         std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
         {
-            std::string f = ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
-            std::cout << Infos->Getfd() << "\n";
-            // Removed hardcoded 404 response, ErrorBuilder already sends the error
+            ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));
             return("");
         }
-            std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
+        std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
         response = Infos->GetRequest().getVersion();
         if (code != 200)
             ActualPath = chose_one(Infos->Getserver().webServ.getErrorPages()[code], Infos->Getserver().getErrorPages()[code]);
@@ -299,19 +332,24 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         response += Infos->GetResponse().GetStatusCode(code);
         response += "\r\n";
         Infos->SetSize(GetLenght(ActualPath));
-        //  std::cout << "the size of file is: " << Infos->GetSize() << "\n";
         response += "Content-Type: " +  ContentType(ActualPath) + "\r\n";
         response += "Content-Length: " + tostring(Infos->GetSize());
         response += "\r\n\r\n";
-        // write (1, response.c_str(), strlen(response.c_str()));
-        OpenFile(ActualPath, true, Infos, response);
-        // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
+        
+        // Read the file content and append to response
+        std::ifstream file(ActualPath.c_str(), std::ios::binary);
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            response += buffer.str();
+            file.close();
+        }
+        
         Infos->GetRequest().ClearURI();
         Infos->SetBool(true);  // Mark connection as done to prevent multiple serving
-        return (std::string(""));
+        return (response);
     }
     OpenFile(ActualPath, false, Infos, response);
-        // write (Infos->Getfd(), response.c_str(), strlen(response.c_str()));
     Infos->SetBool(true);  // Mark connection as done to prevent multiple serving
     return (std::string(""));
 }

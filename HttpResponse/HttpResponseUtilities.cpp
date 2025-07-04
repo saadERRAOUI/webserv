@@ -67,7 +67,7 @@ std::string    OpenFile(std::string PathFile, bool status, Connection* Infos, co
         Infos->GetFile()->close();
         delete fd;
         Infos->SetSize(0);
-        Infos->DefSize(0);
+        // Don't call DefSize since we've already closed the file
 
         return std::string("");  // Return empty string since we've already sent everything
     }
@@ -136,6 +136,12 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
     response += Infos->GetResponse().GetStatusCode(code);
     response += "\r\n";
     response += "Content-Type: text/html\r\n";
+    if (code == 301) {
+        std::string location = Infos->GetRequest().getHeader("Location");
+        if (!location.empty()) {
+            response += "Location: " + location + "\r\n";
+        }
+    }
     response += "Content-Length: " + tostring(errorBody.length()) + "\r\n";
     response += "Connection: close\r\n";
     response += "\r\n";
@@ -143,8 +149,7 @@ std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
     
     write(Infos->Getfd(), response.c_str(), response.length());
     
-    if (code != 301)
-        Infos->SetBool(true);
+    Infos->SetBool(true);
     return (response);
 }
 /*

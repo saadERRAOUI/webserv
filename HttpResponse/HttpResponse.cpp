@@ -99,6 +99,7 @@ static bool saveUploadedFile(const std::string& upload_dir, const std::string& c
 static void handleGet(Connection *Infos) {
     // Default GET handler
     std::string tmpstring = GetMethod(Infos);
+	std::cout << "the tmpstring is: " << tmpstring << '\n';
     if (!tmpstring.empty())
         write(Infos->Getfd(), tmpstring.c_str(), tmpstring.size());
 }
@@ -342,6 +343,7 @@ void ResponseBuilder(Connection *Infos) {
     }
 
     if (req_method == "GET") {
+		std::cout << "entered get method\n";
         handleGet(Infos);
         return;
     } else if (req_method == "POST") {

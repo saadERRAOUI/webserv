@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:02:21 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/03 13:16:17 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/04 22:35:20 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,12 @@ std::map<std::string, std::string> HttpRequest::getQueryParams() const {
 std::string     HttpRequest::getHeader(std::string key) const {
     std::string key_lower = to_lower(key);
     std::map<std::string, std::string>::const_iterator it = _headers.find(key_lower);
+    std::cout << "[getHeader] lookup: '" << key << "' (as '" << key_lower << "') => ";
     if (it != _headers.end()) {
+        std::cout << "found: '" << it->second << "'\n";
         return it->second;
     }
+    std::cout << "not found\n";
     return "";
 }
 /*
@@ -115,7 +118,9 @@ void            HttpRequest::setVersion(std::string version) {this->_version = v
 void            HttpRequest::setBodyFd(int bodyFd) {this->_body = bodyFd;}
 
 void            HttpRequest::setHeaders(std::string headerKey, std::string headerValue) {
-    this->_headers.insert(std::make_pair(headerKey, headerValue));
+    std::string key_lower = to_lower(headerKey);
+    std::cout << "[setHeaders] key: '" << headerKey << "' (stored as '" << key_lower << "'), value: '" << headerValue << "'\n";
+    this->_headers.insert(std::make_pair(key_lower, headerValue));
 }
 
 void            HttpRequest::setHeaderKey(std::string headerKey) {this->_headerKey = headerKey;}
