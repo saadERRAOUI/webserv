@@ -304,7 +304,12 @@ void ResponseBuilder(Connection *Infos) {
     Server *TmpServer =  &Infos->Getserver();
     const std::string url = Infos->GetRequest().getRequestURI();
     const size_t pos = url.find_last_of(".");
-    Route &matchedRoute = Infos->Getserver().getRoutes()[MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest())];
+    std::string matchedRouteKey = MatchRoutes(Infos->Getserver().getRoutes(), Infos->GetRequest());
+    if (matchedRouteKey == "404" || matchedRouteKey == "405") {
+        sendErrorResponse(Infos, TmpServer, atoi(matchedRouteKey.c_str()));
+        return;
+    }
+    Route &matchedRoute = Infos->Getserver().getRoutes()[matchedRouteKey];
     const bool isCGI = pos == std::string::npos ? false :  matchedRoute.getCGI().find(url.substr(pos + 1)) != matchedRoute.getCGI().end();
     if (HostName(&Infos->Getserver(), host) == false){
         sendErrorResponse(Infos, TmpServer, 400);

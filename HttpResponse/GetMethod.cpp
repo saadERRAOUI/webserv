@@ -22,16 +22,24 @@ bool CompareRU(std::string URI, std::string location){
     
     std::cout << "[DEBUG] CompareRU: URI='" << URI << "' vs location='" << tmplocation << "'" << std::endl;
     
-    for (index = 0; index < (int)URI.length() && index < (int)tmplocation.length(); index++){
-        if (URI[index] != tmplocation[index])
-            break;
+    // Check if URI starts with the location path
+    if (URI.length() < tmplocation.length()) {
+        std::cout << "[DEBUG] CompareRU: URI too short, no match" << std::endl;
+        return false;
+    }
+    
+    // Compare the location length characters
+    for (index = 0; index < (int)tmplocation.length(); index++){
+        if (URI[index] != tmplocation[index]) {
+            std::cout << "[DEBUG] CompareRU: mismatch at position " << index << std::endl;
+            return false;
+        }
     }
     
     std::cout << "[DEBUG] CompareRU: matched " << index << " characters, location length=" << tmplocation.length() << std::endl;
     
-    if (index == (int)tmplocation.length())
-        return (true);
-    return (false);
+    // Only return true if we matched the entire location path
+    return true;
 }
 
 
