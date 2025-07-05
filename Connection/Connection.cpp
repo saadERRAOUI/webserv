@@ -196,6 +196,16 @@ void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
 }
 
+long Connection::GetTimeout() const
+{
+	return this->timeout;
+}
+
+void Connection::SetTimeout(long timeout)
+{
+	this->timeout = timeout;
+}
+
 
 /*
 	Author: BOUZID Hicham

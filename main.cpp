@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/04 21:10:03 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/05 22:33:49 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,12 +104,22 @@ void manage_connections(WebServ *web, int epollfd)
             sockservers.push_back(*it1);
         }
     }
+    // Timeout constant: 10 seconds in microseconds
+    const long TIMEOUT_US = 10000000; // 10 seconds
+    
     while (true)
     {
-        int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
+        // Calculate timeout for epoll_wait (1 second to allow periodic timeout checks)
+        int epoll_timeout = 1000; // 1 second in milliseconds
+        
+        int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, epoll_timeout);
         // std::cout << "number of event: " << n << '\n';
         if (n == -1)
         {
+            if (errno == EINTR) {
+                // Interrupted by signal, continue
+                continue;
+            }
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
             exit(EXIT_FAILURE);
         }
@@ -125,6 +135,9 @@ void manage_connections(WebServ *web, int epollfd)
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLIN))
             {
+                // Update timeout for this connection
+                map_connections[events[i].data.fd].SetTimeout(get_current_time());
+                
                 int size = read(events[i].data.fd, BUFFER, BUFFER_SIZE);
                 if (size < BUFFER_SIZE)
                 {
@@ -159,6 +172,33 @@ void manage_connections(WebServ *web, int epollfd)
             )
                     ResponseBuilder(&map_connections[events[i].data.fd]);
             MonitorConnection(&map_connections, epollfd);
+        }
+        
+        // Check for timed out connections after processing all events
+        long current_time = get_current_time();
+        std::map<int, Connection>::iterator conn_it = map_connections.begin();
+        while (conn_it != map_connections.end()) {
+            if (current_time - conn_it->second.GetTimeout() > TIMEOUT_US) {
+                std::cout << "Connection " << conn_it->first << " timed out after 10 seconds" << std::endl;
+                
+                // Create HttpResponse for timeout
+                HttpResponse *timeout_response = new HttpResponse(conn_it->first);
+                conn_it->second.SetHttpResponse(timeout_response);
+                
+                // Use ErrorBuilder to send 408 response
+                ErrorBuilder(&conn_it->second, &conn_it->second.Getserver(), 408);
+                conn_it->second.SetBool(true);
+                
+                // Remove from epoll before closing
+                struct epoll_event event;
+                epoll_ctl(epollfd, EPOLL_CTL_DEL, conn_it->first, &event);
+                
+                delete timeout_response;
+                close(conn_it->first);
+                map_connections.erase(conn_it++);
+            } else {
+                ++conn_it;
+            }
         }
     }
 }

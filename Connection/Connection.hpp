@@ -48,5 +48,10 @@ class Connection{
 		void			DefSize(int);
 		std::ifstream	*GetFile();
 		void			ChagenMode(int FdEpoll, int fd_client, int mood);
+		long			GetTimeout() const;
+		void			SetTimeout(long timeout);
 
 };
+
+// Function declaration for timeout functionality
+long get_current_time(void);
