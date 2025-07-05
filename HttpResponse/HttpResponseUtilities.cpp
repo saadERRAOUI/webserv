@@ -1,4 +1,5 @@
 #include "HttpResponse.hpp"
+#include <sstream>
 /*
 	Author: BOUZID Hicham
 	Description: function get the lenght of file
@@ -128,8 +129,25 @@ std::string chose_one(std::string a, std::string b){
 
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
-    // Create a simple error response without external files
-    std::string errorBody = "<html><body><h1>" + tostring(code) + " " + Infos->GetResponse().GetStatusCode(code) + "</h1><p>Error occurred while processing your request.</p></body></html>";
+    std::cout << "[DEBUG] ErrorBuilder: called with code=" << code << std::endl;
+    std::string errorPagePath = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
+    std::cout << "[DEBUG] ErrorBuilder: error page path='" << errorPagePath << "'" << std::endl;
+    std::string errorBody;
+    
+    // Try to read the error page file
+    std::ifstream errorFile(errorPagePath.c_str());
+    if (errorFile.is_open()) {
+        std::cout << "[DEBUG] ErrorBuilder: successfully opened error page file" << std::endl;
+        std::stringstream buffer;
+        buffer << errorFile.rdbuf();
+        errorBody = buffer.str();
+        errorFile.close();
+        std::cout << "[DEBUG] ErrorBuilder: read " << errorBody.length() << " bytes from error page" << std::endl;
+    } else {
+        std::cout << "[DEBUG] ErrorBuilder: failed to open error page file: " << strerror(errno) << std::endl;
+        // Fallback to generic error message if file can't be read
+        errorBody = "<html><body><h1>" + tostring(code) + " " + Infos->GetResponse().GetStatusCode(code) + "</h1><p>Error occurred while processing your request.</p></body></html>";
+    }
     
     std::string response = Infos->GetRequest().getVersion();
     response += " " + tostring(code) + " ";
