@@ -408,14 +408,7 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         response += "\r\n\r\n";
         
         // Read the file content and append to response
-        std::ifstream file(ActualPath.c_str(), std::ios::binary);
-        if (file.is_open()) {
-            std::stringstream buffer;
-            buffer << file.rdbuf();
-            response += buffer.str();
-            file.close();
-        }
-        
+        OpenFile(ActualPath, true, Infos, response); 
         Infos->GetRequest().ClearURI();
         Infos->SetBool(true);  // Mark connection as done to prevent multiple serving
         return (response);
