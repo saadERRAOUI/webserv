@@ -179,6 +179,11 @@ void Cgi::env_set_up()
         }
         env["HTTP_" + key] = it->second;
     }
+    // Add Cookie header as HTTP_COOKIE for CGI
+    std::string cookie = request.getHeader("Cookie");
+    if (!cookie.empty()) {
+        env["HTTP_COOKIE"] = cookie;
+    }
     envp.clear();
     for (std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); ++it)
     {

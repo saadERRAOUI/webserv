@@ -6,7 +6,7 @@
 /*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/07/05 22:33:49 by sahazel          ###   ########.fr       */
+/*   Updated: 2025/07/11 16:24:21 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,6 @@ void manage_connections(WebServ *web, int epollfd)
         if (n == -1)
         {
             if (errno == EINTR) {
-                // Interrupted by signal, continue
                 continue;
             }
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
