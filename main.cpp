@@ -202,13 +202,14 @@ void manage_connections(WebServ *web, int epollfd)
     }
 }
 
-int main()
+int main(int ac, char **av)
 {
     try
     {
-            signal(SIGPIPE, SIG_IGN);
-
-        WebServ web("./config.toml");
+        if (ac != 2)
+            throw std::invalid_argument("no argument provided");
+        signal(SIGPIPE, SIG_IGN);
+        WebServ web(av[1]);
         // web.getServers()[0].printServer();
         Socketcreate(&web);
         int epollfd = create_manager();
@@ -217,6 +218,5 @@ int main()
     catch (std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-        throw e;
     }
 }

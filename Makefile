@@ -1,6 +1,6 @@
 CPP = c++
 
-CPPFLAGS = -std=c++98 -Wall -Werror -Wextra -g3 -fsanitize=address
+CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 NAME = webserv
 
@@ -19,4 +19,5 @@ clean :
 
 fclean : clean
 
-re : clean all
+
+re : fclean all
