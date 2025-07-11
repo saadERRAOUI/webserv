@@ -53,7 +53,7 @@ std::string    OpenFile(std::string PathFile, bool status, Connection* Infos, co
         long fileSize = GetLenght(PathFile);
         
         while (totalBytesRead < fileSize) {
-            long remainingBytes = fileSize - totalBytesRead;
+            unsigned long remainingBytes = fileSize - totalBytesRead;
             long bytesToRead = (remainingBytes < sizeof(BUFFER)) ? remainingBytes : sizeof(BUFFER);
             
             Infos->GetFile()->read(BUFFER, bytesToRead);

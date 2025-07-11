@@ -418,10 +418,4 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
     return (std::string(""));
 }
 
-static void handleGet(Connection *Infos) {
-    // Default GET handler
-    std::string tmpstring = GetMethod(Infos);
-    if (!tmpstring.empty())
-        write(Infos->Getfd(), tmpstring.c_str(), tmpstring.size());
-}
 
