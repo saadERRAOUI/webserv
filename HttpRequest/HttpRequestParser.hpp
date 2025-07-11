@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestParser.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:35 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/24 18:31:08 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/07/02 19:11:56 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,4 +59,10 @@ class HttpRequestParser {
             Parser Member methods
         */
         ParseResult            parse(HttpRequest& request, char buffer[], int size);
+
+        // Utility to decode chunked transfer encoding
+        std::string decode_chunked_body(const std::string& raw_body);
 };
+
+// Utility to decode chunked transfer encoding
+std::string decode_chunked_body(const std::string& raw_body);

@@ -43,9 +43,9 @@ int SetUpServer(int port)
 	// 	if (rt < 0)
 	// 		std::cout << "Error accept: " << strerror(errno) << '\n';
 	// 	read(rt, buffer, 1024);
-	// 	std::cout << "=================\n";
-	// 	std::cout << std::string(buffer);
-	// 	std::cout << "=================\n";
+		// std::cout << "=================\n";
+		// std::cout << std::string(buffer);
+		// std::cout << "=================\n";
 	// 	const char *message =
 	// 	    "HTTP/1.1 200 OK\r\n"
 	// 	    "Content-Type: text/html; charset=UTF-8\r\n"
@@ -60,7 +60,7 @@ int SetUpServer(int port)
 	// 	    "</html>\n";
 		
 	// 	int n = write(rt, message, strlen(message));
-	// 	std::cout << "----> n: " << n << "\n";
+		std::cout << "----> n: " << n << "\n";
 
 	// }
 	// std::cout << "out of loop\n";

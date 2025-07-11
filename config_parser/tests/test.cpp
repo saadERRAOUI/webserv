@@ -7,7 +7,7 @@
 
 TEST(parse, ParsesCorrectInput) {
     WebServ webServ("config.toml");
-    std::vector<Server> servers = webServ.getServers();
+    std::vector<Server> &servers = webServ.getServers();
     std::vector<int> f = servers[0].getPorts();
     ASSERT_EQ(servers.size(), 1);
     ASSERT_EQ(servers[0].getPorts().size(), 2);
@@ -51,11 +51,11 @@ TEST(syntax_error_incorrect_header , incorrect_header) {
 
 
 TEST(INVALID_SERVER_NAME , InvalidServerName) {
-    ASSERT_THROW(WebServ webServ("./sinvalid_names/invalid_servername.toml"), std::invalid_argument);
+    ASSERT_THROW(WebServ webServ("./invalid_names/invalid_servername.toml"), std::invalid_argument);
 }
 
 TEST(INVALID_KEY , InvalidKEYPAIR) {
-    ASSERT_THROW(WebServ webServ("./sinvalid_names/invalid_keypair.toml"), std::invalid_argument);
+    ASSERT_THROW(WebServ webServ("./invalid_names/invalid_keypair.toml"), std::invalid_argument);
 }
 
 

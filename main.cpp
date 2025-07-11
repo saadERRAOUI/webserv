@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hitchman <hitchman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 18:39:31 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/27 23:26:39 by hitchman         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:24:21 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "HttpResponse/HttpResponse.hpp"
 #include "HttpRequest/HttpRequestParser.hpp"
 #include "SetupServer/includes.hpp"
+#include <signal.h>
 
 /*
     Author: BOUZID Hicham
@@ -44,13 +45,14 @@ HttpRequest *ft_static_request(){
     HttpRequest  *request  = new HttpRequest;
     // std::string method = "GET"
     request->setMethod(std::string("GET"));
-    request->setRequestURI(std::string("/api/v1/tree.jpg"));
+    request->setRequestURI(std::string("/api/v1/script.s"));
     request->setVersion(std::string("HTTP/1.1"));
     request->setHeaders(std::string("accept-encoding"), std::string("gzip, deflate, br"));
     request->setHeaders(std::string("Accept"), std::string("*/*"));
     request->setHeaders(std::string("User-Agent"), std::string("Thunder Client (https://www.thunderclient.com)"));
     request->setHeaders(std::string("Host"), std::string("example.com"));
     request->setHeaders(std::string("Connection"), std::string("close"));
+    request->setIsCGI(true);
     // Host
     return (request);
 
@@ -58,9 +60,10 @@ HttpRequest *ft_static_request(){
 
 
 void Print_static_Request(HttpRequest tmpReques){
-    std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
-    std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
-    std::cout << "Version : " << tmpReques.getVersion() << '\n';
+    (void)tmpReques;
+    // std::cout << "METHOD : " << tmpReques.getMethod() << '\n';
+    // std::cout << "Request URI : " << tmpReques.getRequestURI() << '\n';
+    // std::cout << "Version : " << tmpReques.getVersion() << '\n';
     // std::cout << "=================== PRINT HEADERS ===================\n";
     // std::map<std::string, std::string> tmp_map = tmpReques.getHeaders();
     // for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
@@ -101,12 +104,21 @@ void manage_connections(WebServ *web, int epollfd)
             sockservers.push_back(*it1);
         }
     }
+    // Timeout constant: 10 seconds in microseconds
+    const long TIMEOUT_US = 10000000; // 10 seconds
+    
     while (true)
     {
-        int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, -1);
+        // Calculate timeout for epoll_wait (1 second to allow periodic timeout checks)
+        int epoll_timeout = 1000; // 1 second in milliseconds
+        
+        int n = epoll_wait(epollfd, events, MAX_EPOLL_EVENT, epoll_timeout);
         // std::cout << "number of event: " << n << '\n';
         if (n == -1)
         {
+            if (errno == EINTR) {
+                continue;
+            }
             std::cerr << "epoll_wait Error: " << strerror(errno) << '\n';
             exit(EXIT_FAILURE);
         }
@@ -122,6 +134,9 @@ void manage_connections(WebServ *web, int epollfd)
             }
             else if (map_connections.size() && map_connections.find(events[i].data.fd) != map_connections.end() && (events[i].events & EPOLLIN))
             {
+                // Update timeout for this connection
+                map_connections[events[i].data.fd].SetTimeout(get_current_time());
+                
                 int size = read(events[i].data.fd, BUFFER, BUFFER_SIZE);
                 if (size < BUFFER_SIZE)
                 {
@@ -137,12 +152,15 @@ void manage_connections(WebServ *web, int epollfd)
 
                 ParseResult result = parser.parse(map_connections[events[i].data.fd].GetRequest(), BUFFER, size);
                 if (result == PARSE_ERROR) {
-                    std::cout << "Parse error >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
-                    //todo : should build response error here
-                    // return ;
+                    // Create a proper HttpResponse for error handling
+                    HttpResponse *error_response = new HttpResponse(events[i].data.fd);
+                    map_connections[events[i].data.fd].SetHttpResponse(error_response);
+                    ErrorBuilder(&map_connections[events[i].data.fd], &map_connections[events[i].data.fd].Getserver(), 400);
+                    delete error_response;
+                    close(events[i].data.fd);
+                    map_connections.erase(events[i].data.fd);
+                    continue;
                 }
-                //! to remove     
-                std::cout << "Parse success >> " << parser.getStateName(static_cast<HttpRequestState>(map_connections[events[i].data.fd].GetRequest().getState())) << '\n';
                 map_connections[events[i].data.fd].GetRequest().showRequest();
                 ResponseBuilder(&map_connections[events[i].data.fd]);
             }
@@ -154,15 +172,42 @@ void manage_connections(WebServ *web, int epollfd)
                     ResponseBuilder(&map_connections[events[i].data.fd]);
             MonitorConnection(&map_connections, epollfd);
         }
+        
+        // Check for timed out connections after processing all events
+        long current_time = get_current_time();
+        std::map<int, Connection>::iterator conn_it = map_connections.begin();
+        while (conn_it != map_connections.end()) {
+            if (current_time - conn_it->second.GetTimeout() > TIMEOUT_US) {
+                std::cout << "Connection " << conn_it->first << " timed out after 10 seconds" << std::endl;
+                
+                // Create HttpResponse for timeout
+                HttpResponse *timeout_response = new HttpResponse(conn_it->first);
+                conn_it->second.SetHttpResponse(timeout_response);
+                
+                // Use ErrorBuilder to send 408 response
+                ErrorBuilder(&conn_it->second, &conn_it->second.Getserver(), 408);
+                conn_it->second.SetBool(true);
+                
+                // Remove from epoll before closing
+                struct epoll_event event;
+                epoll_ctl(epollfd, EPOLL_CTL_DEL, conn_it->first, &event);
+                
+                delete timeout_response;
+                close(conn_it->first);
+                map_connections.erase(conn_it++);
+            } else {
+                ++conn_it;
+            }
+        }
     }
 }
 
-int main()
+int main(int ac, char **av)
 {
     try
     {
-        WebServ web("./config.toml");
-        // web.getServers()[0].printServer();
+        signal(SIGPIPE, SIG_IGN);
+        WebServ web(ac == 2 ? av[1] : "config.toml");
         Socketcreate(&web);
         int epollfd = create_manager();
         manage_connections(&web, epollfd); //need web class .
@@ -170,6 +215,5 @@ int main()
     catch (std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-        throw e;
     }
 }

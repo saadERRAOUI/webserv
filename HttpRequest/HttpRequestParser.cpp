@@ -3,14 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestParser.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: serraoui <serraoui@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sahazel <sahazel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 17:45:32 by serraoui          #+#    #+#             */
-/*   Updated: 2025/05/25 19:37:04 by serraoui         ###   ########.fr       */
+/*   Updated: 2025/07/04 20:24:59 by sahazel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequestParser.hpp"
+
+// Helper to convert a string to lowercase
+std::string to_lower(const std::string& s) {
+    if (s.empty()) return s;
+    std::string out = s;
+    for (size_t i = 0; i < out.size() && i < s.size(); ++i) {
+        out[i] = std::tolower(static_cast<unsigned char>(out[i]));
+    }
+    return out;
+}
 
 HttpRequestParser::HttpRequestParser()
 {
@@ -241,6 +251,11 @@ ParseResult HttpRequestParser::parseHttpHeadersMethod(HttpRequest &request, char
         {
             request.setState(HTTP_HEADER_SP);
         }
+        else if (byte == ' ' || byte == '\t')
+        {
+            // Space or tab in header key is invalid - return error immediately
+            return PARSE_ERROR;
+        }
         else if (!std::isalnum(byte) && byte != '-' && byte != '_')
         {
             return PARSE_ERROR;
@@ -281,12 +296,17 @@ ParseResult HttpRequestParser::parseHttpHeadersMethod(HttpRequest &request, char
         if (byte == '\n')
         {
             request.setState(HTTP_HEADER_START);
-            if (
-                request.getMethod() == "POST" &&
-                request.getHeaderKey() == "Transfer-encoding" &&
-                request.getHeaderValue() == "chuncked")
-                request.setIsChunked(true);
-            request.setHeaders(request.getHeaderKey(), request.getHeaderValue());
+            // Only process headers if both key and value are not empty
+            if (!request.getHeaderKey().empty()) {
+                std::string key_lower = to_lower(request.getHeaderKey());
+                std::string val_lower = to_lower(request.getHeaderValue());
+                // Additional safety check - only set headers if key is not empty after to_lower
+                if (!key_lower.empty()) {
+                    request.setHeaders(key_lower, request.getHeaderValue());
+                    if (key_lower == "transfer-encoding" && val_lower.find("chunked") != std::string::npos)
+                        request.setIsChunked(true);
+                }
+            }
             request.setHeaderKey("");
             request.setHeaderValue("");
         }
@@ -313,14 +333,8 @@ ParseResult HttpRequestParser::parseHttpBodyMethod(HttpRequest &request, char by
         break;
 
     case HTTP_BODY:
-        if (byte == '\r')
-        {
-            return PARSE_INPROGRESS;
-        }
-        else
-        {
-            request.setBody(request.getBody() + byte);
-        }
+        // Continue reading body data, including \r characters
+        request.setBody(request.getBody() + byte);
         break;
     }
     return PARSE_INPROGRESS;
@@ -387,4 +401,23 @@ std::string HttpRequestParser::getStateName(HttpRequestState state) const
     default:
         return "UNKNOWN_STATE";
     }
+}
+
+// Utility to decode chunked transfer encoding
+std::string decode_chunked_body(const std::string& raw_body) {
+    std::string decoded;
+    size_t pos = 0;
+    while (pos < raw_body.size()) {
+        // Find the next CRLF for the chunk size
+        size_t crlf = raw_body.find("\r\n", pos);
+        if (crlf == std::string::npos) break;
+        std::string size_str = raw_body.substr(pos, crlf - pos);
+        int chunk_size = strtol(size_str.c_str(), NULL, 16);
+        if (chunk_size == 0) break;
+        pos = crlf + 2;
+        if (pos + chunk_size > raw_body.size()) break;
+        decoded.append(raw_body.substr(pos, chunk_size));
+        pos += chunk_size + 2; // skip chunk and trailing CRLF
+    }
+    return decoded;
 }

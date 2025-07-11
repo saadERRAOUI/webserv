@@ -18,4 +18,6 @@ path = "/api/v1"
 methods = ["GET"]
 autoindex = true
 index = "index.html"
-root = "/var/www/html/pepe"
+root = "/home/sahazel/Projects/webserv"
+upload = "./Path"
+CGI_extensions = {py = "/usr/bin/python" , js = "/usr/bin/node" }

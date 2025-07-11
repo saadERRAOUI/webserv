@@ -1,4 +1,5 @@
 #include "HttpResponse.hpp"
+#include <sstream>
 /*
 	Author: BOUZID Hicham
 	Description: function get the lenght of file
@@ -9,8 +10,8 @@ long GetLenght(std::string PathFile){
 	std::ifstream file(PathFile.c_str(), std::ios::binary);
 
 	if (!file.is_open()){
-		std::cerr << "Error file: " << strerror(errno) << '\n';
-		return (-1);
+		std::cerr << "Error opening file: " << PathFile << " - " << strerror(errno) << '\n';
+		return (0);
 	}
 	file.seekg(0, std::ios::end);
 	long size = file.tellg();
@@ -25,36 +26,68 @@ long GetLenght(std::string PathFile){
 	Date: 2025-05-21
 */
 
-std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
+std::string    OpenFile(std::string PathFile, bool status, Connection* Infos, const std::string prefix)
 {
-	char BUFFER[8001] = {0};
-	std::string line, rt;
+    char BUFFER[8001] = {0};
+    std::string line, rt;
 
-	if(status == true)
-	{
-		std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
+    const char* BUFFER1 = prefix.c_str();  // Use the passed prefix
 
-		if (!fd->is_open())
-		{
-			std::cerr << "Error file : " << strerror(errno) << '\n';
-			return (std::string(""));
-		}
-		Infos->Setfile(*fd);
-    	Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
-		write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
-		// write(1, BUFFER, Infos->GetFile()->gcount());
-		Infos->SetSize(Infos->GetFile()->gcount());
-		Infos->DefSize(0);
-		return (std::string(BUFFER, Infos->GetSize()));
-		// std::cout << "here.\n";
-	}
-    Infos->GetFile()->read(BUFFER, BUFFER_SIZE);
-	write(Infos->Getfd(), BUFFER, Infos->GetFile()->gcount());
-	// write(1, BUFFER, Infos->GetFile()->gcount());
-	Infos->SetSize(Infos->GetFile()->gcount());
-	Infos->DefSize(0);
-	// Infos->DefSize(std::string(BUFFER).size());
-	return (std::string(BUFFER, Infos->GetSize()));
+    if (status == true)
+    {
+        std::ifstream *fd = new std::ifstream(PathFile.c_str(), std::ios::binary);
+
+        if (!fd->is_open())
+        {
+            std::cerr << "Error opening file: " << strerror(errno) << '\n';
+            return (std::string(""));
+        }
+
+        Infos->Setfile(*fd);
+        
+        // First, send the HTTP headers
+        write(Infos->Getfd(), BUFFER1, strlen(BUFFER1));
+        
+        // Then read and send the file content in chunks
+        long totalBytesRead = 0;
+        long fileSize = GetLenght(PathFile);
+        
+        while (totalBytesRead < fileSize) {
+            unsigned long remainingBytes = fileSize - totalBytesRead;
+            long bytesToRead = (remainingBytes < sizeof(BUFFER)) ? remainingBytes : sizeof(BUFFER);
+            
+            Infos->GetFile()->read(BUFFER, bytesToRead);
+            std::streamsize bytesRead = Infos->GetFile()->gcount();
+            
+            if (bytesRead <= 0) break;
+            
+            write(Infos->Getfd(), BUFFER, bytesRead);
+            totalBytesRead += bytesRead;
+        }
+        
+        Infos->GetFile()->close();
+        delete fd;
+        Infos->SetSize(0);
+        // Don't call DefSize since we've already closed the file
+
+        return std::string("");  // Return empty string since we've already sent everything
+    }
+
+    // For non-status case (shouldn't be used for file serving)
+    Infos->GetFile()->read(BUFFER, sizeof(BUFFER));
+
+    // Using std::vector<char> to concatenate BUFFER1 (prefix) and BUFFER (binary content)
+    std::vector<char> combined;
+    combined.insert(combined.end(), BUFFER1, BUFFER1 + strlen(BUFFER1));  // Insert prefix
+    combined.insert(combined.end(), BUFFER, BUFFER + Infos->GetFile()->gcount());  // Insert file content
+
+    // Write the combined buffer to the connection
+    write(Infos->Getfd(), combined.data(), combined.size());
+
+    Infos->SetSize(Infos->GetFile()->gcount());
+    Infos->DefSize(0);
+
+    return std::string(combined.begin(), combined.end());  // Return the combined result as a string
 }
 
 
@@ -66,8 +99,6 @@ std::string OpenFile(std::string PathFile, bool status, Connection *Infos)
 */
 bool HostName(Server *tmpServer, std::string name)
 {
-	// std::cout << "the name of server is : " << name << '\n';
-	// std::cout << "the first server name is: " << *(tmpServer->getServerName().begin()) << '\n';
 	std::vector<std::string>::iterator it = find(tmpServer->getServerName().begin(), tmpServer->getServerName().end(), name);
 	if (it == tmpServer->getServerName().end())
 		return (false);
@@ -96,30 +127,42 @@ std::string chose_one(std::string a, std::string b){
 
 std::string ErrorBuilder(Connection *Infos, Server *tmpServer, int code)
 {
-	std::map<std::string, std::string> tmp_map = Infos->GetRequest().getHeaders();
-	std::string response = Infos->GetRequest().getVersion();
-	std::string DefaultOrOurs;
-
-	DefaultOrOurs = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
-	response += " " + tostring(code) + " ";
-	response += Infos->GetResponse().GetStatusCode(code);
-	response += "\r\n";
-	for (std::map<std::string, std::string>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++)
-	{
-		response += it->first;
-		response += ": ";
-		response += it->second;
-		response += "\r\n";
-	}
-	std::string rt = OpenFile(DefaultOrOurs, true, Infos);
-	response += "Content-Length: " + tostring((int)rt.size());
-	response += "\r\n\r\n";
-	response += rt;
-	if (code != 301)
-		Infos->SetBool(true);
-	return (response);
+    std::string errorPagePath = chose_one(tmpServer->webServ.getErrorPages()[code], tmpServer->getErrorPages()[code]);
+    std::string errorBody;
+    
+    // Try to read the error page file
+    std::ifstream errorFile(errorPagePath.c_str());
+    if (errorFile.is_open()) {
+        std::stringstream buffer;
+        buffer << errorFile.rdbuf();
+        errorBody = buffer.str();
+        errorFile.close();
+    } else {
+        // Fallback to generic error message if file can't be read
+        errorBody = "<html><body><h1>" + tostring(code) + " " + Infos->GetResponse().GetStatusCode(code) + "</h1><p>Error occurred while processing your request.</p></body></html>";
+    }
+    
+    std::string response = Infos->GetRequest().getVersion();
+    response += " " + tostring(code) + " ";
+    response += Infos->GetResponse().GetStatusCode(code);
+    response += "\r\n";
+    response += "Content-Type: text/html\r\n";
+    if (code == 301) {
+        std::string location = Infos->GetRequest().getHeader("Location");
+        if (!location.empty()) {
+            response += "Location: " + location + "\r\n";
+        }
+    }
+    response += "Content-Length: " + tostring(errorBody.length()) + "\r\n";
+    response += "Connection: close\r\n";
+    response += "\r\n";
+    response += errorBody;
+    
+    write(Infos->Getfd(), response.c_str(), response.length());
+    
+    Infos->SetBool(true);
+    return (response);
 }
-
 /*
 	Author: BOUZID Hicham
 	Description: convert number to std::string

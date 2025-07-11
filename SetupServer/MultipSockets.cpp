@@ -75,6 +75,6 @@ int create_manager()
         std::cerr << "Epoll problem: " << strerror(errno) << '\n';
         exit(EXIT_FAILURE);
     }
-    std::cout << "epoll inctence was created .\n";
+    // std::cout << "epoll inctence was created .\n";
     return (EpollFd);
 }

@@ -62,6 +62,8 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 			if (*it_sock == FdServer)
 			{
 				s = &(*it);
+				this->CGI = NULL;
+				Request = NULL;
 				Request = new HttpRequest();
 				Response = NULL;
 				timeout = get_current_time();
@@ -75,7 +77,8 @@ Connection::Connection(int FdServer, int FdEpoll,WebServ *MainObject)
 }
 
 Connection::Connection(){
-	Request = new HttpRequest();
+	this->CGI = NULL;
+	Request = NULL;
 	s = NULL;
 	fd_client = 0;
 	size = 0;
@@ -111,7 +114,16 @@ Server& Connection::Getserver(){
 }
 
 void Connection::SetBool(bool f){
-	this->done = f;
+    std::cout << "[SetBool] called with value: " << f << std::endl;
+    this->done = f;
+}
+
+void Connection::SetCGI(Cgi *cgi){
+	this->CGI = cgi;
+}
+
+Cgi *Connection::getCGI(){
+	return this->CGI;
 }
 
 bool Connection::GetBool(){
@@ -177,11 +189,21 @@ std::ifstream *Connection::GetFile(){
 void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 {
 	struct epoll_event event;
-
+	// std::cout << "pepe\n";
 	event.events = mood;
 	event.data.fd = fd_client;
 	if (epoll_ctl(FdEpoll, EPOLL_CTL_MOD, fd_client, &event))
 		std::cerr << "epoll ctl Error: " << strerror(errno) << '\n';
+}
+
+long Connection::GetTimeout() const
+{
+	return this->timeout;
+}
+
+void Connection::SetTimeout(long timeout)
+{
+	this->timeout = timeout;
 }
 
 
@@ -191,8 +213,8 @@ void Connection::ChagenMode(int FdEpoll, int fd_client, int mood)
 	Date: 2025-05-24
 */
 
-Connection::~Connection(){
-	std::cout << "Distructor of connection class called.\n";
-	delete this->file;
-	delete this->Request;
-}
+// Connection::~Connection(){
+// 	std::cout << "Distructor of connection class called.\n";
+// 	delete this->file;
+// 	delete this->Request;
+// }
