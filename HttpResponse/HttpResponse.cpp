@@ -70,7 +70,7 @@ static bool ensureDirectoryExists(const std::string& dir) {
 			struct stat st;
     if (stat(dir.c_str(), &st) != 0) {
         if (mkdir(dir.c_str(), 0777) != 0) {
-            std::cerr << "[DEBUG] Failed to create upload directory: " << dir << std::endl;
+            //std::cout << "[DEBUG] Failed to create upload directory: " << dir << std::endl;
             return false;
         }
     }
@@ -90,7 +90,7 @@ static bool saveUploadedFile(const std::string& upload_dir, const std::string& c
 				outfile.close();
         return true;
     }
-    std::cerr << "[DEBUG] Failed to open file for upload: " << out_path << std::endl;
+    //std::cout << "[DEBUG] Failed to open file for upload: " << out_path << std::endl;
     return false;
 }
 

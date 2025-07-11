@@ -206,11 +206,8 @@ int main(int ac, char **av)
 {
     try
     {
-        if (ac != 2)
-            throw std::invalid_argument("no argument provided");
         signal(SIGPIPE, SIG_IGN);
-        WebServ web(av[1]);
-        // web.getServers()[0].printServer();
+        WebServ web(ac == 2 ? av[1] : "config.toml");
         Socketcreate(&web);
         int epollfd = create_manager();
         manage_connections(&web, epollfd); //need web class .

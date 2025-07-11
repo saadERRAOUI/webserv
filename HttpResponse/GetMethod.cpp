@@ -20,23 +20,19 @@ bool CompareRU(std::string URI, std::string location){
     if (URI[URI.length() - 1] != '/')
         URI += "/";
     
-    std::cout << "[DEBUG] CompareRU: URI='" << URI << "' vs location='" << tmplocation << "'" << std::endl;
     
     // Check if URI starts with the location path
     if (URI.length() < tmplocation.length()) {
-        std::cout << "[DEBUG] CompareRU: URI too short, no match" << std::endl;
         return false;
     }
     
     // Compare the location length characters
     for (index = 0; index < (int)tmplocation.length(); index++){
         if (URI[index] != tmplocation[index]) {
-            std::cout << "[DEBUG] CompareRU: mismatch at position " << index << std::endl;
             return false;
         }
     }
     
-    std::cout << "[DEBUG] CompareRU: matched " << index << " characters, location length=" << tmplocation.length() << std::endl;
     
     // Only return true if we matched the entire location path
     return true;
@@ -66,19 +62,15 @@ std::string MatchRoutes(std::map<std::string, Route> &TmpRoutes, HttpRequest &Tm
     std::string URI = TmpRequest.getRequestURI();
     std::map<std::string, Route>::iterator it;
 
-    std::cout << "[DEBUG] MatchRoutes: checking URI='" << URI << "'" << std::endl;
 
     for (it = TmpRoutes.begin();it != TmpRoutes.end(); it++){
-        std::cout << "[DEBUG] MatchRoutes: comparing with route='" << it->first << "'" << std::endl;
         if (CompareRU(TmpRequest.getRequestURI(), it->first) == true){
-            std::cout << "[DEBUG] MatchRoutes: found match! checking methods..." << std::endl;
             if(MethodAllowed(TmpRoutes[it->first].getMethods(), "GET") == false)
                 return (std::string("405"));
             else
                 return (it->first);
         }
     }
-    std::cout << "[DEBUG] MatchRoutes: no match found, returning 404" << std::endl;
     return(std::string("404"));
 }
 
@@ -164,11 +156,11 @@ std::string GetMethod(Connection *Infos)
     std::string result;
 
     result = MatchRoutes(routes, Infos->GetRequest());
-    std::cout << "[DEBUG] GetMethod: MatchRoutes returned '" << result << "'" << std::endl;
+    //std::cout << "[DEBUG] GetMethod: MatchRoutes returned '" << result << "'" << std::endl;
     
     // in ths condition i checked for error pages or somthing wrong
     if (!Infos->Getserver().getErrorPages()[atoi(result.c_str())].empty() || !Infos->Getserver().webServ.getErrorPages()[atoi(result.c_str())].empty()){
-        std::cout << "[DEBUG] GetMethod: Found error page for " << result << ", calling ErrorBuilder" << std::endl;
+        //std::cout << "[DEBUG] GetMethod: Found error page for " << result << ", calling ErrorBuilder" << std::endl;
         return (ErrorBuilder(Infos, &Infos->Getserver(), atoi(result.c_str())));
     }
     // here we check for ace
@@ -233,14 +225,6 @@ std::string GetMethod(Connection *Infos)
           // Check if the requested path is a directory
           std::string actualPath = RemovePrefix(requestURI, result, Infos->Getserver().getRoutes()[result].getRoot());
           struct stat st;
-          std::cout << "[DEBUG] Checking if directory: " << actualPath << std::endl;
-          if (stat(actualPath.c_str(), &st) == 0) {
-              std::cout << "[DEBUG] stat() success, mode: " << st.st_mode << std::endl;
-              if (S_ISDIR(st.st_mode)) std::cout << "[DEBUG] It is a directory!" << std::endl;
-              else std::cout << "[DEBUG] Not a directory." << std::endl;
-          } else {
-              std::cout << "[DEBUG] stat() failed: " << strerror(errno) << std::endl;
-          }
           if (stat(actualPath.c_str(), &st) == 0 && S_ISDIR(st.st_mode)) {
               // It's a directory, apply autoindex/index logic
               if (Infos->Getserver().getRoutes()[result].getAutoindex() == true)
@@ -280,7 +264,6 @@ std::string GetMethod(Connection *Infos)
       }
       return std::string("");
     }
-    std::cout << "the result is: " << result << '\n';
     return (std::string(""));
     //Check for all routes and autoindex
 }
@@ -315,7 +298,7 @@ std::string RemovePrefix(std::string URI, std::string location, std::string root
         }
     }
     
-    std::cout << "This is suffex of file: " << Result << "\n" ;
+
     return (Result);
 }
 
@@ -387,9 +370,6 @@ std::string ft_Get(Connection *Infos, std::string URI, std::string route, int co
         } else {
             ActualPath = RemovePrefix(URI, route, Infos->Getserver().getRoutes()[route].getRoot());
         }
-
-        std::cout << "From this path we will serve : " << ActualPath << '\n';
-        std::cout << "============> " << ActualPath.c_str() << "\n";
         if (access(ActualPath.c_str(), R_OK))
         {
             ErrorBuilder(Infos, &Infos->Getserver(), (std::string("Permission denied") == std::string(strerror(errno)) ? 403: 404));

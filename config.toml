@@ -17,7 +17,7 @@ max_body_size = "23"
 500 = "500.html"
 505 = "505.html"
 [[server.route]]
-path = "/root/"
+path = "/"
 methods = ["GET","POST","DELETE"]
 autoindex = true
 index = "index.html"
