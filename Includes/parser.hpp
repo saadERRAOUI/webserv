@@ -198,13 +198,13 @@ private:
   std::map<std::pair<context, e_token>, int> valid_context_map;
 
   void determine_state();
-  e_token determine_token(std::string &line, size_t &i);
+  e_token determine_token(size_t &i);
   bool isComment(char c);
-  void process_line(std::string &line);
-  void tokenize(std::string &line);
+  void process_line();
+  void tokenize();
   void process_bare(Token &token);
   void process_quoted_string(Token &token);
-  Token get_next_token(std::string &line);
+  Token get_next_token();
   bool is_token(char c);
   void validate(std::deque<Token> &token_list);
   void throw_error(std::string errr);
