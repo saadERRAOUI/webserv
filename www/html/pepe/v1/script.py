@@ -14,7 +14,7 @@ def send_chunk(data):
 def send_chunked_response():
     send_headers()
     send_chunk("hello world!")
-    send_chunk("i love me some pussy oh my god!!!")
+    send_chunk("test test Please")
     sys.stdout.write("0\r\n\r\n")  # Proper ending
     sys.stdout.flush()
 

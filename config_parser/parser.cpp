@@ -261,15 +261,11 @@ void ConfigParser::process_keypair()
                 table_key = this->line_data.token_list[i].value;
             }
             else if (this->line_data.token_list[i].type == EQUALS)
-            {
-                // Skip the equals token
                 continue;
-            }
             else if (this->line_data.token_list[i].type & (BARE_KEY | QUOTED_STRING) && !table_key.empty())
             {
-                // Add the key-value pair to the table
                 (*value.table)[table_key] = this->line_data.token_list[i].value;
-                table_key.clear();  // Reset for next key-value pair
+                table_key.clear();  
             }
             
             if (this->line_data.token_list[i].type == BRACE_CLOSE)
@@ -284,9 +280,9 @@ void ConfigParser::process_keypair()
     }
 }
 
-void ConfigParser::process_line(std::string &line)
+void ConfigParser::process_line()
 {
-    tokenize(line);
+    tokenize();
     determine_state();
     validate(this->line_data.token_list);
     if (this->line_data.token_list[1].type == COMMENT)
@@ -300,31 +296,31 @@ void ConfigParser::process_line(std::string &line)
     this->line_data.token_list.clear();
 }
 
-e_token ConfigParser::determine_token(std::string &line, size_t &i)
+e_token ConfigParser::determine_token(size_t &i)
 {
-    if (i >= (line.length()))
+    if (i >= (this->line_data.line.length()))
         return END_OF_LINE;
-    if (line[i] == '[' && line[i + 1] == '[')
+    if (this->line_data.line[i] == '[' && this->line_data.line[i + 1] == '[')
         return i += 2, DOUBLE_BRACKET_OPEN;
-    if (line[i] == ']' && line[i + 1] == ']')
+    if (this->line_data.line[i] == ']' && this->line_data.line[i + 1] == ']')
         return i += 2, DOUBLE_BRACKET_CLOSE;
-    if (line[i] == '=')
+    if (this->line_data.line[i] == '=')
         return i++, EQUALS;
-    if (line[i] == '[')
+    if (this->line_data.line[i] == '[')
         return i++, BRACKET_OPEN;
-    if (line[i] == ']')
+    if (this->line_data.line[i] == ']')
         return i++, BRACKET_CLOSE;
-    if (line[i] == '.')
+    if (this->line_data.line[i] == '.')
         return i++, DOT;
-    if (line[i] == '{')
+    if (this->line_data.line[i] == '{')
         return i++, BRACE_OPEN;
-    if (line[i] == '}')
+    if (this->line_data.line[i] == '}')
         return i++, BRACE_CLOSE;
-    if (line[i] == ',')
+    if (this->line_data.line[i] == ',')
         return i++, COMMA;
-    if (line[i] == '"')
+    if (this->line_data.line[i] == '"')
         return i++, QUOTED_STRING;
-    if (line[i] == '#')
+    if (this->line_data.line[i] == '#')
         return i++, COMMENT;
     return BARE_KEY;
 }
@@ -338,7 +334,7 @@ void ConfigParser::process_quoted_string(Token &token)
         if (this->line_data.line[i] == '"')
         {
             this->state.string_state = OUT_QUOTES;
-            i++;  // Move past the closing quote
+            i++;  
             break;
         }
         token.value += this->line_data.line[i++];
@@ -357,12 +353,12 @@ void ConfigParser::process_bare(Token &token)
     }
 }
 
-Token ConfigParser::get_next_token(std::string &line)
+Token ConfigParser::get_next_token()
 {
     while (std::isspace(this->line_data.line[this->line_data.line_progress]))
         this->line_data.line_progress++;
 
-    Token token(determine_token(line, this->line_data.line_progress));
+    Token token(determine_token(this->line_data.line_progress));
     if (token.type == BARE_KEY)
         process_bare(token);
     if (token.type == QUOTED_STRING)
@@ -370,14 +366,14 @@ Token ConfigParser::get_next_token(std::string &line)
     return token;
 }
 
-void ConfigParser::tokenize(std::string &line)
+void ConfigParser::tokenize()
 {
     this->line_data.token_list.push_back(Token(BEGIN_OF_LINE));
-    Token token = get_next_token(line);
+    Token token = get_next_token();
     while (token.type != END_OF_LINE && token.type != COMMENT)
     {
         this->line_data.token_list.push_back(token);
-        token = get_next_token(line);
+        token = get_next_token();
     }
     this->line_data.token_list.push_back(token);
 }
@@ -388,13 +384,13 @@ void ConfigParser::parse()
     this->line_data.line_nb = 0;
     while (std::getline(file, line))
     {
-        this->line_data.line = line;
         this->line_data.line_nb++;
         this->line_data.line_progress = 0;
         std::string trimmed = trim(line);
+        this->line_data.line = line;
         if (trimmed.empty())
             continue;
-        process_line(trimmed);
+        process_line();
     }
 }
 
